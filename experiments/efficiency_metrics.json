@@ -1,0 +1,85 @@
+{
+  "teacher_pytorch_cpu": {
+    "device": "cpu",
+    "n_iterations": 200,
+    "mean_latency_ms": 116.825,
+    "median_latency_ms": 114.792,
+    "p90_latency_ms": 123.485,
+    "p95_latency_ms": 125.457,
+    "min_latency_ms": 108.544,
+    "max_latency_ms": 182.247,
+    "throughput_fps": 8.6,
+    "peak_memory_mb": 0.27
+  },
+  "teacher_pytorch_gpu": {
+    "device": "cuda",
+    "n_iterations": 200,
+    "mean_latency_ms": 13.789,
+    "median_latency_ms": 12.748,
+    "p90_latency_ms": 18.445,
+    "p95_latency_ms": 20.04,
+    "min_latency_ms": 8.562,
+    "max_latency_ms": 24.072,
+    "throughput_fps": 72.5,
+    "peak_memory_mb": 437.0
+  },
+  "student_pytorch_cpu": {
+    "device": "cpu",
+    "n_iterations": 200,
+    "mean_latency_ms": 9.978,
+    "median_latency_ms": 9.507,
+    "p90_latency_ms": 12.494,
+    "p95_latency_ms": 13.679,
+    "min_latency_ms": 7.046,
+    "max_latency_ms": 17.395,
+    "throughput_fps": 100.2,
+    "peak_memory_mb": 0.27
+  },
+  "student_pytorch_gpu": {
+    "device": "cuda",
+    "n_iterations": 200,
+    "mean_latency_ms": 5.948,
+    "median_latency_ms": 5.078,
+    "p90_latency_ms": 8.742,
+    "p95_latency_ms": 9.745,
+    "min_latency_ms": 3.036,
+    "max_latency_ms": 14.335,
+    "throughput_fps": 168.1,
+    "peak_memory_mb": 478.07
+  },
+  "student_onnx_cpu": {
+    "device": "cpu (onnxruntime)",
+    "n_iterations": 200,
+    "mean_latency_ms": 5.149,
+    "median_latency_ms": 5.116,
+    "p90_latency_ms": 5.768,
+    "p95_latency_ms": 6.095,
+    "min_latency_ms": 3.284,
+    "max_latency_ms": 6.996,
+    "throughput_fps": 194.2,
+    "peak_memory_mb": 0.03
+  },
+  "student_int8_cpu": {
+    "device": "cpu (onnxruntime)",
+    "n_iterations": 200,
+    "mean_latency_ms": 4.112,
+    "median_latency_ms": 3.823,
+    "p90_latency_ms": 5.212,
+    "p95_latency_ms": 5.592,
+    "min_latency_ms": 3.171,
+    "max_latency_ms": 7.224,
+    "throughput_fps": 243.2,
+    "peak_memory_mb": 0.02
+  },
+  "parameters": {
+    "teacher": 110618882,
+    "student": 11549442,
+    "param_compression_ratio": 9.58
+  },
+  "disk_size_mb": {
+    "teacher_fp32": 422.23,
+    "student_fp32": 44.07,
+    "student_onnx_fp32": 44.15,
+    "student_onnx_int8": 11.22
+  }
+}
