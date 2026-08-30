@@ -41,13 +41,18 @@ def load_config(
     if not config_path.exists():
         raise FileNotFoundError(f"Config file not found: {config_path}")
 
-    base_cfg: DictConfig = OmegaConf.load(config_path)
+    # If loading a specific experiment config, merge it on top of configs/base.yaml if it exists
+    base_file = Path("configs/base.yaml")
+    if base_file.exists() and config_path.resolve() != base_file.resolve():
+        base_cfg = OmegaConf.load(base_file)
+        exp_cfg = OmegaConf.load(config_path)
+        cfg = OmegaConf.merge(base_cfg, exp_cfg)
+    else:
+        cfg = OmegaConf.load(config_path)
 
     if overrides:
         override_cfg = OmegaConf.from_dotlist(list(overrides))
-        cfg = OmegaConf.merge(base_cfg, override_cfg)
-    else:
-        cfg = base_cfg
+        cfg = OmegaConf.merge(cfg, override_cfg)
 
     logger.info("Loaded config from %s", config_path)
     if overrides:

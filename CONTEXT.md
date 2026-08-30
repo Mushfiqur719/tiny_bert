@@ -40,8 +40,8 @@ c3d523c  init
 |-------|--------|-------------|
 | **1** | ✅ Done | Repo scaffold, `src/utils/` (seeding, config, logging), 15 tests |
 | **2** | ✅ Done | Data pipeline: load, clean, split, report. 34 tests. `splits.json` committed. |
-| **3** | ⬜ TODO | **Teacher (BanglaBERT) fine-tuning** — implement `src/models/teacher.py`, `src/training/`, fine-tune on train split, evaluate on val, touch test set exactly once at end |
-| **4** | ⬜ TODO | Student (TinyBanglaBERT) architecture + knowledge distillation |
+| **3** | ✅ Done | **Teacher (BanglaBERT) fine-tuning** — `src/models/teacher.py`, `src/training/train_teacher.py`, test macro-F1: 0.8233, accuracy: 0.8420. Soft labels saved to `experiments/teacher/train_soft_labels.pt`. |
+| **4** | ⬜ TODO | **Student (TinyBanglaBERT) architecture + knowledge distillation** |
 | **5** | ⬜ TODO | Evaluation: metrics, McNemar test, cross-domain eval |
 | **6** | ⬜ TODO | Explainability: SHAP token attributions + LIME perturbation |
 | **7** | ⬜ TODO | Efficiency benchmarking: param count, size, latency (ONNX), memory |

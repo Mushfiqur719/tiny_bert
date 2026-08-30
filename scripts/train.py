@@ -1,12 +1,9 @@
 """
-scripts/train.py — CLI entry point for training (teacher or student).
+scripts/train.py — CLI entry point for training (teacher fine-tuning or student distillation).
 
 Usage:
     python -m scripts.train --config configs/teacher_baseline.yaml --seed 42
     python -m scripts.train --config configs/student_distillation.yaml --override training.lr=3e-5
-
-This is a *thin* wrapper — all logic lives in src/.
-Phase 4 will wire in the actual Trainer.
 """
 
 from __future__ import annotations
@@ -14,12 +11,13 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
+from pathlib import Path
 
 # Ensure project root is on path when invoked as a script.
-from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.utils import seed_everything, load_config, ExperimentLogger
+from src.training.train_teacher import train_teacher
+from src.utils import load_config, seed_everything
 
 logging.basicConfig(
     level=logging.INFO,
@@ -47,19 +45,24 @@ def main(argv: list[str] | None = None) -> None:
     args = parse_args(argv)
     cfg = load_config(args.config, overrides=args.override or [])
 
-    # CLI seed overrides config seed.
+    # CLI seed overrides config seed
     seed = args.seed if args.seed is not None else int(cfg.seed)
     seed_everything(seed)
 
-    exp = ExperimentLogger(run_name=cfg.training.run_name, cfg=cfg, seed=seed)
-    logger.info("Training run '%s' initialised (seed=%d).", cfg.training.run_name, seed)
-    logger.info("Config: %s", args.config)
+    config_path_str = str(args.config).lower()
+    run_name = str(cfg.training.run_name).lower()
 
-    # ── Phase 4: wire in src.training.trainer here ──────────────────────
-    raise NotImplementedError(
-        "Training logic not yet implemented — coming in Phase 4. "
-        "Run this script after the training module is added."
-    )
+    # Route based on config type
+    if "student" in config_path_str or "distill" in run_name:
+        raise NotImplementedError(
+            "Student distillation training logic is scheduled for Phase 4."
+        )
+    else:
+        # Default to Teacher training
+        logger.info("Executing Teacher model fine-tuning with config '%s'...", args.config)
+        metrics = train_teacher(cfg=cfg, seed=seed)
+        logger.info("Teacher training run completed successfully.")
+        return metrics
 
 
 if __name__ == "__main__":

@@ -1,0 +1,71 @@
+project:
+  name: TinyBanglaBERT
+  description: Knowledge-distilled transformer for Bangla clickbait detection
+seed: 42
+data:
+  dataset_name: BanglaBait
+  hf_dataset_id: Motahar/banglabait
+  raw_dir: data/raw
+  processed_dir: data/processed
+  splits_file: data/processed/splits.json
+  train_ratio: 0.8
+  val_ratio: 0.1
+  test_ratio: 0.1
+  label_col: label
+  text_col: headline
+  num_labels: 2
+  min_char_length: 5
+model:
+  teacher_model_name: csebuetnlp/banglabert
+  student_model_name: csebuetnlp/banglabert_small
+  max_seq_len: 128
+  dropout: 0.1
+training:
+  output_dir: experiments
+  run_name: teacher
+  epochs: 5
+  batch_size: 32
+  lr: 2.0e-05
+  weight_decay: 0.01
+  warmup_ratio: 0.1
+  gradient_clip: 1.0
+  eval_strategy: epoch
+  save_strategy: epoch
+  load_best_model_at_end: true
+  metric_for_best: f1_macro
+  greater_is_better: true
+  fp16: true
+  dataloader_num_workers: 0
+  early_stopping_patience: 3
+distillation:
+  temperature: 4.0
+  alpha: 0.7
+  intermediate_layers: true
+  hidden_loss_weight: 0.1
+optuna:
+  n_trials: 30
+  timeout_sec: 7200
+  study_name: default_study
+  direction: maximize
+  storage: null
+evaluation:
+  test_batch_size: 64
+  cross_domain_dataset: null
+explainability:
+  shap:
+    n_samples: 100
+    max_display: 20
+  lime:
+    n_samples: 100
+    num_features: 15
+    num_perturbations: 500
+efficiency:
+  onnx_opset: 17
+  latency_warmup_iters: 10
+  latency_bench_iters: 100
+  batch_sizes:
+  - 1
+  - 8
+  - 32
+logging:
+  level: INFO

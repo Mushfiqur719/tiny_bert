@@ -1,0 +1,22 @@
+{
+  "accuracy": 0.842,
+  "f1_macro": 0.8233,
+  "precision_macro": 0.8288,
+  "recall_macro": 0.8187,
+  "f1_not_clickbait": 0.8808,
+  "precision_not_clickbait": 0.8669,
+  "recall_not_clickbait": 0.8951,
+  "f1_clickbait": 0.7657,
+  "precision_clickbait": 0.7907,
+  "recall_clickbait": 0.7424,
+  "confusion_matrix": [
+    [
+      879,
+      103
+    ],
+    [
+      135,
+      389
+    ]
+  ]
+}
