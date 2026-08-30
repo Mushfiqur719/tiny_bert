@@ -1,0 +1,69 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "tinybanglabert"
+version = "0.1.0"
+description = "Lightweight knowledge-distilled transformer for explainable Bangla clickbait detection"
+requires-python = ">=3.11"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Mushfiqur Rahman" }]
+
+dependencies = [
+    "torch>=2.2.0",
+    "transformers>=4.40.0",
+    "datasets>=2.19.0",
+    "evaluate>=0.4.2",
+    "accelerate>=0.30.0",
+    "omegaconf>=2.3.0",
+    "pyyaml>=6.0.1",
+    "optuna>=3.6.0",
+    "shap>=0.45.0",
+    "lime>=0.2.0.1",
+    "scipy>=1.13.0",
+    "statsmodels>=0.14.2",
+    "onnx>=1.16.0",
+    "onnxruntime>=1.18.0",
+    "numpy>=1.26.0",
+    "pandas>=2.2.0",
+    "scikit-learn>=1.4.0",
+    "matplotlib>=3.9.0",
+    "seaborn>=0.13.2",
+    "tqdm>=4.66.0",
+    "rich>=13.7.0",
+    "python-dotenv>=1.0.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.2.0",
+    "pytest-cov>=5.0.0",
+    "jupyterlab>=4.2.0",
+    "ipywidgets>=8.1.0",
+    "ruff>=0.4.0",
+]
+
+[project.scripts]
+tbb-train   = "scripts.train:main"
+tbb-eval    = "scripts.evaluate:main"
+tbb-explain = "scripts.explain:main"
+tbb-bench   = "scripts.benchmark:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*", "scripts*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# --basetemp keeps tmp_path inside the project dir, avoiding Windows AppData permission errors
+addopts   = "-v --tb=short --basetemp=.pytest_tmp"
+tmp_path_retention_policy = "failed"
+tmp_path_retention_count = 3
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+select = ["E", "F", "I", "UP", "N", "ANN"]
+ignore = ["ANN101", "ANN102"]

@@ -1,0 +1,90 @@
+# Default / baseline config shared across experiments.
+# Every experiment-specific config *extends* this one via OmegaConf merge.
+# CLI overrides use dotlist syntax: --override training.lr=3e-5
+
+project:
+  name: "TinyBanglaBERT"
+  description: "Knowledge-distilled transformer for Bangla clickbait detection"
+
+# ── Reproducibility ────────────────────────────────────────────────────────
+seed: 42
+
+# ── Data ───────────────────────────────────────────────────────────────────
+data:
+  dataset_name: "BanglaBait"           # primary dataset
+  raw_dir:       "data/raw"
+  processed_dir: "data/processed"
+  splits_file:   "data/processed/splits.json"
+  train_ratio: 0.80
+  val_ratio:   0.10
+  test_ratio:  0.10
+  label_col:   "label"
+  text_col:    "headline"
+  num_labels:  2                        # 0=non-clickbait, 1=clickbait
+
+# ── Model defaults (overridden per experiment) ─────────────────────────────
+model:
+  teacher_model_name: "csebuetnlp/banglabert"
+  student_model_name: "csebuetnlp/banglabert_small"
+  max_seq_len: 128
+  dropout: 0.1
+
+# ── Training ───────────────────────────────────────────────────────────────
+training:
+  output_dir:         "experiments"
+  run_name:           "default_run"
+  epochs:             5
+  batch_size:         32
+  lr:                 2.0e-5
+  weight_decay:       0.01
+  warmup_ratio:       0.1
+  gradient_clip:      1.0
+  eval_strategy:      "epoch"           # "epoch" | "steps"
+  save_strategy:      "epoch"
+  load_best_model_at_end: true
+  metric_for_best:    "eval_f1_macro"
+  greater_is_better:  true
+  fp16:               false            # set true on GPU if supported
+  dataloader_num_workers: 0            # 0 = main process (safe on Windows)
+
+# ── Distillation (populated in later phases) ───────────────────────────────
+distillation:
+  temperature: 4.0
+  alpha: 0.7                           # weight of soft-label loss
+  intermediate_layers: true            # match hidden states?
+  hidden_loss_weight: 0.1
+
+# ── Optuna hyperparameter search ──────────────────────────────────────────
+optuna:
+  n_trials: 30
+  timeout_sec: 7200                    # 2 h wall-clock limit
+  study_name:  "default_study"
+  direction:   "maximize"              # maximise eval_f1_macro
+  storage:     null                    # null = in-memory; set to sqlite:// for persistence
+
+# ── Evaluation ────────────────────────────────────────────────────────────
+evaluation:
+  test_batch_size: 64
+  cross_domain_dataset: null           # path or HF dataset id for cross-domain eval
+
+# ── Explainability ────────────────────────────────────────────────────────
+explainability:
+  shap:
+    n_samples: 100                     # headlines to explain
+    max_display: 20
+  lime:
+    n_samples: 100
+    num_features: 15
+    num_perturbations: 500
+
+# ── Efficiency benchmarking ───────────────────────────────────────────────
+efficiency:
+  onnx_opset: 17
+  latency_warmup_iters: 10
+  latency_bench_iters: 100
+  batch_sizes: [1, 8, 32]
+
+# ── Logging ───────────────────────────────────────────────────────────────
+logging:
+  level: "INFO"
+  # wandb: false  # uncomment + set to true to enable W&B later

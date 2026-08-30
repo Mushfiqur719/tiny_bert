@@ -1,0 +1,59 @@
+# Byte-compiled / optimized
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# ── Project-specific ──────────────────────────────────────────────────────
+
+# Raw data (large files, not tracked)
+data/raw/
+
+# Processed data splits (tracked — deterministic and small)
+# data/processed/   ← keep this COMMENTED OUT so splits are versioned
+
+# Experiment outputs (large — gitignore everything except summary CSVs)
+experiments/*/checkpoints/
+experiments/*/run.log
+experiments/*/metrics.json
+
+# Keep summary CSVs and run_info so results are reproducible from git alone
+!experiments/*/metrics.csv
+!experiments/*/run_info.json
+!experiments/*/config.yaml
+
+# ONNX exports
+*.onnx
+
+# dotenv
+.env
+
+# pytest cache
+.pytest_cache/
+.pytest_tmp/
+.coverage
+htmlcov/
