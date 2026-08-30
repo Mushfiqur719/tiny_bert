@@ -7,6 +7,10 @@ from src.evaluation.ablation import (
     plot_f1_comparison,
     run_ablation_analysis,
 )
+from src.evaluation.crossdomain_eval import (
+    evaluate_model_on_dataset,
+    run_crossdomain_evaluation,
+)
 from src.evaluation.mcnemar_test import (
     build_contingency_table,
     get_model_test_predictions,
@@ -29,4 +33,6 @@ __all__ = [
     "run_pairwise_mcnemar_test",
     "get_model_test_predictions",
     "run_full_mcnemar_suite",
+    "evaluate_model_on_dataset",
+    "run_crossdomain_evaluation",
 ]
