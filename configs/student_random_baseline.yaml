@@ -1,0 +1,28 @@
+# Student 1: Random Init + Supervised Baseline (Cross-Entropy only)
+model:
+  student_model_name: "TinyBanglaBERT"
+  init_type: "random"
+  num_hidden_layers: 4
+  hidden_size: 256
+  num_attention_heads: 4
+  intermediate_size: 1024
+  max_seq_len: 128
+  dropout: 0.1
+
+training:
+  output_dir:             "experiments"
+  run_name:               "student_random_baseline"
+  epochs:                 5
+  batch_size:             32
+  lr:                     5.0e-5
+  weight_decay:           0.01
+  warmup_ratio:           0.1
+  gradient_clip:          1.0
+  eval_strategy:          "epoch"
+  save_strategy:          "epoch"
+  early_stopping_patience: 3
+  load_best_model_at_end: true
+  metric_for_best:        "f1_macro"
+  greater_is_better:      true
+  fp16:                   true
+  dataloader_num_workers: 0

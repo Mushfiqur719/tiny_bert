@@ -1,6 +1,11 @@
 # src/models/__init__.py
 """Model sub-package: teacher, student, and distillation definitions."""
 
+from src.models.distillation import (
+    DistillationDataset,
+    KnowledgeDistillationLoss,
+    load_teacher_soft_labels,
+)
 from src.models.student import (
     count_parameters,
     create_student_config,
@@ -27,4 +32,7 @@ __all__ = [
     "init_from_teacher",
     "count_parameters",
     "save_student_checkpoint",
+    "KnowledgeDistillationLoss",
+    "DistillationDataset",
+    "load_teacher_soft_labels",
 ]
