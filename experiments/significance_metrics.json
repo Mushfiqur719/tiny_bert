@@ -1,0 +1,114 @@
+[
+  {
+    "model_a": "Teacher (BanglaBERT)",
+    "model_b": "TinyBanglaBERT-final",
+    "contingency_table": [
+      [
+        1038,
+        230
+      ],
+      [
+        101,
+        137
+      ]
+    ],
+    "counts": {
+      "n_total": 1506,
+      "both_correct_n00": 1038,
+      "a_only_correct_n01": 230,
+      "b_only_correct_n10": 101,
+      "both_wrong_n11": 137,
+      "discordant_pairs": 331
+    },
+    "statistic": 101.0,
+    "p_value": 1.0299697624510448e-12,
+    "p_value_formatted": "p < 0.001",
+    "is_significant_alpha_05": true,
+    "is_significant_alpha_01": true,
+    "interpretation": "p < 0.001: The difference in error rates is statistically significant at alpha=0.05. Teacher (BanglaBERT) significantly outperformed TinyBanglaBERT-final (230 unique correct predictions vs. 101)."
+  },
+  {
+    "model_a": "TinyBanglaBERT-final",
+    "model_b": "Student (Random Init + Supervised)",
+    "contingency_table": [
+      [
+        998,
+        141
+      ],
+      [
+        126,
+        241
+      ]
+    ],
+    "counts": {
+      "n_total": 1506,
+      "both_correct_n00": 998,
+      "a_only_correct_n01": 141,
+      "b_only_correct_n10": 126,
+      "both_wrong_n11": 241,
+      "discordant_pairs": 267
+    },
+    "statistic": 126.0,
+    "p_value": 0.39160320223690265,
+    "p_value_formatted": "p = 0.3916",
+    "is_significant_alpha_05": false,
+    "is_significant_alpha_01": false,
+    "interpretation": "p = 0.3916: The difference in error rates is not statistically significant at alpha=0.05 (141 vs. 126 discordant predictions). The performance difference is consistent with random chance."
+  },
+  {
+    "model_a": "TinyBanglaBERT-final",
+    "model_b": "Student (Random Init + Distilled)",
+    "contingency_table": [
+      [
+        998,
+        141
+      ],
+      [
+        126,
+        241
+      ]
+    ],
+    "counts": {
+      "n_total": 1506,
+      "both_correct_n00": 998,
+      "a_only_correct_n01": 141,
+      "b_only_correct_n10": 126,
+      "both_wrong_n11": 241,
+      "discordant_pairs": 267
+    },
+    "statistic": 126.0,
+    "p_value": 0.39160320223690265,
+    "p_value_formatted": "p = 0.3916",
+    "is_significant_alpha_05": false,
+    "is_significant_alpha_01": false,
+    "interpretation": "p = 0.3916: The difference in error rates is not statistically significant at alpha=0.05 (141 vs. 126 discordant predictions). The performance difference is consistent with random chance."
+  },
+  {
+    "model_a": "TinyBanglaBERT-final",
+    "model_b": "Student (Teacher Init + Supervised)",
+    "contingency_table": [
+      [
+        1139,
+        0
+      ],
+      [
+        0,
+        367
+      ]
+    ],
+    "counts": {
+      "n_total": 1506,
+      "both_correct_n00": 1139,
+      "a_only_correct_n01": 0,
+      "b_only_correct_n10": 0,
+      "both_wrong_n11": 367,
+      "discordant_pairs": 0
+    },
+    "statistic": 0.0,
+    "p_value": 1.0,
+    "p_value_formatted": "p = 1.0000",
+    "is_significant_alpha_05": false,
+    "is_significant_alpha_01": false,
+    "interpretation": "p = 1.0000: The difference in error rates is not statistically significant at alpha=0.05 (0 vs. 0 discordant predictions). The performance difference is consistent with random chance."
+  }
+]

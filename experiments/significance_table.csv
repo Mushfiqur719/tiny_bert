@@ -1,0 +1,5 @@
+Comparison (Model A vs. Model B),Both Correct (n00),A Only (b),B Only (c),Both Wrong (n11),Discordant Pairs (b + c),McNemar p-value,Significant (α=0.05)
+Teacher (BanglaBERT) vs. TinyBanglaBERT-final,1038,230,101,137,331,p < 0.001,Yes (p < 0.05)
+TinyBanglaBERT-final vs. Student (Random Init + Supervised),998,141,126,241,267,p = 0.3916,No (p ≥ 0.05)
+TinyBanglaBERT-final vs. Student (Random Init + Distilled),998,141,126,241,267,p = 0.3916,No (p ≥ 0.05)
+TinyBanglaBERT-final vs. Student (Teacher Init + Supervised),1139,0,0,367,0,p = 1.0000,No (p ≥ 0.05)
