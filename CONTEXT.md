@@ -40,9 +40,9 @@ c3d523c  init
 |-------|--------|-------------|
 | **1** | ✅ Done | Repo scaffold, `src/utils/` (seeding, config, logging), 15 tests |
 | **2** | ✅ Done | Data pipeline: load, clean, split, report. 34 tests. `splits.json` committed. |
-| **3** | ✅ Done | **Teacher (BanglaBERT) fine-tuning** — `src/models/teacher.py`, `src/training/train_teacher.py`, test macro-F1: 0.8233, accuracy: 0.8420. Soft labels saved to `experiments/teacher/train_soft_labels.pt`. |
-| **4** | ⬜ TODO | **Student (TinyBanglaBERT) architecture + knowledge distillation** |
-| **5** | ⬜ TODO | Evaluation: metrics, McNemar test, cross-domain eval |
+| **3** | ✅ Done | **Teacher (BanglaBERT) fine-tuning** — `src/models/teacher.py`, test macro-F1: 0.8233, accuracy: 0.8420. Soft labels saved. |
+| **4** | ✅ Done | **Student (TinyBanglaBERT) architecture & 4-way ablation distillation** — selected `student_teacher_init_distilled` as `tinybanglabert_final` (Val F1: 0.7462, Test F1: 0.7431, Test Acc: 75.63%). 90.3% Teacher F1 retention at 9.58x smaller size. |
+| **5** | ⬜ TODO | **Evaluation: metrics, McNemar test, cross-domain eval** |
 | **6** | ⬜ TODO | Explainability: SHAP token attributions + LIME perturbation |
 | **7** | ⬜ TODO | Efficiency benchmarking: param count, size, latency (ONNX), memory |
 | **8** | ⬜ TODO | Ablation study: temperature T, alpha α, intermediate-layer matching |
