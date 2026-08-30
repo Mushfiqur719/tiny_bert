@@ -11,16 +11,18 @@ seed: 42
 
 # ── Data ───────────────────────────────────────────────────────────────────
 data:
-  dataset_name: "BanglaBait"           # primary dataset
-  raw_dir:       "data/raw"
-  processed_dir: "data/processed"
-  splits_file:   "data/processed/splits.json"
-  train_ratio: 0.80
-  val_ratio:   0.10
-  test_ratio:  0.10
-  label_col:   "label"
-  text_col:    "headline"
-  num_labels:  2                        # 0=non-clickbait, 1=clickbait
+  dataset_name:   "BanglaBait"           # primary dataset
+  hf_dataset_id:  "Motahar/banglabait"   # HuggingFace Hub id
+  raw_dir:        "data/raw"
+  processed_dir:  "data/processed"
+  splits_file:    "data/processed/splits.json"
+  train_ratio:    0.80
+  val_ratio:      0.10
+  test_ratio:     0.10
+  label_col:      "label"
+  text_col:       "headline"             # mapped from 'title' in HF schema
+  num_labels:     2                      # 0=not-clickbait, 1=clickbait
+  min_char_length: 5                     # drop rows shorter than this after cleaning
 
 # ── Model defaults (overridden per experiment) ─────────────────────────────
 model:
