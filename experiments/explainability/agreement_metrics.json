@@ -1,0 +1,2153 @@
+{
+  "summary": {
+    "num_samples": 15,
+    "mean_jaccard_top3_overall": 0.3267,
+    "median_jaccard_top3_overall": 0.2,
+    "mean_jaccard_top3_clickbait": 0.2978,
+    "mean_sign_agreement": 0.4881
+  },
+  "samples": [
+    {
+      "sample_id": 1,
+      "headline": "\u2018\u09a8\u09be\u09af\u09bc\u09bf\u0995\u09be\u09b0\u09be \u09ac\u09c1\u099d\u09b2\u09be\u09ae, \u09a8\u09be\u09af\u09bc\u0995\u09b0\u09be\u0993 \u0995\u09bf \u09ac\u09bf\u099b\u09be\u09a8\u09be\u09af\u09bc \u09b6\u09c1\u09af\u09bc\u09c7 \u0995\u09be\u099c \u09aa\u09be\u09af\u09bc?\u2019",
+      "true_label": 1,
+      "pred_label": 1,
+      "shap": {
+        "headline": "\u2018\u09a8\u09be\u09af\u09bc\u09bf\u0995\u09be\u09b0\u09be \u09ac\u09c1\u099d\u09b2\u09be\u09ae, \u09a8\u09be\u09af\u09bc\u0995\u09b0\u09be\u0993 \u0995\u09bf \u09ac\u09bf\u099b\u09be\u09a8\u09be\u09af\u09bc \u09b6\u09c1\u09af\u09bc\u09c7 \u0995\u09be\u099c \u09aa\u09be\u09af\u09bc?\u2019",
+        "pred_label": 1,
+        "pred_class_name": "clickbait",
+        "pred_proba": [
+          0.0783,
+          0.9217
+        ],
+        "clickbait_prob": 0.9217,
+        "tokens": [
+          "\u2018\u09a8\u09be\u09af\u09bc\u09bf\u0995\u09be\u09b0\u09be",
+          "\u09ac\u09c1\u099d\u09b2\u09be\u09ae,",
+          "\u09a8\u09be\u09af\u09bc\u0995\u09b0\u09be\u0993",
+          "\u0995\u09bf",
+          "\u09ac\u09bf\u099b\u09be\u09a8\u09be\u09af\u09bc",
+          "\u09b6\u09c1\u09af\u09bc\u09c7",
+          "\u0995\u09be\u099c",
+          "\u09aa\u09be\u09af\u09bc?\u2019"
+        ],
+        "shap_values_clickbait": [
+          0.0068,
+          0.0234,
+          -0.0015,
+          0.0379,
+          0.019,
+          0.0077,
+          0.0149,
+          0.0262
+        ],
+        "token_attributions": [
+          {
+            "token": "\u2018\u09a8\u09be\u09af\u09bc\u09bf\u0995\u09be\u09b0\u09be",
+            "score": 0.0068
+          },
+          {
+            "token": "\u09ac\u09c1\u099d\u09b2\u09be\u09ae,",
+            "score": 0.0234
+          },
+          {
+            "token": "\u09a8\u09be\u09af\u09bc\u0995\u09b0\u09be\u0993",
+            "score": -0.0015
+          },
+          {
+            "token": "\u0995\u09bf",
+            "score": 0.0379
+          },
+          {
+            "token": "\u09ac\u09bf\u099b\u09be\u09a8\u09be\u09af\u09bc",
+            "score": 0.019
+          },
+          {
+            "token": "\u09b6\u09c1\u09af\u09bc\u09c7",
+            "score": 0.0077
+          },
+          {
+            "token": "\u0995\u09be\u099c",
+            "score": 0.0149
+          },
+          {
+            "token": "\u09aa\u09be\u09af\u09bc?\u2019",
+            "score": 0.0262
+          }
+        ],
+        "top_clickbait_tokens": [
+          "\u0995\u09bf",
+          "\u09aa\u09be\u09af\u09bc?\u2019",
+          "\u09ac\u09c1\u099d\u09b2\u09be\u09ae,",
+          "\u09ac\u09bf\u099b\u09be\u09a8\u09be\u09af\u09bc",
+          "\u0995\u09be\u099c"
+        ],
+        "top_non_clickbait_tokens": [
+          "\u09a8\u09be\u09af\u09bc\u0995\u09b0\u09be\u0993"
+        ]
+      },
+      "lime": {
+        "headline": "\u2018\u09a8\u09be\u09af\u09bc\u09bf\u0995\u09be\u09b0\u09be \u09ac\u09c1\u099d\u09b2\u09be\u09ae, \u09a8\u09be\u09af\u09bc\u0995\u09b0\u09be\u0993 \u0995\u09bf \u09ac\u09bf\u099b\u09be\u09a8\u09be\u09af\u09bc \u09b6\u09c1\u09af\u09bc\u09c7 \u0995\u09be\u099c \u09aa\u09be\u09af\u09bc?\u2019",
+        "pred_label": 1,
+        "pred_class_name": "clickbait",
+        "pred_proba": [
+          0.0783,
+          0.9217
+        ],
+        "clickbait_prob": 0.9217,
+        "lime_weights": [
+          {
+            "token": "\u09aa\u09be\u09af\u09bc?\u2019",
+            "weight": 0.1133
+          },
+          {
+            "token": "\u09ac\u09bf\u099b\u09be\u09a8\u09be\u09af\u09bc",
+            "weight": 0.0834
+          },
+          {
+            "token": "\u0995\u09bf",
+            "weight": 0.0825
+          },
+          {
+            "token": "\u2018\u09a8\u09be\u09af\u09bc\u09bf\u0995\u09be\u09b0\u09be",
+            "weight": 0.0824
+          },
+          {
+            "token": "\u09ac\u09c1\u099d\u09b2\u09be\u09ae,",
+            "weight": 0.0761
+          },
+          {
+            "token": "\u0995\u09be\u099c",
+            "weight": 0.0679
+          },
+          {
+            "token": "\u09a8\u09be\u09af\u09bc\u0995\u09b0\u09be\u0993",
+            "weight": 0.0592
+          },
+          {
+            "token": "\u09b6\u09c1\u09af\u09bc\u09c7",
+            "weight": 0.0265
+          }
+        ],
+        "top_clickbait_tokens": [
+          "\u09aa\u09be\u09af\u09bc?\u2019",
+          "\u09ac\u09bf\u099b\u09be\u09a8\u09be\u09af\u09bc",
+          "\u0995\u09bf",
+          "\u2018\u09a8\u09be\u09af\u09bc\u09bf\u0995\u09be\u09b0\u09be",
+          "\u09ac\u09c1\u099d\u09b2\u09be\u09ae,"
+        ],
+        "top_non_clickbait_tokens": []
+      },
+      "agreement": {
+        "jaccard_top3_clickbait": 0.5,
+        "jaccard_top3_non_clickbait": 0.0,
+        "jaccard_top3_overall": 0.5,
+        "sign_agreement": 0.875,
+        "shared_token_count": 8,
+        "shap_top_tokens": [
+          "\u0995\u09bf",
+          "\u09aa\u09be\u09af\u09bc?\u2019",
+          "\u09ac\u09c1\u099d\u09b2\u09be\u09ae,"
+        ],
+        "lime_top_tokens": [
+          "\u09aa\u09be\u09af\u09bc?\u2019",
+          "\u09ac\u09bf\u099b\u09be\u09a8\u09be\u09af\u09bc",
+          "\u0995\u09bf"
+        ]
+      }
+    },
+    {
+      "sample_id": 2,
+      "headline": "\u099c\u09be\u2019\u09a8\u09bf\u09a8\u09be \u0995\u09be\u09b0 \u09b8\u2019\u09a8\u09cd\u09a4\u09be\u09a8 \u0986\u09ae\u09be\u09b0 \u09aa\u09c7\u2019\u099f\u09c7, \u09b8\u09cd\u09ac\u09be\u2019\u09ae\u09c0 \u09a8\u09be\u0995\u09bf \u09a6\u09c7\u2019\u09ac\u09b0\u09c7\u09b0\u2026",
+      "true_label": 1,
+      "pred_label": 1,
+      "shap": {
+        "headline": "\u099c\u09be\u2019\u09a8\u09bf\u09a8\u09be \u0995\u09be\u09b0 \u09b8\u2019\u09a8\u09cd\u09a4\u09be\u09a8 \u0986\u09ae\u09be\u09b0 \u09aa\u09c7\u2019\u099f\u09c7, \u09b8\u09cd\u09ac\u09be\u2019\u09ae\u09c0 \u09a8\u09be\u0995\u09bf \u09a6\u09c7\u2019\u09ac\u09b0\u09c7\u09b0\u2026",
+        "pred_label": 1,
+        "pred_class_name": "clickbait",
+        "pred_proba": [
+          0.1318,
+          0.8682
+        ],
+        "clickbait_prob": 0.8682,
+        "tokens": [
+          "\u099c\u09be\u2019\u09a8\u09bf\u09a8\u09be",
+          "\u0995\u09be\u09b0",
+          "\u09b8\u2019\u09a8\u09cd\u09a4\u09be\u09a8",
+          "\u0986\u09ae\u09be\u09b0",
+          "\u09aa\u09c7\u2019\u099f\u09c7,",
+          "\u09b8\u09cd\u09ac\u09be\u2019\u09ae\u09c0",
+          "\u09a8\u09be\u0995\u09bf",
+          "\u09a6\u09c7\u2019\u09ac\u09b0\u09c7\u09b0\u2026"
+        ],
+        "shap_values_clickbait": [
+          -0.0257,
+          0.016,
+          -0.0042,
+          0.0223,
+          0.0153,
+          0.0106,
+          0.0514,
+          -0.005
+        ],
+        "token_attributions": [
+          {
+            "token": "\u099c\u09be\u2019\u09a8\u09bf\u09a8\u09be",
+            "score": -0.0257
+          },
+          {
+            "token": "\u0995\u09be\u09b0",
+            "score": 0.016
+          },
+          {
+            "token": "\u09b8\u2019\u09a8\u09cd\u09a4\u09be\u09a8",
+            "score": -0.0042
+          },
+          {
+            "token": "\u0986\u09ae\u09be\u09b0",
+            "score": 0.0223
+          },
+          {
+            "token": "\u09aa\u09c7\u2019\u099f\u09c7,",
+            "score": 0.0153
+          },
+          {
+            "token": "\u09b8\u09cd\u09ac\u09be\u2019\u09ae\u09c0",
+            "score": 0.0106
+          },
+          {
+            "token": "\u09a8\u09be\u0995\u09bf",
+            "score": 0.0514
+          },
+          {
+            "token": "\u09a6\u09c7\u2019\u09ac\u09b0\u09c7\u09b0\u2026",
+            "score": -0.005
+          }
+        ],
+        "top_clickbait_tokens": [
+          "\u09a8\u09be\u0995\u09bf",
+          "\u0986\u09ae\u09be\u09b0",
+          "\u0995\u09be\u09b0",
+          "\u09aa\u09c7\u2019\u099f\u09c7,",
+          "\u09b8\u09cd\u09ac\u09be\u2019\u09ae\u09c0"
+        ],
+        "top_non_clickbait_tokens": [
+          "\u09b8\u2019\u09a8\u09cd\u09a4\u09be\u09a8",
+          "\u09a6\u09c7\u2019\u09ac\u09b0\u09c7\u09b0\u2026",
+          "\u099c\u09be\u2019\u09a8\u09bf\u09a8\u09be"
+        ]
+      },
+      "lime": {
+        "headline": "\u099c\u09be\u2019\u09a8\u09bf\u09a8\u09be \u0995\u09be\u09b0 \u09b8\u2019\u09a8\u09cd\u09a4\u09be\u09a8 \u0986\u09ae\u09be\u09b0 \u09aa\u09c7\u2019\u099f\u09c7, \u09b8\u09cd\u09ac\u09be\u2019\u09ae\u09c0 \u09a8\u09be\u0995\u09bf \u09a6\u09c7\u2019\u09ac\u09b0\u09c7\u09b0\u2026",
+        "pred_label": 1,
+        "pred_class_name": "clickbait",
+        "pred_proba": [
+          0.1318,
+          0.8682
+        ],
+        "clickbait_prob": 0.8682,
+        "lime_weights": [
+          {
+            "token": "\u09b8\u2019\u09a8\u09cd\u09a4\u09be\u09a8",
+            "weight": 0.0731
+          },
+          {
+            "token": "\u09a8\u09be\u0995\u09bf",
+            "weight": 0.0624
+          },
+          {
+            "token": "\u09aa\u09c7\u2019\u099f\u09c7,",
+            "weight": 0.0581
+          },
+          {
+            "token": "\u0995\u09be\u09b0",
+            "weight": 0.0514
+          },
+          {
+            "token": "\u0986\u09ae\u09be\u09b0",
+            "weight": 0.0483
+          },
+          {
+            "token": "\u09b8\u09cd\u09ac\u09be\u2019\u09ae\u09c0",
+            "weight": 0.0373
+          },
+          {
+            "token": "\u09a6\u09c7\u2019\u09ac\u09b0\u09c7\u09b0\u2026",
+            "weight": 0.0371
+          },
+          {
+            "token": "\u099c\u09be\u2019\u09a8\u09bf\u09a8\u09be",
+            "weight": 0.0335
+          }
+        ],
+        "top_clickbait_tokens": [
+          "\u09b8\u2019\u09a8\u09cd\u09a4\u09be\u09a8",
+          "\u09a8\u09be\u0995\u09bf",
+          "\u09aa\u09c7\u2019\u099f\u09c7,",
+          "\u0995\u09be\u09b0",
+          "\u0986\u09ae\u09be\u09b0"
+        ],
+        "top_non_clickbait_tokens": []
+      },
+      "agreement": {
+        "jaccard_top3_clickbait": 0.2,
+        "jaccard_top3_non_clickbait": 0.0,
+        "jaccard_top3_overall": 0.2,
+        "sign_agreement": 0.625,
+        "shared_token_count": 8,
+        "shap_top_tokens": [
+          "\u09a8\u09be\u0995\u09bf",
+          "\u099c\u09be\u2019\u09a8\u09bf\u09a8\u09be",
+          "\u0986\u09ae\u09be\u09b0"
+        ],
+        "lime_top_tokens": [
+          "\u09b8\u2019\u09a8\u09cd\u09a4\u09be\u09a8",
+          "\u09a8\u09be\u0995\u09bf",
+          "\u09aa\u09c7\u2019\u099f\u09c7,"
+        ]
+      }
+    },
+    {
+      "sample_id": 3,
+      "headline": "\u2018\u09a4\u09be\u09b0\u09be \u09a6\u09bf\u09a8\u09c7 \u0998\u09c1\u09ae\u09be\u09a4\u09c7\u09a8, \u09b0\u09be\u09a4\u09c7 \u0989\u099a\u09cd\u099a\u09ac\u09bf\u09a4\u09cd\u09a4 \u09aa\u09b0\u09bf\u09ac\u09be\u09b0\u09c7\u09b0 \u09b8\u09a8\u09cd\u09a4\u09be\u09a8\u09a6\u09c7\u09b0 \u09ac\u09be\u09b8\u09be\u09af\u09bc \u09a1\u09c7\u0995\u09c7 \u0986\u09a8\u09a4\u09c7\u09a8\u2019",
+      "true_label": 1,
+      "pred_label": 1,
+      "shap": {
+        "headline": "\u2018\u09a4\u09be\u09b0\u09be \u09a6\u09bf\u09a8\u09c7 \u0998\u09c1\u09ae\u09be\u09a4\u09c7\u09a8, \u09b0\u09be\u09a4\u09c7 \u0989\u099a\u09cd\u099a\u09ac\u09bf\u09a4\u09cd\u09a4 \u09aa\u09b0\u09bf\u09ac\u09be\u09b0\u09c7\u09b0 \u09b8\u09a8\u09cd\u09a4\u09be\u09a8\u09a6\u09c7\u09b0 \u09ac\u09be\u09b8\u09be\u09af\u09bc \u09a1\u09c7\u0995\u09c7 \u0986\u09a8\u09a4\u09c7\u09a8\u2019",
+        "pred_label": 1,
+        "pred_class_name": "clickbait",
+        "pred_proba": [
+          0.4928,
+          0.5072
+        ],
+        "clickbait_prob": 0.5072,
+        "tokens": [
+          "\u2018\u09a4\u09be\u09b0\u09be",
+          "\u09a6\u09bf\u09a8\u09c7",
+          "\u0998\u09c1\u09ae\u09be\u09a4\u09c7\u09a8,",
+          "\u09b0\u09be\u09a4\u09c7",
+          "\u0989\u099a\u09cd\u099a\u09ac\u09bf\u09a4\u09cd\u09a4",
+          "\u09aa\u09b0\u09bf\u09ac\u09be\u09b0\u09c7\u09b0",
+          "\u09b8\u09a8\u09cd\u09a4\u09be\u09a8\u09a6\u09c7\u09b0",
+          "\u09ac\u09be\u09b8\u09be\u09af\u09bc",
+          "\u09a1\u09c7\u0995\u09c7",
+          "\u0986\u09a8\u09a4\u09c7\u09a8\u2019"
+        ],
+        "shap_values_clickbait": [
+          0.0531,
+          0.0523,
+          -0.028,
+          0.0249,
+          -0.0374,
+          0.0089,
+          -0.0633,
+          -0.0617,
+          -0.0999,
+          -0.1291
+        ],
+        "token_attributions": [
+          {
+            "token": "\u2018\u09a4\u09be\u09b0\u09be",
+            "score": 0.0531
+          },
+          {
+            "token": "\u09a6\u09bf\u09a8\u09c7",
+            "score": 0.0523
+          },
+          {
+            "token": "\u0998\u09c1\u09ae\u09be\u09a4\u09c7\u09a8,",
+            "score": -0.028
+          },
+          {
+            "token": "\u09b0\u09be\u09a4\u09c7",
+            "score": 0.0249
+          },
+          {
+            "token": "\u0989\u099a\u09cd\u099a\u09ac\u09bf\u09a4\u09cd\u09a4",
+            "score": -0.0374
+          },
+          {
+            "token": "\u09aa\u09b0\u09bf\u09ac\u09be\u09b0\u09c7\u09b0",
+            "score": 0.0089
+          },
+          {
+            "token": "\u09b8\u09a8\u09cd\u09a4\u09be\u09a8\u09a6\u09c7\u09b0",
+            "score": -0.0633
+          },
+          {
+            "token": "\u09ac\u09be\u09b8\u09be\u09af\u09bc",
+            "score": -0.0617
+          },
+          {
+            "token": "\u09a1\u09c7\u0995\u09c7",
+            "score": -0.0999
+          },
+          {
+            "token": "\u0986\u09a8\u09a4\u09c7\u09a8\u2019",
+            "score": -0.1291
+          }
+        ],
+        "top_clickbait_tokens": [
+          "\u2018\u09a4\u09be\u09b0\u09be",
+          "\u09a6\u09bf\u09a8\u09c7",
+          "\u09b0\u09be\u09a4\u09c7",
+          "\u09aa\u09b0\u09bf\u09ac\u09be\u09b0\u09c7\u09b0"
+        ],
+        "top_non_clickbait_tokens": [
+          "\u0989\u099a\u09cd\u099a\u09ac\u09bf\u09a4\u09cd\u09a4",
+          "\u09ac\u09be\u09b8\u09be\u09af\u09bc",
+          "\u09b8\u09a8\u09cd\u09a4\u09be\u09a8\u09a6\u09c7\u09b0",
+          "\u09a1\u09c7\u0995\u09c7",
+          "\u0986\u09a8\u09a4\u09c7\u09a8\u2019"
+        ]
+      },
+      "lime": {
+        "headline": "\u2018\u09a4\u09be\u09b0\u09be \u09a6\u09bf\u09a8\u09c7 \u0998\u09c1\u09ae\u09be\u09a4\u09c7\u09a8, \u09b0\u09be\u09a4\u09c7 \u0989\u099a\u09cd\u099a\u09ac\u09bf\u09a4\u09cd\u09a4 \u09aa\u09b0\u09bf\u09ac\u09be\u09b0\u09c7\u09b0 \u09b8\u09a8\u09cd\u09a4\u09be\u09a8\u09a6\u09c7\u09b0 \u09ac\u09be\u09b8\u09be\u09af\u09bc \u09a1\u09c7\u0995\u09c7 \u0986\u09a8\u09a4\u09c7\u09a8\u2019",
+        "pred_label": 1,
+        "pred_class_name": "clickbait",
+        "pred_proba": [
+          0.4928,
+          0.5072
+        ],
+        "clickbait_prob": 0.5072,
+        "lime_weights": [
+          {
+            "token": "\u09b0\u09be\u09a4\u09c7",
+            "weight": 0.0055
+          },
+          {
+            "token": "\u2018\u09a4\u09be\u09b0\u09be",
+            "weight": 0.0049
+          },
+          {
+            "token": "\u09b8\u09a8\u09cd\u09a4\u09be\u09a8\u09a6\u09c7\u09b0",
+            "weight": 0.0043
+          },
+          {
+            "token": "\u09a6\u09bf\u09a8\u09c7",
+            "weight": 0.0041
+          },
+          {
+            "token": "\u09aa\u09b0\u09bf\u09ac\u09be\u09b0\u09c7\u09b0",
+            "weight": 0.0041
+          },
+          {
+            "token": "\u0986\u09a8\u09a4\u09c7\u09a8\u2019",
+            "weight": 0.0036
+          },
+          {
+            "token": "\u0989\u099a\u09cd\u099a\u09ac\u09bf\u09a4\u09cd\u09a4",
+            "weight": 0.0035
+          },
+          {
+            "token": "\u0998\u09c1\u09ae\u09be\u09a4\u09c7\u09a8,",
+            "weight": 0.0032
+          },
+          {
+            "token": "\u09a1\u09c7\u0995\u09c7",
+            "weight": 0.003
+          },
+          {
+            "token": "\u09ac\u09be\u09b8\u09be\u09af\u09bc",
+            "weight": 0.0016
+          }
+        ],
+        "top_clickbait_tokens": [
+          "\u09b0\u09be\u09a4\u09c7",
+          "\u2018\u09a4\u09be\u09b0\u09be",
+          "\u09b8\u09a8\u09cd\u09a4\u09be\u09a8\u09a6\u09c7\u09b0",
+          "\u09a6\u09bf\u09a8\u09c7",
+          "\u09aa\u09b0\u09bf\u09ac\u09be\u09b0\u09c7\u09b0"
+        ],
+        "top_non_clickbait_tokens": []
+      },
+      "agreement": {
+        "jaccard_top3_clickbait": 0.5,
+        "jaccard_top3_non_clickbait": 0.0,
+        "jaccard_top3_overall": 0.2,
+        "sign_agreement": 0.4,
+        "shared_token_count": 10,
+        "shap_top_tokens": [
+          "\u0986\u09a8\u09a4\u09c7\u09a8\u2019",
+          "\u09a1\u09c7\u0995\u09c7",
+          "\u09b8\u09a8\u09cd\u09a4\u09be\u09a8\u09a6\u09c7\u09b0"
+        ],
+        "lime_top_tokens": [
+          "\u09b0\u09be\u09a4\u09c7",
+          "\u2018\u09a4\u09be\u09b0\u09be",
+          "\u09b8\u09a8\u09cd\u09a4\u09be\u09a8\u09a6\u09c7\u09b0"
+        ]
+      }
+    },
+    {
+      "sample_id": 4,
+      "headline": "\u09aa\u09cd\u09b0\u09c7\u09ae \u0995\u09b0\u099b\u09c7\u09a8 \u09b6\u09be\u0995\u09bf\u09ac-\u09b6\u09cd\u09b0\u09be\u09ac\u09a8\u09cd\u09a4\u09c0\u2026\u2026.!",
+      "true_label": 1,
+      "pred_label": 1,
+      "shap": {
+        "headline": "\u09aa\u09cd\u09b0\u09c7\u09ae \u0995\u09b0\u099b\u09c7\u09a8 \u09b6\u09be\u0995\u09bf\u09ac-\u09b6\u09cd\u09b0\u09be\u09ac\u09a8\u09cd\u09a4\u09c0\u2026\u2026.!",
+        "pred_label": 1,
+        "pred_class_name": "clickbait",
+        "pred_proba": [
+          0.1015,
+          0.8985
+        ],
+        "clickbait_prob": 0.8985,
+        "tokens": [
+          "\u09aa\u09cd\u09b0\u09c7\u09ae",
+          "\u0995\u09b0\u099b\u09c7\u09a8",
+          "\u09b6\u09be\u0995\u09bf\u09ac-\u09b6\u09cd\u09b0\u09be\u09ac\u09a8\u09cd\u09a4\u09c0\u2026\u2026.!"
+        ],
+        "shap_values_clickbait": [
+          0.0111,
+          0.0371,
+          0.0628
+        ],
+        "token_attributions": [
+          {
+            "token": "\u09aa\u09cd\u09b0\u09c7\u09ae",
+            "score": 0.0111
+          },
+          {
+            "token": "\u0995\u09b0\u099b\u09c7\u09a8",
+            "score": 0.0371
+          },
+          {
+            "token": "\u09b6\u09be\u0995\u09bf\u09ac-\u09b6\u09cd\u09b0\u09be\u09ac\u09a8\u09cd\u09a4\u09c0\u2026\u2026.!",
+            "score": 0.0628
+          }
+        ],
+        "top_clickbait_tokens": [
+          "\u09b6\u09be\u0995\u09bf\u09ac-\u09b6\u09cd\u09b0\u09be\u09ac\u09a8\u09cd\u09a4\u09c0\u2026\u2026.!",
+          "\u0995\u09b0\u099b\u09c7\u09a8",
+          "\u09aa\u09cd\u09b0\u09c7\u09ae"
+        ],
+        "top_non_clickbait_tokens": []
+      },
+      "lime": {
+        "headline": "\u09aa\u09cd\u09b0\u09c7\u09ae \u0995\u09b0\u099b\u09c7\u09a8 \u09b6\u09be\u0995\u09bf\u09ac-\u09b6\u09cd\u09b0\u09be\u09ac\u09a8\u09cd\u09a4\u09c0\u2026\u2026.!",
+        "pred_label": 1,
+        "pred_class_name": "clickbait",
+        "pred_proba": [
+          0.1015,
+          0.8985
+        ],
+        "clickbait_prob": 0.8985,
+        "lime_weights": [
+          {
+            "token": "\u09b6\u09be\u0995\u09bf\u09ac-\u09b6\u09cd\u09b0\u09be\u09ac\u09a8\u09cd\u09a4\u09c0\u2026\u2026.!",
+            "weight": 0.0555
+          },
+          {
+            "token": "\u0995\u09b0\u099b\u09c7\u09a8",
+            "weight": 0.0399
+          },
+          {
+            "token": "\u09aa\u09cd\u09b0\u09c7\u09ae",
+            "weight": 0.0366
+          }
+        ],
+        "top_clickbait_tokens": [
+          "\u09b6\u09be\u0995\u09bf\u09ac-\u09b6\u09cd\u09b0\u09be\u09ac\u09a8\u09cd\u09a4\u09c0\u2026\u2026.!",
+          "\u0995\u09b0\u099b\u09c7\u09a8",
+          "\u09aa\u09cd\u09b0\u09c7\u09ae"
+        ],
+        "top_non_clickbait_tokens": []
+      },
+      "agreement": {
+        "jaccard_top3_clickbait": 1.0,
+        "jaccard_top3_non_clickbait": 1.0,
+        "jaccard_top3_overall": 1.0,
+        "sign_agreement": 1.0,
+        "shared_token_count": 3,
+        "shap_top_tokens": [
+          "\u09b6\u09be\u0995\u09bf\u09ac-\u09b6\u09cd\u09b0\u09be\u09ac\u09a8\u09cd\u09a4\u09c0\u2026\u2026.!",
+          "\u0995\u09b0\u099b\u09c7\u09a8",
+          "\u09aa\u09cd\u09b0\u09c7\u09ae"
+        ],
+        "lime_top_tokens": [
+          "\u09b6\u09be\u0995\u09bf\u09ac-\u09b6\u09cd\u09b0\u09be\u09ac\u09a8\u09cd\u09a4\u09c0\u2026\u2026.!",
+          "\u0995\u09b0\u099b\u09c7\u09a8",
+          "\u09aa\u09cd\u09b0\u09c7\u09ae"
+        ]
+      }
+    },
+    {
+      "sample_id": 5,
+      "headline": "\u0986\u09ae\u09bf \u0995\u09c0 \u099c\u09ac\u09be\u09ac \u09a6\u09c7\u09ac \u09b8\u09cd\u09ac\u09be\u09ae\u09c0\u0995\u09c7, \u0986\u09ae\u09bf \u09a4\u09cb \u09a4\u09cb\u09ae\u09be\u09b0 \u09b8\u09a8\u09cd\u09a4\u09be\u09a8\u0995\u09c7 \u09ac\u09be\u0981\u2019\u099a\u09be\u09a4\u09c7 \u09aa\u09be\u09b0\u09b2\u09be\u09ae \u09a8\u09be",
+      "true_label": 1,
+      "pred_label": 1,
+      "shap": {
+        "headline": "\u0986\u09ae\u09bf \u0995\u09c0 \u099c\u09ac\u09be\u09ac \u09a6\u09c7\u09ac \u09b8\u09cd\u09ac\u09be\u09ae\u09c0\u0995\u09c7, \u0986\u09ae\u09bf \u09a4\u09cb \u09a4\u09cb\u09ae\u09be\u09b0 \u09b8\u09a8\u09cd\u09a4\u09be\u09a8\u0995\u09c7 \u09ac\u09be\u0981\u2019\u099a\u09be\u09a4\u09c7 \u09aa\u09be\u09b0\u09b2\u09be\u09ae \u09a8\u09be",
+        "pred_label": 1,
+        "pred_class_name": "clickbait",
+        "pred_proba": [
+          0.1208,
+          0.8792
+        ],
+        "clickbait_prob": 0.8792,
+        "tokens": [
+          "\u0986\u09ae\u09bf",
+          "\u0995\u09c0",
+          "\u099c\u09ac\u09be\u09ac",
+          "\u09a6\u09c7\u09ac",
+          "\u09b8\u09cd\u09ac\u09be\u09ae\u09c0\u0995\u09c7,",
+          "\u0986\u09ae\u09bf",
+          "\u09a4\u09cb",
+          "\u09a4\u09cb\u09ae\u09be\u09b0",
+          "\u09b8\u09a8\u09cd\u09a4\u09be\u09a8\u0995\u09c7",
+          "\u09ac\u09be\u0981\u2019\u099a\u09be\u09a4\u09c7",
+          "\u09aa\u09be\u09b0\u09b2\u09be\u09ae",
+          "\u09a8\u09be"
+        ],
+        "shap_values_clickbait": [
+          0.0117,
+          0.0374,
+          -0.0049,
+          0.0132,
+          -0.0035,
+          0.0231,
+          0.0403,
+          0.0064,
+          -0.0184,
+          -0.0357,
+          0.0383,
+          -0.0161
+        ],
+        "token_attributions": [
+          {
+            "token": "\u0986\u09ae\u09bf",
+            "score": 0.0117
+          },
+          {
+            "token": "\u0995\u09c0",
+            "score": 0.0374
+          },
+          {
+            "token": "\u099c\u09ac\u09be\u09ac",
+            "score": -0.0049
+          },
+          {
+            "token": "\u09a6\u09c7\u09ac",
+            "score": 0.0132
+          },
+          {
+            "token": "\u09b8\u09cd\u09ac\u09be\u09ae\u09c0\u0995\u09c7,",
+            "score": -0.0035
+          },
+          {
+            "token": "\u0986\u09ae\u09bf",
+            "score": 0.0231
+          },
+          {
+            "token": "\u09a4\u09cb",
+            "score": 0.0403
+          },
+          {
+            "token": "\u09a4\u09cb\u09ae\u09be\u09b0",
+            "score": 0.0064
+          },
+          {
+            "token": "\u09b8\u09a8\u09cd\u09a4\u09be\u09a8\u0995\u09c7",
+            "score": -0.0184
+          },
+          {
+            "token": "\u09ac\u09be\u0981\u2019\u099a\u09be\u09a4\u09c7",
+            "score": -0.0357
+          },
+          {
+            "token": "\u09aa\u09be\u09b0\u09b2\u09be\u09ae",
+            "score": 0.0383
+          },
+          {
+            "token": "\u09a8\u09be",
+            "score": -0.0161
+          }
+        ],
+        "top_clickbait_tokens": [
+          "\u09a4\u09cb",
+          "\u09aa\u09be\u09b0\u09b2\u09be\u09ae",
+          "\u0995\u09c0",
+          "\u0986\u09ae\u09bf",
+          "\u09a6\u09c7\u09ac"
+        ],
+        "top_non_clickbait_tokens": [
+          "\u09b8\u09cd\u09ac\u09be\u09ae\u09c0\u0995\u09c7,",
+          "\u099c\u09ac\u09be\u09ac",
+          "\u09a8\u09be",
+          "\u09b8\u09a8\u09cd\u09a4\u09be\u09a8\u0995\u09c7",
+          "\u09ac\u09be\u0981\u2019\u099a\u09be\u09a4\u09c7"
+        ]
+      },
+      "lime": {
+        "headline": "\u0986\u09ae\u09bf \u0995\u09c0 \u099c\u09ac\u09be\u09ac \u09a6\u09c7\u09ac \u09b8\u09cd\u09ac\u09be\u09ae\u09c0\u0995\u09c7, \u0986\u09ae\u09bf \u09a4\u09cb \u09a4\u09cb\u09ae\u09be\u09b0 \u09b8\u09a8\u09cd\u09a4\u09be\u09a8\u0995\u09c7 \u09ac\u09be\u0981\u2019\u099a\u09be\u09a4\u09c7 \u09aa\u09be\u09b0\u09b2\u09be\u09ae \u09a8\u09be",
+        "pred_label": 1,
+        "pred_class_name": "clickbait",
+        "pred_proba": [
+          0.1208,
+          0.8792
+        ],
+        "clickbait_prob": 0.8792,
+        "lime_weights": [
+          {
+            "token": "\u09a4\u09cb",
+            "weight": 0.0313
+          },
+          {
+            "token": "\u09a4\u09cb\u09ae\u09be\u09b0",
+            "weight": 0.0272
+          },
+          {
+            "token": "\u0986\u09ae\u09bf",
+            "weight": 0.0258
+          },
+          {
+            "token": "\u09b8\u09cd\u09ac\u09be\u09ae\u09c0\u0995\u09c7,",
+            "weight": 0.0248
+          },
+          {
+            "token": "\u09a8\u09be",
+            "weight": 0.0237
+          },
+          {
+            "token": "\u0986\u09ae\u09bf",
+            "weight": 0.0234
+          },
+          {
+            "token": "\u0995\u09c0",
+            "weight": 0.023
+          },
+          {
+            "token": "\u09aa\u09be\u09b0\u09b2\u09be\u09ae",
+            "weight": 0.0219
+          },
+          {
+            "token": "\u099c\u09ac\u09be\u09ac",
+            "weight": 0.0213
+          },
+          {
+            "token": "\u09ac\u09be\u0981\u2019\u099a\u09be\u09a4\u09c7",
+            "weight": 0.0209
+          }
+        ],
+        "top_clickbait_tokens": [
+          "\u09a4\u09cb",
+          "\u09a4\u09cb\u09ae\u09be\u09b0",
+          "\u0986\u09ae\u09bf",
+          "\u09b8\u09cd\u09ac\u09be\u09ae\u09c0\u0995\u09c7,",
+          "\u09a8\u09be"
+        ],
+        "top_non_clickbait_tokens": []
+      },
+      "agreement": {
+        "jaccard_top3_clickbait": 0.2,
+        "jaccard_top3_non_clickbait": 0.0,
+        "jaccard_top3_overall": 0.2,
+        "sign_agreement": 0.5556,
+        "shared_token_count": 9,
+        "shap_top_tokens": [
+          "\u09a4\u09cb",
+          "\u09aa\u09be\u09b0\u09b2\u09be\u09ae",
+          "\u0995\u09c0"
+        ],
+        "lime_top_tokens": [
+          "\u09a4\u09cb",
+          "\u09a4\u09cb\u09ae\u09be\u09b0",
+          "\u0986\u09ae\u09bf"
+        ]
+      }
+    },
+    {
+      "sample_id": 6,
+      "headline": "\u09a4\u09be\u09a8\u09bf\u09af\u09bc\u09be\u09b0 \u09aa\u09cd\u09b0\u09a4\u09bf \u09ae\u09be\u09b8\u09c7 \u0986\u09af\u09bc \u09ed\u09e6 \u09b9\u09be\u099c\u09be\u09b0 \u099f\u09be\u0995\u09be",
+      "true_label": 0,
+      "pred_label": 0,
+      "shap": {
+        "headline": "\u09a4\u09be\u09a8\u09bf\u09af\u09bc\u09be\u09b0 \u09aa\u09cd\u09b0\u09a4\u09bf \u09ae\u09be\u09b8\u09c7 \u0986\u09af\u09bc \u09ed\u09e6 \u09b9\u09be\u099c\u09be\u09b0 \u099f\u09be\u0995\u09be",
+        "pred_label": 0,
+        "pred_class_name": "not-clickbait",
+        "pred_proba": [
+          0.8305,
+          0.1695
+        ],
+        "clickbait_prob": 0.1695,
+        "tokens": [
+          "\u09a4\u09be\u09a8\u09bf\u09af\u09bc\u09be\u09b0",
+          "\u09aa\u09cd\u09b0\u09a4\u09bf",
+          "\u09ae\u09be\u09b8\u09c7",
+          "\u0986\u09af\u09bc",
+          "\u09ed\u09e6",
+          "\u09b9\u09be\u099c\u09be\u09b0",
+          "\u099f\u09be\u0995\u09be"
+        ],
+        "shap_values_clickbait": [
+          -0.1994,
+          -0.018,
+          -0.0612,
+          -0.0826,
+          -0.1286,
+          0.0182,
+          -0.1465
+        ],
+        "token_attributions": [
+          {
+            "token": "\u09a4\u09be\u09a8\u09bf\u09af\u09bc\u09be\u09b0",
+            "score": -0.1994
+          },
+          {
+            "token": "\u09aa\u09cd\u09b0\u09a4\u09bf",
+            "score": -0.018
+          },
+          {
+            "token": "\u09ae\u09be\u09b8\u09c7",
+            "score": -0.0612
+          },
+          {
+            "token": "\u0986\u09af\u09bc",
+            "score": -0.0826
+          },
+          {
+            "token": "\u09ed\u09e6",
+            "score": -0.1286
+          },
+          {
+            "token": "\u09b9\u09be\u099c\u09be\u09b0",
+            "score": 0.0182
+          },
+          {
+            "token": "\u099f\u09be\u0995\u09be",
+            "score": -0.1465
+          }
+        ],
+        "top_clickbait_tokens": [
+          "\u09b9\u09be\u099c\u09be\u09b0"
+        ],
+        "top_non_clickbait_tokens": [
+          "\u09ae\u09be\u09b8\u09c7",
+          "\u0986\u09af\u09bc",
+          "\u09ed\u09e6",
+          "\u099f\u09be\u0995\u09be",
+          "\u09a4\u09be\u09a8\u09bf\u09af\u09bc\u09be\u09b0"
+        ]
+      },
+      "lime": {
+        "headline": "\u09a4\u09be\u09a8\u09bf\u09af\u09bc\u09be\u09b0 \u09aa\u09cd\u09b0\u09a4\u09bf \u09ae\u09be\u09b8\u09c7 \u0986\u09af\u09bc \u09ed\u09e6 \u09b9\u09be\u099c\u09be\u09b0 \u099f\u09be\u0995\u09be",
+        "pred_label": 0,
+        "pred_class_name": "not-clickbait",
+        "pred_proba": [
+          0.8305,
+          0.1695
+        ],
+        "clickbait_prob": 0.1695,
+        "lime_weights": [
+          {
+            "token": "\u099f\u09be\u0995\u09be",
+            "weight": 0.0007
+          },
+          {
+            "token": "\u09aa\u09cd\u09b0\u09a4\u09bf",
+            "weight": 0.0005
+          },
+          {
+            "token": "\u09ae\u09be\u09b8\u09c7",
+            "weight": 0.0005
+          },
+          {
+            "token": "\u09b9\u09be\u099c\u09be\u09b0",
+            "weight": 0.0004
+          },
+          {
+            "token": "\u09ed\u09e6",
+            "weight": 0.0
+          },
+          {
+            "token": "\u0986\u09af\u09bc",
+            "weight": 0.0
+          },
+          {
+            "token": "\u09a4\u09be\u09a8\u09bf\u09af\u09bc\u09be\u09b0",
+            "weight": -0.0008
+          }
+        ],
+        "top_clickbait_tokens": [
+          "\u099f\u09be\u0995\u09be",
+          "\u09aa\u09cd\u09b0\u09a4\u09bf",
+          "\u09ae\u09be\u09b8\u09c7",
+          "\u09b9\u09be\u099c\u09be\u09b0",
+          "\u09ed\u09e6"
+        ],
+        "top_non_clickbait_tokens": [
+          "\u09a4\u09be\u09a8\u09bf\u09af\u09bc\u09be\u09b0"
+        ]
+      },
+      "agreement": {
+        "jaccard_top3_clickbait": 0.0,
+        "jaccard_top3_non_clickbait": 0.0,
+        "jaccard_top3_overall": 0.5,
+        "sign_agreement": 0.2857,
+        "shared_token_count": 7,
+        "shap_top_tokens": [
+          "\u09a4\u09be\u09a8\u09bf\u09af\u09bc\u09be\u09b0",
+          "\u099f\u09be\u0995\u09be",
+          "\u09ed\u09e6"
+        ],
+        "lime_top_tokens": [
+          "\u09a4\u09be\u09a8\u09bf\u09af\u09bc\u09be\u09b0",
+          "\u099f\u09be\u0995\u09be",
+          "\u09aa\u09cd\u09b0\u09a4\u09bf"
+        ]
+      }
+    },
+    {
+      "sample_id": 7,
+      "headline": "\u09ac\u09cd\u09b0\u09be\u099c\u09bf\u09b2-\u09ad\u09c7\u09a8\u09c7\u099c\u09c1\u09af\u09bc\u09c7\u09b2\u09be \u09ae\u09cd\u09af\u09be\u099a \u09a6\u09bf\u09af\u09bc\u09c7 \u09aa\u09b0\u09cd\u09a6\u09be \u0989\u09a0\u099b\u09c7 \u0995\u09cb\u09aa\u09be\u09b0",
+      "true_label": 0,
+      "pred_label": 0,
+      "shap": {
+        "headline": "\u09ac\u09cd\u09b0\u09be\u099c\u09bf\u09b2-\u09ad\u09c7\u09a8\u09c7\u099c\u09c1\u09af\u09bc\u09c7\u09b2\u09be \u09ae\u09cd\u09af\u09be\u099a \u09a6\u09bf\u09af\u09bc\u09c7 \u09aa\u09b0\u09cd\u09a6\u09be \u0989\u09a0\u099b\u09c7 \u0995\u09cb\u09aa\u09be\u09b0",
+        "pred_label": 0,
+        "pred_class_name": "not-clickbait",
+        "pred_proba": [
+          0.9199,
+          0.0801
+        ],
+        "clickbait_prob": 0.0801,
+        "tokens": [
+          "\u09ac\u09cd\u09b0\u09be\u099c\u09bf\u09b2-\u09ad\u09c7\u09a8\u09c7\u099c\u09c1\u09af\u09bc\u09c7\u09b2\u09be",
+          "\u09ae\u09cd\u09af\u09be\u099a",
+          "\u09a6\u09bf\u09af\u09bc\u09c7",
+          "\u09aa\u09b0\u09cd\u09a6\u09be",
+          "\u0989\u09a0\u099b\u09c7",
+          "\u0995\u09cb\u09aa\u09be\u09b0"
+        ],
+        "shap_values_clickbait": [
+          -0.4242,
+          -0.0239,
+          0.0426,
+          0.0431,
+          0.022,
+          -0.367
+        ],
+        "token_attributions": [
+          {
+            "token": "\u09ac\u09cd\u09b0\u09be\u099c\u09bf\u09b2-\u09ad\u09c7\u09a8\u09c7\u099c\u09c1\u09af\u09bc\u09c7\u09b2\u09be",
+            "score": -0.4242
+          },
+          {
+            "token": "\u09ae\u09cd\u09af\u09be\u099a",
+            "score": -0.0239
+          },
+          {
+            "token": "\u09a6\u09bf\u09af\u09bc\u09c7",
+            "score": 0.0426
+          },
+          {
+            "token": "\u09aa\u09b0\u09cd\u09a6\u09be",
+            "score": 0.0431
+          },
+          {
+            "token": "\u0989\u09a0\u099b\u09c7",
+            "score": 0.022
+          },
+          {
+            "token": "\u0995\u09cb\u09aa\u09be\u09b0",
+            "score": -0.367
+          }
+        ],
+        "top_clickbait_tokens": [
+          "\u09aa\u09b0\u09cd\u09a6\u09be",
+          "\u09a6\u09bf\u09af\u09bc\u09c7",
+          "\u0989\u09a0\u099b\u09c7"
+        ],
+        "top_non_clickbait_tokens": [
+          "\u09ae\u09cd\u09af\u09be\u099a",
+          "\u0995\u09cb\u09aa\u09be\u09b0",
+          "\u09ac\u09cd\u09b0\u09be\u099c\u09bf\u09b2-\u09ad\u09c7\u09a8\u09c7\u099c\u09c1\u09af\u09bc\u09c7\u09b2\u09be"
+        ]
+      },
+      "lime": {
+        "headline": "\u09ac\u09cd\u09b0\u09be\u099c\u09bf\u09b2-\u09ad\u09c7\u09a8\u09c7\u099c\u09c1\u09af\u09bc\u09c7\u09b2\u09be \u09ae\u09cd\u09af\u09be\u099a \u09a6\u09bf\u09af\u09bc\u09c7 \u09aa\u09b0\u09cd\u09a6\u09be \u0989\u09a0\u099b\u09c7 \u0995\u09cb\u09aa\u09be\u09b0",
+        "pred_label": 0,
+        "pred_class_name": "not-clickbait",
+        "pred_proba": [
+          0.9199,
+          0.0801
+        ],
+        "clickbait_prob": 0.0801,
+        "lime_weights": [
+          {
+            "token": "\u09ac\u09cd\u09b0\u09be\u099c\u09bf\u09b2-\u09ad\u09c7\u09a8\u09c7\u099c\u09c1\u09af\u09bc\u09c7\u09b2\u09be",
+            "weight": -0.0001
+          },
+          {
+            "token": "\u0989\u09a0\u099b\u09c7",
+            "weight": -0.0005
+          },
+          {
+            "token": "\u09a6\u09bf\u09af\u09bc\u09c7",
+            "weight": -0.0005
+          },
+          {
+            "token": "\u09aa\u09b0\u09cd\u09a6\u09be",
+            "weight": -0.0006
+          },
+          {
+            "token": "\u09ae\u09cd\u09af\u09be\u099a",
+            "weight": -0.0006
+          },
+          {
+            "token": "\u0995\u09cb\u09aa\u09be\u09b0",
+            "weight": -0.0009
+          }
+        ],
+        "top_clickbait_tokens": [],
+        "top_non_clickbait_tokens": [
+          "\u0995\u09cb\u09aa\u09be\u09b0",
+          "\u09ae\u09cd\u09af\u09be\u099a",
+          "\u09aa\u09b0\u09cd\u09a6\u09be",
+          "\u09a6\u09bf\u09af\u09bc\u09c7",
+          "\u0989\u09a0\u099b\u09c7"
+        ]
+      },
+      "agreement": {
+        "jaccard_top3_clickbait": 0.0,
+        "jaccard_top3_non_clickbait": 0.5,
+        "jaccard_top3_overall": 0.5,
+        "sign_agreement": 0.5,
+        "shared_token_count": 6,
+        "shap_top_tokens": [
+          "\u09ac\u09cd\u09b0\u09be\u099c\u09bf\u09b2-\u09ad\u09c7\u09a8\u09c7\u099c\u09c1\u09af\u09bc\u09c7\u09b2\u09be",
+          "\u0995\u09cb\u09aa\u09be\u09b0",
+          "\u09aa\u09b0\u09cd\u09a6\u09be"
+        ],
+        "lime_top_tokens": [
+          "\u0995\u09cb\u09aa\u09be\u09b0",
+          "\u09aa\u09b0\u09cd\u09a6\u09be",
+          "\u09ae\u09cd\u09af\u09be\u099a"
+        ]
+      }
+    },
+    {
+      "sample_id": 8,
+      "headline": "\u09ab\u09c7\u09b0 \u09ac\u09be\u0982\u09b2\u09be\u09a6\u09c7\u09b6\u09c7\u09b0 \u099b\u09ac\u09bf\u09a4\u09c7 \u09b0\u09c2\u09aa\u09b8\u09be",
+      "true_label": 0,
+      "pred_label": 0,
+      "shap": {
+        "headline": "\u09ab\u09c7\u09b0 \u09ac\u09be\u0982\u09b2\u09be\u09a6\u09c7\u09b6\u09c7\u09b0 \u099b\u09ac\u09bf\u09a4\u09c7 \u09b0\u09c2\u09aa\u09b8\u09be",
+        "pred_label": 0,
+        "pred_class_name": "not-clickbait",
+        "pred_proba": [
+          0.882,
+          0.118
+        ],
+        "clickbait_prob": 0.118,
+        "tokens": [
+          "\u09ab\u09c7\u09b0",
+          "\u09ac\u09be\u0982\u09b2\u09be\u09a6\u09c7\u09b6\u09c7\u09b0",
+          "\u099b\u09ac\u09bf\u09a4\u09c7",
+          "\u09b0\u09c2\u09aa\u09b8\u09be"
+        ],
+        "shap_values_clickbait": [
+          -0.1466,
+          -0.1117,
+          -0.0229,
+          -0.3883
+        ],
+        "token_attributions": [
+          {
+            "token": "\u09ab\u09c7\u09b0",
+            "score": -0.1466
+          },
+          {
+            "token": "\u09ac\u09be\u0982\u09b2\u09be\u09a6\u09c7\u09b6\u09c7\u09b0",
+            "score": -0.1117
+          },
+          {
+            "token": "\u099b\u09ac\u09bf\u09a4\u09c7",
+            "score": -0.0229
+          },
+          {
+            "token": "\u09b0\u09c2\u09aa\u09b8\u09be",
+            "score": -0.3883
+          }
+        ],
+        "top_clickbait_tokens": [],
+        "top_non_clickbait_tokens": [
+          "\u099b\u09ac\u09bf\u09a4\u09c7",
+          "\u09ac\u09be\u0982\u09b2\u09be\u09a6\u09c7\u09b6\u09c7\u09b0",
+          "\u09ab\u09c7\u09b0",
+          "\u09b0\u09c2\u09aa\u09b8\u09be"
+        ]
+      },
+      "lime": {
+        "headline": "\u09ab\u09c7\u09b0 \u09ac\u09be\u0982\u09b2\u09be\u09a6\u09c7\u09b6\u09c7\u09b0 \u099b\u09ac\u09bf\u09a4\u09c7 \u09b0\u09c2\u09aa\u09b8\u09be",
+        "pred_label": 0,
+        "pred_class_name": "not-clickbait",
+        "pred_proba": [
+          0.882,
+          0.118
+        ],
+        "clickbait_prob": 0.118,
+        "lime_weights": [
+          {
+            "token": "\u099b\u09ac\u09bf\u09a4\u09c7",
+            "weight": 0.0003
+          },
+          {
+            "token": "\u09ac\u09be\u0982\u09b2\u09be\u09a6\u09c7\u09b6\u09c7\u09b0",
+            "weight": 0.0001
+          },
+          {
+            "token": "\u09ab\u09c7\u09b0",
+            "weight": -0.0005
+          },
+          {
+            "token": "\u09b0\u09c2\u09aa\u09b8\u09be",
+            "weight": -0.0014
+          }
+        ],
+        "top_clickbait_tokens": [
+          "\u099b\u09ac\u09bf\u09a4\u09c7",
+          "\u09ac\u09be\u0982\u09b2\u09be\u09a6\u09c7\u09b6\u09c7\u09b0"
+        ],
+        "top_non_clickbait_tokens": [
+          "\u09b0\u09c2\u09aa\u09b8\u09be",
+          "\u09ab\u09c7\u09b0"
+        ]
+      },
+      "agreement": {
+        "jaccard_top3_clickbait": 0.0,
+        "jaccard_top3_non_clickbait": 0.25,
+        "jaccard_top3_overall": 0.5,
+        "sign_agreement": 0.5,
+        "shared_token_count": 4,
+        "shap_top_tokens": [
+          "\u09b0\u09c2\u09aa\u09b8\u09be",
+          "\u09ab\u09c7\u09b0",
+          "\u09ac\u09be\u0982\u09b2\u09be\u09a6\u09c7\u09b6\u09c7\u09b0"
+        ],
+        "lime_top_tokens": [
+          "\u09b0\u09c2\u09aa\u09b8\u09be",
+          "\u09ab\u09c7\u09b0",
+          "\u099b\u09ac\u09bf\u09a4\u09c7"
+        ]
+      }
+    },
+    {
+      "sample_id": 9,
+      "headline": "\u0985\u09a8\u09c1\u09b7\u09cd\u0995\u09be \u09b6\u09b0\u09cd\u09ae\u09be \u09b9\u09b2\u09c7\u09a8 \u09a6\u09c7\u09b6\u09c7\u09b0 \u09ac\u09cc\u09ae\u09be\u0983 \u0995\u09b0\u09a3 \u099c\u09cb\u09b9\u09b0",
+      "true_label": 0,
+      "pred_label": 0,
+      "shap": {
+        "headline": "\u0985\u09a8\u09c1\u09b7\u09cd\u0995\u09be \u09b6\u09b0\u09cd\u09ae\u09be \u09b9\u09b2\u09c7\u09a8 \u09a6\u09c7\u09b6\u09c7\u09b0 \u09ac\u09cc\u09ae\u09be\u0983 \u0995\u09b0\u09a3 \u099c\u09cb\u09b9\u09b0",
+        "pred_label": 0,
+        "pred_class_name": "not-clickbait",
+        "pred_proba": [
+          0.5851,
+          0.4149
+        ],
+        "clickbait_prob": 0.4149,
+        "tokens": [
+          "\u0985\u09a8\u09c1\u09b7\u09cd\u0995\u09be",
+          "\u09b6\u09b0\u09cd\u09ae\u09be",
+          "\u09b9\u09b2\u09c7\u09a8",
+          "\u09a6\u09c7\u09b6\u09c7\u09b0",
+          "\u09ac\u09cc\u09ae\u09be\u0983",
+          "\u0995\u09b0\u09a3",
+          "\u099c\u09cb\u09b9\u09b0"
+        ],
+        "shap_values_clickbait": [
+          -0.0742,
+          -0.0832,
+          0.0163,
+          -0.0627,
+          -0.0621,
+          0.0229,
+          -0.1296
+        ],
+        "token_attributions": [
+          {
+            "token": "\u0985\u09a8\u09c1\u09b7\u09cd\u0995\u09be",
+            "score": -0.0742
+          },
+          {
+            "token": "\u09b6\u09b0\u09cd\u09ae\u09be",
+            "score": -0.0832
+          },
+          {
+            "token": "\u09b9\u09b2\u09c7\u09a8",
+            "score": 0.0163
+          },
+          {
+            "token": "\u09a6\u09c7\u09b6\u09c7\u09b0",
+            "score": -0.0627
+          },
+          {
+            "token": "\u09ac\u09cc\u09ae\u09be\u0983",
+            "score": -0.0621
+          },
+          {
+            "token": "\u0995\u09b0\u09a3",
+            "score": 0.0229
+          },
+          {
+            "token": "\u099c\u09cb\u09b9\u09b0",
+            "score": -0.1296
+          }
+        ],
+        "top_clickbait_tokens": [
+          "\u0995\u09b0\u09a3",
+          "\u09b9\u09b2\u09c7\u09a8"
+        ],
+        "top_non_clickbait_tokens": [
+          "\u09ac\u09cc\u09ae\u09be\u0983",
+          "\u09a6\u09c7\u09b6\u09c7\u09b0",
+          "\u0985\u09a8\u09c1\u09b7\u09cd\u0995\u09be",
+          "\u09b6\u09b0\u09cd\u09ae\u09be",
+          "\u099c\u09cb\u09b9\u09b0"
+        ]
+      },
+      "lime": {
+        "headline": "\u0985\u09a8\u09c1\u09b7\u09cd\u0995\u09be \u09b6\u09b0\u09cd\u09ae\u09be \u09b9\u09b2\u09c7\u09a8 \u09a6\u09c7\u09b6\u09c7\u09b0 \u09ac\u09cc\u09ae\u09be\u0983 \u0995\u09b0\u09a3 \u099c\u09cb\u09b9\u09b0",
+        "pred_label": 0,
+        "pred_class_name": "not-clickbait",
+        "pred_proba": [
+          0.5851,
+          0.4149
+        ],
+        "clickbait_prob": 0.4149,
+        "lime_weights": [
+          {
+            "token": "\u09b9\u09b2\u09c7\u09a8",
+            "weight": 0.0036
+          },
+          {
+            "token": "\u09ac\u09cc\u09ae\u09be\u0983",
+            "weight": 0.0035
+          },
+          {
+            "token": "\u09a6\u09c7\u09b6\u09c7\u09b0",
+            "weight": 0.0031
+          },
+          {
+            "token": "\u0995\u09b0\u09a3",
+            "weight": 0.0026
+          },
+          {
+            "token": "\u0985\u09a8\u09c1\u09b7\u09cd\u0995\u09be",
+            "weight": 0.0023
+          },
+          {
+            "token": "\u099c\u09cb\u09b9\u09b0",
+            "weight": 0.0023
+          },
+          {
+            "token": "\u09b6\u09b0\u09cd\u09ae\u09be",
+            "weight": 0.0022
+          }
+        ],
+        "top_clickbait_tokens": [
+          "\u09b9\u09b2\u09c7\u09a8",
+          "\u09ac\u09cc\u09ae\u09be\u0983",
+          "\u09a6\u09c7\u09b6\u09c7\u09b0",
+          "\u0995\u09b0\u09a3",
+          "\u0985\u09a8\u09c1\u09b7\u09cd\u0995\u09be"
+        ],
+        "top_non_clickbait_tokens": []
+      },
+      "agreement": {
+        "jaccard_top3_clickbait": 0.25,
+        "jaccard_top3_non_clickbait": 0.0,
+        "jaccard_top3_overall": 0.0,
+        "sign_agreement": 0.2857,
+        "shared_token_count": 7,
+        "shap_top_tokens": [
+          "\u099c\u09cb\u09b9\u09b0",
+          "\u09b6\u09b0\u09cd\u09ae\u09be",
+          "\u0985\u09a8\u09c1\u09b7\u09cd\u0995\u09be"
+        ],
+        "lime_top_tokens": [
+          "\u09b9\u09b2\u09c7\u09a8",
+          "\u09ac\u09cc\u09ae\u09be\u0983",
+          "\u09a6\u09c7\u09b6\u09c7\u09b0"
+        ]
+      }
+    },
+    {
+      "sample_id": 10,
+      "headline": "\u09ae\u09c7\u09a7\u09be\u09ac\u09c0 \u09a1\u09be\u0995\u09cd\u09a4\u09be\u09b0 \u09a5\u09c7\u0995\u09c7 \u09af\u09c7\u09ad\u09be\u09ac\u09c7 \u2018\u099c\u09a8\u09aa\u09cd\u09b0\u09bf\u09af\u09bc \u09a8\u09be\u09af\u09bc\u09bf\u0995\u09be\u2019 \u09b9\u09b2\u09c7 \u2018\u09b8\u09be\u0987 \u09aa\u09b2\u09cd\u09b2\u09ac\u09c0\u2019",
+      "true_label": 0,
+      "pred_label": 1,
+      "shap": {
+        "headline": "\u09ae\u09c7\u09a7\u09be\u09ac\u09c0 \u09a1\u09be\u0995\u09cd\u09a4\u09be\u09b0 \u09a5\u09c7\u0995\u09c7 \u09af\u09c7\u09ad\u09be\u09ac\u09c7 \u2018\u099c\u09a8\u09aa\u09cd\u09b0\u09bf\u09af\u09bc \u09a8\u09be\u09af\u09bc\u09bf\u0995\u09be\u2019 \u09b9\u09b2\u09c7 \u2018\u09b8\u09be\u0987 \u09aa\u09b2\u09cd\u09b2\u09ac\u09c0\u2019",
+        "pred_label": 1,
+        "pred_class_name": "clickbait",
+        "pred_proba": [
+          0.1288,
+          0.8712
+        ],
+        "clickbait_prob": 0.8712,
+        "tokens": [
+          "\u09ae\u09c7\u09a7\u09be\u09ac\u09c0",
+          "\u09a1\u09be\u0995\u09cd\u09a4\u09be\u09b0",
+          "\u09a5\u09c7\u0995\u09c7",
+          "\u09af\u09c7\u09ad\u09be\u09ac\u09c7",
+          "\u2018\u099c\u09a8\u09aa\u09cd\u09b0\u09bf\u09af\u09bc",
+          "\u09a8\u09be\u09af\u09bc\u09bf\u0995\u09be\u2019",
+          "\u09b9\u09b2\u09c7",
+          "\u2018\u09b8\u09be\u0987",
+          "\u09aa\u09b2\u09cd\u09b2\u09ac\u09c0\u2019"
+        ],
+        "shap_values_clickbait": [
+          0.0051,
+          0.0048,
+          -0.0051,
+          0.0419,
+          0.0225,
+          0.0322,
+          0.0134,
+          0.0147,
+          -0.0458
+        ],
+        "token_attributions": [
+          {
+            "token": "\u09ae\u09c7\u09a7\u09be\u09ac\u09c0",
+            "score": 0.0051
+          },
+          {
+            "token": "\u09a1\u09be\u0995\u09cd\u09a4\u09be\u09b0",
+            "score": 0.0048
+          },
+          {
+            "token": "\u09a5\u09c7\u0995\u09c7",
+            "score": -0.0051
+          },
+          {
+            "token": "\u09af\u09c7\u09ad\u09be\u09ac\u09c7",
+            "score": 0.0419
+          },
+          {
+            "token": "\u2018\u099c\u09a8\u09aa\u09cd\u09b0\u09bf\u09af\u09bc",
+            "score": 0.0225
+          },
+          {
+            "token": "\u09a8\u09be\u09af\u09bc\u09bf\u0995\u09be\u2019",
+            "score": 0.0322
+          },
+          {
+            "token": "\u09b9\u09b2\u09c7",
+            "score": 0.0134
+          },
+          {
+            "token": "\u2018\u09b8\u09be\u0987",
+            "score": 0.0147
+          },
+          {
+            "token": "\u09aa\u09b2\u09cd\u09b2\u09ac\u09c0\u2019",
+            "score": -0.0458
+          }
+        ],
+        "top_clickbait_tokens": [
+          "\u09af\u09c7\u09ad\u09be\u09ac\u09c7",
+          "\u09a8\u09be\u09af\u09bc\u09bf\u0995\u09be\u2019",
+          "\u2018\u099c\u09a8\u09aa\u09cd\u09b0\u09bf\u09af\u09bc",
+          "\u2018\u09b8\u09be\u0987",
+          "\u09b9\u09b2\u09c7"
+        ],
+        "top_non_clickbait_tokens": [
+          "\u09a5\u09c7\u0995\u09c7",
+          "\u09aa\u09b2\u09cd\u09b2\u09ac\u09c0\u2019"
+        ]
+      },
+      "lime": {
+        "headline": "\u09ae\u09c7\u09a7\u09be\u09ac\u09c0 \u09a1\u09be\u0995\u09cd\u09a4\u09be\u09b0 \u09a5\u09c7\u0995\u09c7 \u09af\u09c7\u09ad\u09be\u09ac\u09c7 \u2018\u099c\u09a8\u09aa\u09cd\u09b0\u09bf\u09af\u09bc \u09a8\u09be\u09af\u09bc\u09bf\u0995\u09be\u2019 \u09b9\u09b2\u09c7 \u2018\u09b8\u09be\u0987 \u09aa\u09b2\u09cd\u09b2\u09ac\u09c0\u2019",
+        "pred_label": 1,
+        "pred_class_name": "clickbait",
+        "pred_proba": [
+          0.1288,
+          0.8712
+        ],
+        "clickbait_prob": 0.8712,
+        "lime_weights": [
+          {
+            "token": "\u2018\u09b8\u09be\u0987",
+            "weight": 0.0263
+          },
+          {
+            "token": "\u09af\u09c7\u09ad\u09be\u09ac\u09c7",
+            "weight": 0.023
+          },
+          {
+            "token": "\u09b9\u09b2\u09c7",
+            "weight": 0.022
+          },
+          {
+            "token": "\u09a8\u09be\u09af\u09bc\u09bf\u0995\u09be\u2019",
+            "weight": 0.0196
+          },
+          {
+            "token": "\u09ae\u09c7\u09a7\u09be\u09ac\u09c0",
+            "weight": 0.0193
+          },
+          {
+            "token": "\u2018\u099c\u09a8\u09aa\u09cd\u09b0\u09bf\u09af\u09bc",
+            "weight": 0.0187
+          },
+          {
+            "token": "\u09a1\u09be\u0995\u09cd\u09a4\u09be\u09b0",
+            "weight": 0.0175
+          },
+          {
+            "token": "\u09aa\u09b2\u09cd\u09b2\u09ac\u09c0\u2019",
+            "weight": 0.0167
+          },
+          {
+            "token": "\u09a5\u09c7\u0995\u09c7",
+            "weight": 0.0085
+          }
+        ],
+        "top_clickbait_tokens": [
+          "\u2018\u09b8\u09be\u0987",
+          "\u09af\u09c7\u09ad\u09be\u09ac\u09c7",
+          "\u09b9\u09b2\u09c7",
+          "\u09a8\u09be\u09af\u09bc\u09bf\u0995\u09be\u2019",
+          "\u09ae\u09c7\u09a7\u09be\u09ac\u09c0"
+        ],
+        "top_non_clickbait_tokens": []
+      },
+      "agreement": {
+        "jaccard_top3_clickbait": 0.2,
+        "jaccard_top3_non_clickbait": 0.0,
+        "jaccard_top3_overall": 0.2,
+        "sign_agreement": 0.7778,
+        "shared_token_count": 9,
+        "shap_top_tokens": [
+          "\u09aa\u09b2\u09cd\u09b2\u09ac\u09c0\u2019",
+          "\u09af\u09c7\u09ad\u09be\u09ac\u09c7",
+          "\u09a8\u09be\u09af\u09bc\u09bf\u0995\u09be\u2019"
+        ],
+        "lime_top_tokens": [
+          "\u2018\u09b8\u09be\u0987",
+          "\u09af\u09c7\u09ad\u09be\u09ac\u09c7",
+          "\u09b9\u09b2\u09c7"
+        ]
+      }
+    },
+    {
+      "sample_id": 11,
+      "headline": "\u09aa\u09cd\u09b0\u09cb\u099f\u09bf\u09af\u09bc\u09be\u09a6\u09c7\u09b0 \u09ac\u09bf\u09aa\u0995\u09cd\u09b7\u09c7 \u09af\u09c7 \u09ad\u09c1\u09b2 \u09a5\u09c7\u0995\u09c7 \u09ac\u09c7\u09b0\u09bf\u09af\u09bc\u09c7 \u0986\u09b8\u09a4\u09c7 \u09b9\u09ac\u09c7",
+      "true_label": 0,
+      "pred_label": 1,
+      "shap": {
+        "headline": "\u09aa\u09cd\u09b0\u09cb\u099f\u09bf\u09af\u09bc\u09be\u09a6\u09c7\u09b0 \u09ac\u09bf\u09aa\u0995\u09cd\u09b7\u09c7 \u09af\u09c7 \u09ad\u09c1\u09b2 \u09a5\u09c7\u0995\u09c7 \u09ac\u09c7\u09b0\u09bf\u09af\u09bc\u09c7 \u0986\u09b8\u09a4\u09c7 \u09b9\u09ac\u09c7",
+        "pred_label": 1,
+        "pred_class_name": "clickbait",
+        "pred_proba": [
+          0.1838,
+          0.8162
+        ],
+        "clickbait_prob": 0.8162,
+        "tokens": [
+          "\u09aa\u09cd\u09b0\u09cb\u099f\u09bf\u09af\u09bc\u09be\u09a6\u09c7\u09b0",
+          "\u09ac\u09bf\u09aa\u0995\u09cd\u09b7\u09c7",
+          "\u09af\u09c7",
+          "\u09ad\u09c1\u09b2",
+          "\u09a5\u09c7\u0995\u09c7",
+          "\u09ac\u09c7\u09b0\u09bf\u09af\u09bc\u09c7",
+          "\u0986\u09b8\u09a4\u09c7",
+          "\u09b9\u09ac\u09c7"
+        ],
+        "shap_values_clickbait": [
+          -0.2614,
+          -0.0342,
+          0.3734,
+          0.0602,
+          -0.001,
+          -0.0274,
+          -0.0564,
+          -0.0244
+        ],
+        "token_attributions": [
+          {
+            "token": "\u09aa\u09cd\u09b0\u09cb\u099f\u09bf\u09af\u09bc\u09be\u09a6\u09c7\u09b0",
+            "score": -0.2614
+          },
+          {
+            "token": "\u09ac\u09bf\u09aa\u0995\u09cd\u09b7\u09c7",
+            "score": -0.0342
+          },
+          {
+            "token": "\u09af\u09c7",
+            "score": 0.3734
+          },
+          {
+            "token": "\u09ad\u09c1\u09b2",
+            "score": 0.0602
+          },
+          {
+            "token": "\u09a5\u09c7\u0995\u09c7",
+            "score": -0.001
+          },
+          {
+            "token": "\u09ac\u09c7\u09b0\u09bf\u09af\u09bc\u09c7",
+            "score": -0.0274
+          },
+          {
+            "token": "\u0986\u09b8\u09a4\u09c7",
+            "score": -0.0564
+          },
+          {
+            "token": "\u09b9\u09ac\u09c7",
+            "score": -0.0244
+          }
+        ],
+        "top_clickbait_tokens": [
+          "\u09af\u09c7",
+          "\u09ad\u09c1\u09b2"
+        ],
+        "top_non_clickbait_tokens": [
+          "\u09b9\u09ac\u09c7",
+          "\u09ac\u09c7\u09b0\u09bf\u09af\u09bc\u09c7",
+          "\u09ac\u09bf\u09aa\u0995\u09cd\u09b7\u09c7",
+          "\u0986\u09b8\u09a4\u09c7",
+          "\u09aa\u09cd\u09b0\u09cb\u099f\u09bf\u09af\u09bc\u09be\u09a6\u09c7\u09b0"
+        ]
+      },
+      "lime": {
+        "headline": "\u09aa\u09cd\u09b0\u09cb\u099f\u09bf\u09af\u09bc\u09be\u09a6\u09c7\u09b0 \u09ac\u09bf\u09aa\u0995\u09cd\u09b7\u09c7 \u09af\u09c7 \u09ad\u09c1\u09b2 \u09a5\u09c7\u0995\u09c7 \u09ac\u09c7\u09b0\u09bf\u09af\u09bc\u09c7 \u0986\u09b8\u09a4\u09c7 \u09b9\u09ac\u09c7",
+        "pred_label": 1,
+        "pred_class_name": "clickbait",
+        "pred_proba": [
+          0.1838,
+          0.8162
+        ],
+        "clickbait_prob": 0.8162,
+        "lime_weights": [
+          {
+            "token": "\u09af\u09c7",
+            "weight": 0.0199
+          },
+          {
+            "token": "\u09b9\u09ac\u09c7",
+            "weight": 0.0132
+          },
+          {
+            "token": "\u09a5\u09c7\u0995\u09c7",
+            "weight": 0.0131
+          },
+          {
+            "token": "\u09ad\u09c1\u09b2",
+            "weight": 0.012
+          },
+          {
+            "token": "\u09ac\u09c7\u09b0\u09bf\u09af\u09bc\u09c7",
+            "weight": 0.0111
+          },
+          {
+            "token": "\u0986\u09b8\u09a4\u09c7",
+            "weight": 0.0077
+          },
+          {
+            "token": "\u09aa\u09cd\u09b0\u09cb\u099f\u09bf\u09af\u09bc\u09be\u09a6\u09c7\u09b0",
+            "weight": 0.0064
+          },
+          {
+            "token": "\u09ac\u09bf\u09aa\u0995\u09cd\u09b7\u09c7",
+            "weight": 0.0059
+          }
+        ],
+        "top_clickbait_tokens": [
+          "\u09af\u09c7",
+          "\u09b9\u09ac\u09c7",
+          "\u09a5\u09c7\u0995\u09c7",
+          "\u09ad\u09c1\u09b2",
+          "\u09ac\u09c7\u09b0\u09bf\u09af\u09bc\u09c7"
+        ],
+        "top_non_clickbait_tokens": []
+      },
+      "agreement": {
+        "jaccard_top3_clickbait": 0.25,
+        "jaccard_top3_non_clickbait": 0.0,
+        "jaccard_top3_overall": 0.2,
+        "sign_agreement": 0.25,
+        "shared_token_count": 8,
+        "shap_top_tokens": [
+          "\u09af\u09c7",
+          "\u09aa\u09cd\u09b0\u09cb\u099f\u09bf\u09af\u09bc\u09be\u09a6\u09c7\u09b0",
+          "\u09ad\u09c1\u09b2"
+        ],
+        "lime_top_tokens": [
+          "\u09af\u09c7",
+          "\u09b9\u09ac\u09c7",
+          "\u09a5\u09c7\u0995\u09c7"
+        ]
+      }
+    },
+    {
+      "sample_id": 12,
+      "headline": "\u09b8\u09ac \u0995\u09bf\u099b\u09c1\u09b0 \u09aa\u09b0\u09c7 \u09b6\u09c1\u099f\u09bf\u0982\u09af\u09bc\u09c7 \u09ac\u09cd\u09af\u09b8\u09cd\u09a4 \u09aa\u09b0\u09c0\u09ae\u09a8\u09bf",
+      "true_label": 0,
+      "pred_label": 1,
+      "shap": {
+        "headline": "\u09b8\u09ac \u0995\u09bf\u099b\u09c1\u09b0 \u09aa\u09b0\u09c7 \u09b6\u09c1\u099f\u09bf\u0982\u09af\u09bc\u09c7 \u09ac\u09cd\u09af\u09b8\u09cd\u09a4 \u09aa\u09b0\u09c0\u09ae\u09a8\u09bf",
+        "pred_label": 1,
+        "pred_class_name": "clickbait",
+        "pred_proba": [
+          0.2091,
+          0.7909
+        ],
+        "clickbait_prob": 0.7909,
+        "tokens": [
+          "\u09b8\u09ac",
+          "\u0995\u09bf\u099b\u09c1\u09b0",
+          "\u09aa\u09b0\u09c7",
+          "\u09b6\u09c1\u099f\u09bf\u0982\u09af\u09bc\u09c7",
+          "\u09ac\u09cd\u09af\u09b8\u09cd\u09a4",
+          "\u09aa\u09b0\u09c0\u09ae\u09a8\u09bf"
+        ],
+        "shap_values_clickbait": [
+          0.0482,
+          0.0697,
+          0.0714,
+          -0.0392,
+          -0.058,
+          -0.0888
+        ],
+        "token_attributions": [
+          {
+            "token": "\u09b8\u09ac",
+            "score": 0.0482
+          },
+          {
+            "token": "\u0995\u09bf\u099b\u09c1\u09b0",
+            "score": 0.0697
+          },
+          {
+            "token": "\u09aa\u09b0\u09c7",
+            "score": 0.0714
+          },
+          {
+            "token": "\u09b6\u09c1\u099f\u09bf\u0982\u09af\u09bc\u09c7",
+            "score": -0.0392
+          },
+          {
+            "token": "\u09ac\u09cd\u09af\u09b8\u09cd\u09a4",
+            "score": -0.058
+          },
+          {
+            "token": "\u09aa\u09b0\u09c0\u09ae\u09a8\u09bf",
+            "score": -0.0888
+          }
+        ],
+        "top_clickbait_tokens": [
+          "\u09aa\u09b0\u09c7",
+          "\u0995\u09bf\u099b\u09c1\u09b0",
+          "\u09b8\u09ac"
+        ],
+        "top_non_clickbait_tokens": [
+          "\u09b6\u09c1\u099f\u09bf\u0982\u09af\u09bc\u09c7",
+          "\u09ac\u09cd\u09af\u09b8\u09cd\u09a4",
+          "\u09aa\u09b0\u09c0\u09ae\u09a8\u09bf"
+        ]
+      },
+      "lime": {
+        "headline": "\u09b8\u09ac \u0995\u09bf\u099b\u09c1\u09b0 \u09aa\u09b0\u09c7 \u09b6\u09c1\u099f\u09bf\u0982\u09af\u09bc\u09c7 \u09ac\u09cd\u09af\u09b8\u09cd\u09a4 \u09aa\u09b0\u09c0\u09ae\u09a8\u09bf",
+        "pred_label": 1,
+        "pred_class_name": "clickbait",
+        "pred_proba": [
+          0.2091,
+          0.7909
+        ],
+        "clickbait_prob": 0.7909,
+        "lime_weights": [
+          {
+            "token": "\u09b8\u09ac",
+            "weight": 0.014
+          },
+          {
+            "token": "\u0995\u09bf\u099b\u09c1\u09b0",
+            "weight": 0.0139
+          },
+          {
+            "token": "\u09aa\u09b0\u09c0\u09ae\u09a8\u09bf",
+            "weight": 0.0109
+          },
+          {
+            "token": "\u09aa\u09b0\u09c7",
+            "weight": 0.0103
+          },
+          {
+            "token": "\u09ac\u09cd\u09af\u09b8\u09cd\u09a4",
+            "weight": 0.0091
+          },
+          {
+            "token": "\u09b6\u09c1\u099f\u09bf\u0982\u09af\u09bc\u09c7",
+            "weight": 0.0072
+          }
+        ],
+        "top_clickbait_tokens": [
+          "\u09b8\u09ac",
+          "\u0995\u09bf\u099b\u09c1\u09b0",
+          "\u09aa\u09b0\u09c0\u09ae\u09a8\u09bf",
+          "\u09aa\u09b0\u09c7",
+          "\u09ac\u09cd\u09af\u09b8\u09cd\u09a4"
+        ],
+        "top_non_clickbait_tokens": []
+      },
+      "agreement": {
+        "jaccard_top3_clickbait": 0.5,
+        "jaccard_top3_non_clickbait": 0.0,
+        "jaccard_top3_overall": 0.5,
+        "sign_agreement": 0.5,
+        "shared_token_count": 6,
+        "shap_top_tokens": [
+          "\u09aa\u09b0\u09c0\u09ae\u09a8\u09bf",
+          "\u09aa\u09b0\u09c7",
+          "\u0995\u09bf\u099b\u09c1\u09b0"
+        ],
+        "lime_top_tokens": [
+          "\u09b8\u09ac",
+          "\u0995\u09bf\u099b\u09c1\u09b0",
+          "\u09aa\u09b0\u09c0\u09ae\u09a8\u09bf"
+        ]
+      }
+    },
+    {
+      "sample_id": 13,
+      "headline": "\u09af\u09c7\u09ad\u09be\u09ac\u09c7 \u09ac\u09bf\u09a1\u09bc\u09be\u09b2\u099f\u09bf \u09ab\u09c7\u0995 \u0986\u0987\u09a1\u09bf \u099a\u09bf\u09a8\u09a4\u09c7 \u09aa\u09be\u09b0\u09b2",
+      "true_label": 1,
+      "pred_label": 0,
+      "shap": {
+        "headline": "\u09af\u09c7\u09ad\u09be\u09ac\u09c7 \u09ac\u09bf\u09a1\u09bc\u09be\u09b2\u099f\u09bf \u09ab\u09c7\u0995 \u0986\u0987\u09a1\u09bf \u099a\u09bf\u09a8\u09a4\u09c7 \u09aa\u09be\u09b0\u09b2",
+        "pred_label": 0,
+        "pred_class_name": "not-clickbait",
+        "pred_proba": [
+          0.5792,
+          0.4208
+        ],
+        "clickbait_prob": 0.4208,
+        "tokens": [
+          "\u09af\u09c7\u09ad\u09be\u09ac\u09c7",
+          "\u09ac\u09bf\u09a1\u09bc\u09be\u09b2\u099f\u09bf",
+          "\u09ab\u09c7\u0995",
+          "\u0986\u0987\u09a1\u09bf",
+          "\u099a\u09bf\u09a8\u09a4\u09c7",
+          "\u09aa\u09be\u09b0\u09b2"
+        ],
+        "shap_values_clickbait": [
+          0.0809,
+          -0.0192,
+          -0.031,
+          -0.2866,
+          -0.1036,
+          -0.0073
+        ],
+        "token_attributions": [
+          {
+            "token": "\u09af\u09c7\u09ad\u09be\u09ac\u09c7",
+            "score": 0.0809
+          },
+          {
+            "token": "\u09ac\u09bf\u09a1\u09bc\u09be\u09b2\u099f\u09bf",
+            "score": -0.0192
+          },
+          {
+            "token": "\u09ab\u09c7\u0995",
+            "score": -0.031
+          },
+          {
+            "token": "\u0986\u0987\u09a1\u09bf",
+            "score": -0.2866
+          },
+          {
+            "token": "\u099a\u09bf\u09a8\u09a4\u09c7",
+            "score": -0.1036
+          },
+          {
+            "token": "\u09aa\u09be\u09b0\u09b2",
+            "score": -0.0073
+          }
+        ],
+        "top_clickbait_tokens": [
+          "\u09af\u09c7\u09ad\u09be\u09ac\u09c7"
+        ],
+        "top_non_clickbait_tokens": [
+          "\u09aa\u09be\u09b0\u09b2",
+          "\u09ac\u09bf\u09a1\u09bc\u09be\u09b2\u099f\u09bf",
+          "\u09ab\u09c7\u0995",
+          "\u099a\u09bf\u09a8\u09a4\u09c7",
+          "\u0986\u0987\u09a1\u09bf"
+        ]
+      },
+      "lime": {
+        "headline": "\u09af\u09c7\u09ad\u09be\u09ac\u09c7 \u09ac\u09bf\u09a1\u09bc\u09be\u09b2\u099f\u09bf \u09ab\u09c7\u0995 \u0986\u0987\u09a1\u09bf \u099a\u09bf\u09a8\u09a4\u09c7 \u09aa\u09be\u09b0\u09b2",
+        "pred_label": 0,
+        "pred_class_name": "not-clickbait",
+        "pred_proba": [
+          0.5792,
+          0.4208
+        ],
+        "clickbait_prob": 0.4208,
+        "lime_weights": [
+          {
+            "token": "\u09af\u09c7\u09ad\u09be\u09ac\u09c7",
+            "weight": 0.0071
+          },
+          {
+            "token": "\u09aa\u09be\u09b0\u09b2",
+            "weight": 0.0058
+          },
+          {
+            "token": "\u09ab\u09c7\u0995",
+            "weight": 0.0051
+          },
+          {
+            "token": "\u09ac\u09bf\u09a1\u09bc\u09be\u09b2\u099f\u09bf",
+            "weight": 0.0051
+          },
+          {
+            "token": "\u099a\u09bf\u09a8\u09a4\u09c7",
+            "weight": 0.0048
+          },
+          {
+            "token": "\u0986\u0987\u09a1\u09bf",
+            "weight": 0.0036
+          }
+        ],
+        "top_clickbait_tokens": [
+          "\u09af\u09c7\u09ad\u09be\u09ac\u09c7",
+          "\u09aa\u09be\u09b0\u09b2",
+          "\u09ab\u09c7\u0995",
+          "\u09ac\u09bf\u09a1\u09bc\u09be\u09b2\u099f\u09bf",
+          "\u099a\u09bf\u09a8\u09a4\u09c7"
+        ],
+        "top_non_clickbait_tokens": []
+      },
+      "agreement": {
+        "jaccard_top3_clickbait": 0.3333,
+        "jaccard_top3_non_clickbait": 0.0,
+        "jaccard_top3_overall": 0.2,
+        "sign_agreement": 0.1667,
+        "shared_token_count": 6,
+        "shap_top_tokens": [
+          "\u0986\u0987\u09a1\u09bf",
+          "\u099a\u09bf\u09a8\u09a4\u09c7",
+          "\u09af\u09c7\u09ad\u09be\u09ac\u09c7"
+        ],
+        "lime_top_tokens": [
+          "\u09af\u09c7\u09ad\u09be\u09ac\u09c7",
+          "\u09aa\u09be\u09b0\u09b2",
+          "\u09ab\u09c7\u0995"
+        ]
+      }
+    },
+    {
+      "sample_id": 14,
+      "headline": "\u098f\u0995\u09c7\u0987 \u09ac\u09b2\u09c7 \u0997\u09c1\u09b0\u09c1\u09ae\u09be\u09b0\u09be \u09ac\u09bf\u09a6\u09cd\u09af\u09c7! \u09a7\u09cb\u09a8\u09bf\u0995\u09c7 \u09a6\u09c1\u09ac\u09be\u09b0 \u09ab\u09be\u0981\u09a6\u09c7 \u09ab\u09c7\u09b2\u09c7 \u0986\u0989\u099f \u0995\u09b0\u09c7\u09a8 \u09aa\u09a8\u09cd\u09a5, \u09ab\u09be\u0981\u09b8 \u09b8\u09cd\u099f\u09cd\u09b0\u09cd\u09af\u09be\u099f\u09c7\u099c\u09bf",
+      "true_label": 1,
+      "pred_label": 0,
+      "shap": {
+        "headline": "\u098f\u0995\u09c7\u0987 \u09ac\u09b2\u09c7 \u0997\u09c1\u09b0\u09c1\u09ae\u09be\u09b0\u09be \u09ac\u09bf\u09a6\u09cd\u09af\u09c7! \u09a7\u09cb\u09a8\u09bf\u0995\u09c7 \u09a6\u09c1\u09ac\u09be\u09b0 \u09ab\u09be\u0981\u09a6\u09c7 \u09ab\u09c7\u09b2\u09c7 \u0986\u0989\u099f \u0995\u09b0\u09c7\u09a8 \u09aa\u09a8\u09cd\u09a5, \u09ab\u09be\u0981\u09b8 \u09b8\u09cd\u099f\u09cd\u09b0\u09cd\u09af\u09be\u099f\u09c7\u099c\u09bf",
+        "pred_label": 0,
+        "pred_class_name": "not-clickbait",
+        "pred_proba": [
+          0.6937,
+          0.3063
+        ],
+        "clickbait_prob": 0.3063,
+        "tokens": [
+          "\u098f\u0995\u09c7\u0987",
+          "\u09ac\u09b2\u09c7",
+          "\u0997\u09c1\u09b0\u09c1\u09ae\u09be\u09b0\u09be",
+          "\u09ac\u09bf\u09a6\u09cd\u09af\u09c7!",
+          "\u09a7\u09cb\u09a8\u09bf\u0995\u09c7",
+          "\u09a6\u09c1\u09ac\u09be\u09b0",
+          "\u09ab\u09be\u0981\u09a6\u09c7",
+          "\u09ab\u09c7\u09b2\u09c7",
+          "\u0986\u0989\u099f",
+          "\u0995\u09b0\u09c7\u09a8",
+          "\u09aa\u09a8\u09cd\u09a5,",
+          "\u09ab\u09be\u0981\u09b8",
+          "\u09b8\u09cd\u099f\u09cd\u09b0\u09cd\u09af\u09be\u099f\u09c7\u099c\u09bf"
+        ],
+        "shap_values_clickbait": [
+          -0.054,
+          0.0618,
+          -0.0667,
+          0.1234,
+          -0.0202,
+          -0.028,
+          -0.0361,
+          -0.0375,
+          -0.0987,
+          0.0397,
+          -0.0084,
+          0.0004,
+          -0.357
+        ],
+        "token_attributions": [
+          {
+            "token": "\u098f\u0995\u09c7\u0987",
+            "score": -0.054
+          },
+          {
+            "token": "\u09ac\u09b2\u09c7",
+            "score": 0.0618
+          },
+          {
+            "token": "\u0997\u09c1\u09b0\u09c1\u09ae\u09be\u09b0\u09be",
+            "score": -0.0667
+          },
+          {
+            "token": "\u09ac\u09bf\u09a6\u09cd\u09af\u09c7!",
+            "score": 0.1234
+          },
+          {
+            "token": "\u09a7\u09cb\u09a8\u09bf\u0995\u09c7",
+            "score": -0.0202
+          },
+          {
+            "token": "\u09a6\u09c1\u09ac\u09be\u09b0",
+            "score": -0.028
+          },
+          {
+            "token": "\u09ab\u09be\u0981\u09a6\u09c7",
+            "score": -0.0361
+          },
+          {
+            "token": "\u09ab\u09c7\u09b2\u09c7",
+            "score": -0.0375
+          },
+          {
+            "token": "\u0986\u0989\u099f",
+            "score": -0.0987
+          },
+          {
+            "token": "\u0995\u09b0\u09c7\u09a8",
+            "score": 0.0397
+          },
+          {
+            "token": "\u09aa\u09a8\u09cd\u09a5,",
+            "score": -0.0084
+          },
+          {
+            "token": "\u09ab\u09be\u0981\u09b8",
+            "score": 0.0004
+          },
+          {
+            "token": "\u09b8\u09cd\u099f\u09cd\u09b0\u09cd\u09af\u09be\u099f\u09c7\u099c\u09bf",
+            "score": -0.357
+          }
+        ],
+        "top_clickbait_tokens": [
+          "\u09ac\u09bf\u09a6\u09cd\u09af\u09c7!",
+          "\u09ac\u09b2\u09c7",
+          "\u0995\u09b0\u09c7\u09a8",
+          "\u09ab\u09be\u0981\u09b8"
+        ],
+        "top_non_clickbait_tokens": [
+          "\u09ab\u09c7\u09b2\u09c7",
+          "\u098f\u0995\u09c7\u0987",
+          "\u0997\u09c1\u09b0\u09c1\u09ae\u09be\u09b0\u09be",
+          "\u0986\u0989\u099f",
+          "\u09b8\u09cd\u099f\u09cd\u09b0\u09cd\u09af\u09be\u099f\u09c7\u099c\u09bf"
+        ]
+      },
+      "lime": {
+        "headline": "\u098f\u0995\u09c7\u0987 \u09ac\u09b2\u09c7 \u0997\u09c1\u09b0\u09c1\u09ae\u09be\u09b0\u09be \u09ac\u09bf\u09a6\u09cd\u09af\u09c7! \u09a7\u09cb\u09a8\u09bf\u0995\u09c7 \u09a6\u09c1\u09ac\u09be\u09b0 \u09ab\u09be\u0981\u09a6\u09c7 \u09ab\u09c7\u09b2\u09c7 \u0986\u0989\u099f \u0995\u09b0\u09c7\u09a8 \u09aa\u09a8\u09cd\u09a5, \u09ab\u09be\u0981\u09b8 \u09b8\u09cd\u099f\u09cd\u09b0\u09cd\u09af\u09be\u099f\u09c7\u099c\u09bf",
+        "pred_label": 0,
+        "pred_class_name": "not-clickbait",
+        "pred_proba": [
+          0.6937,
+          0.3063
+        ],
+        "clickbait_prob": 0.3063,
+        "lime_weights": [
+          {
+            "token": "\u09aa\u09a8\u09cd\u09a5,",
+            "weight": 0.0051
+          },
+          {
+            "token": "\u0995\u09b0\u09c7\u09a8",
+            "weight": 0.0042
+          },
+          {
+            "token": "\u09ab\u09c7\u09b2\u09c7",
+            "weight": 0.0037
+          },
+          {
+            "token": "\u09ac\u09bf\u09a6\u09cd\u09af\u09c7!",
+            "weight": 0.0037
+          },
+          {
+            "token": "\u0986\u0989\u099f",
+            "weight": 0.0036
+          },
+          {
+            "token": "\u09ac\u09b2\u09c7",
+            "weight": 0.0034
+          },
+          {
+            "token": "\u0997\u09c1\u09b0\u09c1\u09ae\u09be\u09b0\u09be",
+            "weight": 0.0034
+          },
+          {
+            "token": "\u09ab\u09be\u0981\u09b8",
+            "weight": 0.0026
+          },
+          {
+            "token": "\u09a7\u09cb\u09a8\u09bf\u0995\u09c7",
+            "weight": 0.0024
+          },
+          {
+            "token": "\u09a6\u09c1\u09ac\u09be\u09b0",
+            "weight": 0.0021
+          }
+        ],
+        "top_clickbait_tokens": [
+          "\u09aa\u09a8\u09cd\u09a5,",
+          "\u0995\u09b0\u09c7\u09a8",
+          "\u09ab\u09c7\u09b2\u09c7",
+          "\u09ac\u09bf\u09a6\u09cd\u09af\u09c7!",
+          "\u0986\u0989\u099f"
+        ],
+        "top_non_clickbait_tokens": []
+      },
+      "agreement": {
+        "jaccard_top3_clickbait": 0.2,
+        "jaccard_top3_non_clickbait": 0.0,
+        "jaccard_top3_overall": 0.0,
+        "sign_agreement": 0.4,
+        "shared_token_count": 10,
+        "shap_top_tokens": [
+          "\u09b8\u09cd\u099f\u09cd\u09b0\u09cd\u09af\u09be\u099f\u09c7\u099c\u09bf",
+          "\u09ac\u09bf\u09a6\u09cd\u09af\u09c7!",
+          "\u0986\u0989\u099f"
+        ],
+        "lime_top_tokens": [
+          "\u09aa\u09a8\u09cd\u09a5,",
+          "\u0995\u09b0\u09c7\u09a8",
+          "\u09ab\u09c7\u09b2\u09c7"
+        ]
+      }
+    },
+    {
+      "sample_id": 15,
+      "headline": "\u09a4\u09c3\u09a4\u09c0\u09af\u09bc\u09ac\u09be\u09b0\u09c7\u09b0 \u09ae\u09a4 \u099c\u09c1\u099f\u09bf \u09ac\u09be\u0981\u09a7\u09b2\u09c7\u09a8 \u09b8\u09bf\u09af\u09bc\u09be\u09ae-\u09aa\u09b0\u09c0",
+      "true_label": 1,
+      "pred_label": 0,
+      "shap": {
+        "headline": "\u09a4\u09c3\u09a4\u09c0\u09af\u09bc\u09ac\u09be\u09b0\u09c7\u09b0 \u09ae\u09a4 \u099c\u09c1\u099f\u09bf \u09ac\u09be\u0981\u09a7\u09b2\u09c7\u09a8 \u09b8\u09bf\u09af\u09bc\u09be\u09ae-\u09aa\u09b0\u09c0",
+        "pred_label": 0,
+        "pred_class_name": "not-clickbait",
+        "pred_proba": [
+          0.7689,
+          0.2311
+        ],
+        "clickbait_prob": 0.2311,
+        "tokens": [
+          "\u09a4\u09c3\u09a4\u09c0\u09af\u09bc\u09ac\u09be\u09b0\u09c7\u09b0",
+          "\u09ae\u09a4",
+          "\u099c\u09c1\u099f\u09bf",
+          "\u09ac\u09be\u0981\u09a7\u09b2\u09c7\u09a8",
+          "\u09b8\u09bf\u09af\u09bc\u09be\u09ae-\u09aa\u09b0\u09c0"
+        ],
+        "shap_values_clickbait": [
+          -0.1697,
+          0.122,
+          -0.0609,
+          -0.1916,
+          -0.2563
+        ],
+        "token_attributions": [
+          {
+            "token": "\u09a4\u09c3\u09a4\u09c0\u09af\u09bc\u09ac\u09be\u09b0\u09c7\u09b0",
+            "score": -0.1697
+          },
+          {
+            "token": "\u09ae\u09a4",
+            "score": 0.122
+          },
+          {
+            "token": "\u099c\u09c1\u099f\u09bf",
+            "score": -0.0609
+          },
+          {
+            "token": "\u09ac\u09be\u0981\u09a7\u09b2\u09c7\u09a8",
+            "score": -0.1916
+          },
+          {
+            "token": "\u09b8\u09bf\u09af\u09bc\u09be\u09ae-\u09aa\u09b0\u09c0",
+            "score": -0.2563
+          }
+        ],
+        "top_clickbait_tokens": [
+          "\u09ae\u09a4"
+        ],
+        "top_non_clickbait_tokens": [
+          "\u099c\u09c1\u099f\u09bf",
+          "\u09a4\u09c3\u09a4\u09c0\u09af\u09bc\u09ac\u09be\u09b0\u09c7\u09b0",
+          "\u09ac\u09be\u0981\u09a7\u09b2\u09c7\u09a8",
+          "\u09b8\u09bf\u09af\u09bc\u09be\u09ae-\u09aa\u09b0\u09c0"
+        ]
+      },
+      "lime": {
+        "headline": "\u09a4\u09c3\u09a4\u09c0\u09af\u09bc\u09ac\u09be\u09b0\u09c7\u09b0 \u09ae\u09a4 \u099c\u09c1\u099f\u09bf \u09ac\u09be\u0981\u09a7\u09b2\u09c7\u09a8 \u09b8\u09bf\u09af\u09bc\u09be\u09ae-\u09aa\u09b0\u09c0",
+        "pred_label": 0,
+        "pred_class_name": "not-clickbait",
+        "pred_proba": [
+          0.7689,
+          0.2311
+        ],
+        "clickbait_prob": 0.2311,
+        "lime_weights": [
+          {
+            "token": "\u09ae\u09a4",
+            "weight": 0.0035
+          },
+          {
+            "token": "\u099c\u09c1\u099f\u09bf",
+            "weight": 0.0019
+          },
+          {
+            "token": "\u09b8\u09bf\u09af\u09bc\u09be\u09ae-\u09aa\u09b0\u09c0",
+            "weight": 0.0018
+          },
+          {
+            "token": "\u09ac\u09be\u0981\u09a7\u09b2\u09c7\u09a8",
+            "weight": 0.0017
+          },
+          {
+            "token": "\u09a4\u09c3\u09a4\u09c0\u09af\u09bc\u09ac\u09be\u09b0\u09c7\u09b0",
+            "weight": 0.0013
+          }
+        ],
+        "top_clickbait_tokens": [
+          "\u09ae\u09a4",
+          "\u099c\u09c1\u099f\u09bf",
+          "\u09b8\u09bf\u09af\u09bc\u09be\u09ae-\u09aa\u09b0\u09c0",
+          "\u09ac\u09be\u0981\u09a7\u09b2\u09c7\u09a8",
+          "\u09a4\u09c3\u09a4\u09c0\u09af\u09bc\u09ac\u09be\u09b0\u09c7\u09b0"
+        ],
+        "top_non_clickbait_tokens": []
+      },
+      "agreement": {
+        "jaccard_top3_clickbait": 0.3333,
+        "jaccard_top3_non_clickbait": 0.0,
+        "jaccard_top3_overall": 0.2,
+        "sign_agreement": 0.2,
+        "shared_token_count": 5,
+        "shap_top_tokens": [
+          "\u09b8\u09bf\u09af\u09bc\u09be\u09ae-\u09aa\u09b0\u09c0",
+          "\u09ac\u09be\u0981\u09a7\u09b2\u09c7\u09a8",
+          "\u09a4\u09c3\u09a4\u09c0\u09af\u09bc\u09ac\u09be\u09b0\u09c7\u09b0"
+        ],
+        "lime_top_tokens": [
+          "\u09ae\u09a4",
+          "\u099c\u09c1\u099f\u09bf",
+          "\u09b8\u09bf\u09af\u09bc\u09be\u09ae-\u09aa\u09b0\u09c0"
+        ]
+      }
+    }
+  ]
+}
