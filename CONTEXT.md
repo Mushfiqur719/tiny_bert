@@ -196,13 +196,19 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 ## 7. Models
 
-| Role | HuggingFace ID | Config key |
-|------|---------------|------------|
-| Teacher | `csebuetnlp/banglabert` | `cfg.model.teacher_model_name` |
-| Student | `csebuetnlp/banglabert_small` | `cfg.model.student_model_name` |
-| `max_seq_len` | 128 | `cfg.model.max_seq_len` |
+| Role | Model Architecture | HuggingFace ID / Config | Parameters |
+|------|-------------------|-------------------------|------------|
+| Teacher | BanglaBERT (Electra, 12 layers, 768 hidden, 12 heads) | `csebuetnlp/banglabert` | **110,618,882** (~110.6M) |
+| Student | TinyBanglaBERT (4 layers, 256 hidden, 4 heads, 1024 intermediate) | `src.models.student` | **11,549,442** (~11.55M, ~9.58x smaller) |
+| Vocab | WordPiece (Bengali) | `32,000` | Shared between Teacher & Student |
+| `max_seq_len` | 128 | `cfg.model.max_seq_len` | Max headline tokens in dataset is 46 |
 
-Both are BERT-architecture transformers pre-trained on Bengali text. BanglaBERT uses a WordPiece vocabulary. The tokenizer is a standard `AutoTokenizer`.
+### Student Initialization Strategies:
+1. **Random (`init_random`)**: Fresh weight initialization from standard normal distribution ($N(0, 0.02^2)$).
+2. **Teacher Transfer (`init_from_teacher`)**: 
+   - Embeddings & Encoder: Orthogonal PCA projection matrix ($P \in \mathbb{R}^{768 \times 256}$) preserving maximum representation variance.
+   - Layers: First 4 transformer layers $\{0, 1, 2, 3\}$ of the Teacher transferred as Student's starting point.
+   - Classifier: Dense projection and output layers mapped into 256-d space.
 
 ---
 
