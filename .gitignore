@@ -1,59 +1,101 @@
-# Byte-compiled / optimized
+# ==============================================================================
+# TinyBanglaBERT Git Ignore Rules
+# ==============================================================================
+
+# Byte-compiled / optimized Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.pyo
 
-# Distribution / packaging
+# Distribution / packaging / builds
 dist/
 build/
 *.egg-info/
 .eggs/
+*.egg
 
 # Virtual environments
 .venv/
 venv/
 env/
+ENV/
+env.bak/
+venv.bak/
 
-# Jupyter
+# Jupyter & Notebook Checkpoints
 .ipynb_checkpoints/
 *.ipynb_checkpoints
+.jupyter/
 
-# IDEs
+# IDEs and Editors
 .vscode/
 .idea/
 *.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
 
-# OS
+# Operating System Files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+desktop.ini
 
-# ── Project-specific ──────────────────────────────────────────────────────
-
-# Raw data (large files, not tracked)
-data/raw/
-
-# Processed data splits (tracked — deterministic and small)
-# data/processed/   ← keep this COMMENTED OUT so splits are versioned
-
-# Experiment outputs (large — gitignore everything except summary CSVs)
-experiments/*/checkpoints/
-experiments/*/run.log
-experiments/*/metrics.json
-
-# Keep summary CSVs and run_info so results are reproducible from git alone
-!experiments/*/metrics.csv
-!experiments/*/run_info.json
-!experiments/*/config.yaml
-
-# ONNX exports
-*.onnx
-
-# dotenv
+# Environment variables & secrets
 .env
+.env.*
+!.env.example
 
-# pytest cache
+# Pytest / Coverage / Profiling
 .pytest_cache/
 .pytest_tmp/
 .coverage
+.coverage.*
 htmlcov/
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# ── Data files ───────────────────────────────────────────────────────────────
+# Raw downloaded datasets (large, reproducible via scripts)
+data/raw/
+
+# Note: data/processed/splits.json is tracked for deterministic evaluation
+
+# ── Model Checkpoints & Large Binary Weights ─────────────────────────────────
+# Large model binaries (>100MB or reproducible via training pipelines)
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.onnx_data
+*.tflite
+*.pb
+
+# Experiment checkpoints & run artifacts
+experiments/**/checkpoints/
+experiments/*/checkpoints/
+experiments/**/metrics.json
+experiments/*/metrics.json
+experiments/**/run.log
+experiments/*/run.log
+*.log
+
+# Keep summary CSVs, test metrics, run info, configs and figures tracked
+!experiments/*/metrics.csv
+!experiments/*/test_metrics.json
+!experiments/*/run_info.json
+!experiments/*/config.yaml
+!experiments/*/config.json
+!experiments/*/tokenizer.json
+!experiments/*/tokenizer_config.json

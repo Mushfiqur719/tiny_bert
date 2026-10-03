@@ -1,6 +1,6 @@
 # TinyBanglaBERT: A Lightweight Knowledge-Distilled Transformer for Real-Time Bengali Clickbait Detection on Resource-Constrained Edge Devices
 
-**IEEE Format**
+**Conference / Journal Submission Ready (IEEE Format)**
 
 ---
 

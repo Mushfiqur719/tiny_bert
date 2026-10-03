@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use TinyBanglaBERT in your research or application, please cite it as below."
+authors:
+  - family-names: "Rahman"
+    given-names: "Mushfiqur"
+    affiliation: "Department of Computer Science & Engineering"
+title: "TinyBanglaBERT: A Lightweight Knowledge-Distilled Transformer for Explainable Bangla Clickbait Headline Detection"
+version: 0.1.0
+date-released: 2026-08-30
+url: "https://github.com/mushfiqur-rahman/tinybanglabert"
+repository-code: "https://github.com/mushfiqur-rahman/tinybanglabert"
+keywords:
+  - natural-language-processing
+  - bengali-nlp
+  - knowledge-distillation
+  - transformers
+  - clickbait-detection
+  - explainable-ai
+  - onnx-quantization
+  - edge-ai
+license: MIT
