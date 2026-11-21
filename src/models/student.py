@@ -165,10 +165,46 @@ def _compute_intermediate_projection(
     return P
 
 
+def _select_teacher_layers(
+    num_teacher_layers: int,
+    num_student_layers: int,
+    layer_selection: str = "strided",
+) -> list[int]:
+    """Choose which teacher encoder layer indices to transfer into the student.
+
+    Args:
+        num_teacher_layers: Total layers in teacher (e.g., 12).
+        num_student_layers: Total layers in student (e.g., 4).
+        layer_selection: 'strided' (default, e.g. [2, 5, 8, 11] for 12->4),
+                         'first' / 'first4' ([0, 1, 2, 3]), or
+                         'last' / 'last4' ([8, 9, 10, 11]).
+
+    Returns:
+        List of teacher layer indices of length `num_student_layers`.
+    """
+    if num_student_layers > num_teacher_layers:
+        raise ValueError(
+            f"Student layers ({num_student_layers}) cannot exceed teacher layers ({num_teacher_layers})."
+        )
+    if layer_selection in ("first", "first4"):
+        return list(range(num_student_layers))
+    elif layer_selection in ("last", "last4"):
+        return list(range(num_teacher_layers - num_student_layers, num_teacher_layers))
+    elif layer_selection == "strided":
+        # Evenly spaced across depth, always including the final semantic layer
+        stride = num_teacher_layers / num_student_layers
+        return [min(num_teacher_layers - 1, int(round((i + 1) * stride)) - 1) for i in range(num_student_layers)]
+    else:
+        raise ValueError(
+            f"Unknown layer_selection: '{layer_selection}'. Choose 'strided', 'first', or 'last'."
+        )
+
+
 def init_from_teacher(
     teacher_model: PreTrainedModel,
     config: ElectraConfig,
     strategy: str = "projection",
+    layer_selection: str = "strided",
 ) -> ElectraForSequenceClassification:
     """Strategy 2b: Initialize Student model by transferring and projecting Teacher weights.
 
@@ -176,21 +212,34 @@ def init_from_teacher(
       1. SVD / Orthogonal PCA Projection (Default): Rather than arbitrarily slicing / truncating
          the first 256 coordinates (which discards ~67% of coordinate variance), we compute
          an orthogonal projection matrix P from the Teacher's word embedding space.
-      2. Layer Selection: We extract layers {0, 1, 2, 3} (earliest 4 transformer layers of Teacher)
-         as the Student's starting point. Early layers capture universal Bangla syntax, token
-         representations, and local dependencies essential for headline parsing.
-      3. Classifier Head: The classification dense and projection layers are mapped into
+      2. LayerNorm Preservation: LayerNorm weights are element-wise scale parameters (~1.0),
+         not vectors in embedding space, so they are initialized to neutral (weight=1, bias=0)
+         rather than multiplied by P.
+      3. Strided Layer Selection: By default ('strided'), we extract evenly spaced layers
+         {2, 5, 8, 11} from the 12-layer Teacher so the Student inherits both low-level Bangla
+         syntax and high-level semantic/pragmatic clickbait representations.
+      4. Classifier Head: The classification dense and projection layers are mapped into
          the 256-dimensional space to preserve the learned decision boundary.
 
     Args:
         teacher_model: Fine-tuned Teacher BanglaBERT model.
         config: TinyBanglaBERT ElectraConfig.
         strategy: Transfer strategy — 'projection' (PCA-based) or 'truncation' (slice 0..256).
+        layer_selection: 'strided' (default) or 'first'.
 
     Returns:
         Initialized ElectraForSequenceClassification model with transferred weights.
     """
-    logger.info("Initializing TinyBanglaBERT from Teacher (Strategy: %s)...", strategy)
+    layer_indices = _select_teacher_layers(
+        num_teacher_layers=teacher_model.config.num_hidden_layers,
+        num_student_layers=config.num_hidden_layers,
+        layer_selection=layer_selection,
+    )
+    logger.info(
+        "Initializing TinyBanglaBERT from Teacher (Strategy: %s, Layers: %s)...",
+        strategy,
+        layer_indices,
+    )
     student_model = ElectraForSequenceClassification(config)
 
     t_emb = teacher_model.electra.embeddings
@@ -217,14 +266,14 @@ def init_from_teacher(
             # Token type embeddings: [2, 768] @ [768, 256] -> [2, 256]
             s_emb.token_type_embeddings.weight.copy_(t_emb.token_type_embeddings.weight.data @ P)
 
-            # LayerNorm: [768] @ [768, 256] -> [256]
-            s_emb.LayerNorm.weight.copy_(t_emb.LayerNorm.weight.data @ P)
-            s_emb.LayerNorm.bias.copy_(t_emb.LayerNorm.bias.data @ P)
+            # LayerNorm: neutral init (element-wise scale != embedding space vector)
+            nn.init.ones_(s_emb.LayerNorm.weight)
+            nn.init.zeros_(s_emb.LayerNorm.bias)
 
-            # 2. Transformer Encoder Layers {0, 1, 2, 3} Transfer
-            for i in range(config.num_hidden_layers):
-                t_layer = teacher_model.electra.encoder.layer[i]
-                s_layer = student_model.electra.encoder.layer[i]
+            # 2. Transformer Encoder Layers Transfer
+            for s_idx, t_idx in enumerate(layer_indices):
+                t_layer = teacher_model.electra.encoder.layer[t_idx]
+                s_layer = student_model.electra.encoder.layer[s_idx]
 
                 # Attention Query: [768, 768] -> [256, 256] via P.T @ W @ P
                 s_layer.attention.self.query.weight.copy_(P.T @ t_layer.attention.self.query.weight.data @ P)
@@ -241,8 +290,8 @@ def init_from_teacher(
                 # Attention Output Dense: [768, 768] -> [256, 256]
                 s_layer.attention.output.dense.weight.copy_(P.T @ t_layer.attention.output.dense.weight.data @ P)
                 s_layer.attention.output.dense.bias.copy_(t_layer.attention.output.dense.bias.data @ P)
-                s_layer.attention.output.LayerNorm.weight.copy_(t_layer.attention.output.LayerNorm.weight.data @ P)
-                s_layer.attention.output.LayerNorm.bias.copy_(t_layer.attention.output.LayerNorm.bias.data @ P)
+                nn.init.ones_(s_layer.attention.output.LayerNorm.weight)
+                nn.init.zeros_(s_layer.attention.output.LayerNorm.bias)
 
                 # Intermediate Dense: [3072, 768] -> [1024, 256] via P_inter.T @ W @ P
                 s_layer.intermediate.dense.weight.copy_(P_inter.T @ t_layer.intermediate.dense.weight.data @ P)
@@ -251,8 +300,8 @@ def init_from_teacher(
                 # Output Dense: [768, 3072] -> [256, 1024] via P.T @ W @ P_inter
                 s_layer.output.dense.weight.copy_(P.T @ t_layer.output.dense.weight.data @ P_inter)
                 s_layer.output.dense.bias.copy_(t_layer.output.dense.bias.data @ P)
-                s_layer.output.LayerNorm.weight.copy_(t_layer.output.LayerNorm.weight.data @ P)
-                s_layer.output.LayerNorm.bias.copy_(t_layer.output.LayerNorm.bias.data @ P)
+                nn.init.ones_(s_layer.output.LayerNorm.weight)
+                nn.init.zeros_(s_layer.output.LayerNorm.bias)
 
             # 3. Classifier Head Transfer
             if hasattr(teacher_model, "classifier") and hasattr(student_model, "classifier"):
@@ -272,9 +321,9 @@ def init_from_teacher(
             s_emb.LayerNorm.weight.copy_(t_emb.LayerNorm.weight.data[:s_hidden])
             s_emb.LayerNorm.bias.copy_(t_emb.LayerNorm.bias.data[:s_hidden])
 
-            for i in range(config.num_hidden_layers):
-                t_layer = teacher_model.electra.encoder.layer[i]
-                s_layer = student_model.electra.encoder.layer[i]
+            for s_idx, t_idx in enumerate(layer_indices):
+                t_layer = teacher_model.electra.encoder.layer[t_idx]
+                s_layer = student_model.electra.encoder.layer[s_idx]
 
                 s_layer.attention.self.query.weight.copy_(t_layer.attention.self.query.weight.data[:s_hidden, :s_hidden])
                 s_layer.attention.self.query.bias.copy_(t_layer.attention.self.query.bias.data[:s_hidden])
@@ -311,6 +360,135 @@ def init_from_teacher(
         param_info["size_mb"],
     )
     return student_model
+
+
+def init_from_small_pretrained(
+    pretrained_name: str = "csebuetnlp/banglabert_small",
+    num_hidden_layers: int = 4,
+    num_labels: int = 2,
+    dropout: float = 0.1,
+    layer_selection: str = "strided",
+) -> ElectraForSequenceClassification:
+    """Strategy 2c: Initialize a 4-layer compact Student from pre-trained BanglaBERT-Small.
+
+    Preserves exact pre-trained Bengali embeddings (including factorized embedding_size=128
+    -> hidden_size=256 projection) and copies strided encoder layers {2, 5, 8, 11} without
+    any PCA dimension mismatch.
+
+    Args:
+        pretrained_name: HuggingFace model ID for compact pre-trained backbone.
+        num_hidden_layers: Number of encoder layers to retain (default: 4).
+        num_labels: Number of classification labels (default: 2).
+        dropout: Hidden and attention dropout probability.
+        layer_selection: 'strided' (default) or 'first'.
+
+    Returns:
+        Compact ElectraForSequenceClassification initialized from pre-trained weights.
+    """
+    logger.info(
+        "Initializing %d-layer TinyBanglaBERT from pre-trained '%s'...",
+        num_hidden_layers,
+        pretrained_name,
+    )
+    base_model = AutoModelForSequenceClassification.from_pretrained(
+        pretrained_name,
+        num_labels=num_labels,
+        id2label=ID2LABEL,
+        label2id=LABEL2ID,
+    )
+    base_cfg = base_model.config
+    layer_indices = _select_teacher_layers(
+        num_teacher_layers=base_cfg.num_hidden_layers,
+        num_student_layers=num_hidden_layers,
+        layer_selection=layer_selection,
+    )
+
+    student_cfg = ElectraConfig(
+        vocab_size=base_cfg.vocab_size,
+        embedding_size=getattr(base_cfg, "embedding_size", base_cfg.hidden_size),
+        hidden_size=base_cfg.hidden_size,
+        num_hidden_layers=num_hidden_layers,
+        num_attention_heads=base_cfg.num_attention_heads,
+        intermediate_size=base_cfg.intermediate_size,
+        hidden_act=base_cfg.hidden_act,
+        hidden_dropout_prob=dropout,
+        attention_probs_dropout_prob=dropout,
+        max_position_embeddings=base_cfg.max_position_embeddings,
+        type_vocab_size=base_cfg.type_vocab_size,
+        initializer_range=base_cfg.initializer_range,
+        num_labels=num_labels,
+        id2label=ID2LABEL,
+        label2id=LABEL2ID,
+    )
+    student_model = ElectraForSequenceClassification(student_cfg)
+
+    with torch.no_grad():
+        # Copy embeddings directly (exact shape match)
+        student_model.electra.embeddings.load_state_dict(
+            base_model.electra.embeddings.state_dict()
+        )
+        # Copy factorized embedding projection if present (e.g., 128 -> 256)
+        if hasattr(base_model.electra, "embeddings_project") and hasattr(
+            student_model.electra, "embeddings_project"
+        ):
+            student_model.electra.embeddings_project.load_state_dict(
+                base_model.electra.embeddings_project.state_dict()
+            )
+        # Copy selected encoder layers directly
+        for s_idx, t_idx in enumerate(layer_indices):
+            student_model.electra.encoder.layer[s_idx].load_state_dict(
+                base_model.electra.encoder.layer[t_idx].state_dict()
+            )
+
+    param_info = count_parameters(student_model)
+    logger.info(
+        "TinyBanglaBERT (Small Pre-trained Init, layers=%s) created — Total Params: %d (%.2f MB)",
+        layer_indices,
+        param_info["total_params"],
+        param_info["size_mb"],
+    )
+    return student_model
+
+
+def init_small_random(
+    pretrained_name: str = "csebuetnlp/banglabert_small",
+    num_hidden_layers: int = 4,
+    num_labels: int = 2,
+    dropout: float = 0.1,
+) -> ElectraForSequenceClassification:
+    """Initialize a parameter-matched compact Student with fresh random weights.
+
+    Matches the exact factorized architecture (embedding_size=128, hidden_size=256,
+    vocab_size=32000, ~7.42M params at 4L) of `init_from_small_pretrained` without
+    copying any pre-trained weights, enabling strictly controlled initialisation ablations.
+    """
+    base_cfg = AutoConfig.from_pretrained(pretrained_name)
+    student_cfg = ElectraConfig(
+        vocab_size=base_cfg.vocab_size,
+        embedding_size=getattr(base_cfg, "embedding_size", base_cfg.hidden_size),
+        hidden_size=base_cfg.hidden_size,
+        num_hidden_layers=num_hidden_layers,
+        num_attention_heads=base_cfg.num_attention_heads,
+        intermediate_size=base_cfg.intermediate_size,
+        hidden_act=base_cfg.hidden_act,
+        hidden_dropout_prob=dropout,
+        attention_probs_dropout_prob=dropout,
+        max_position_embeddings=base_cfg.max_position_embeddings,
+        type_vocab_size=base_cfg.type_vocab_size,
+        initializer_range=base_cfg.initializer_range,
+        num_labels=num_labels,
+        id2label=ID2LABEL,
+        label2id=LABEL2ID,
+    )
+    model = ElectraForSequenceClassification(student_cfg)
+    param_info = count_parameters(model)
+    logger.info(
+        "TinyBanglaBERT (Parameter-Matched Random Init, %dL) created — Total Params: %d (%.2f MB)",
+        num_hidden_layers,
+        param_info["total_params"],
+        param_info["size_mb"],
+    )
+    return model
 
 
 def save_student_checkpoint(

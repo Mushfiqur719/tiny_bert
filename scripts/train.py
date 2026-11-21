@@ -49,8 +49,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--init",
         type=str,
         default=None,
-        choices=["random", "teacher_init"],
-        help="Override student initialization strategy (random or teacher_init).",
+        choices=["random", "teacher_init", "small_pretrained"],
+        help="Override student initialization strategy (random, teacher_init, or small_pretrained).",
     )
     p.add_argument(
         "--temperature",
@@ -63,6 +63,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         type=float,
         default=None,
         help="Override distillation alpha weight.",
+    )
+    p.add_argument(
+        "--soft-labels",
+        type=str,
+        default="experiments/teacher/train_soft_labels.pt",
+        help="Path to precomputed teacher soft labels (.pt).",
     )
     p.add_argument(
         "--override",
@@ -116,6 +122,7 @@ def main(argv: list[str] | None = None) -> None:
             temperature=args.temperature,
             alpha=args.alpha,
             seed=seed,
+            soft_labels_path=args.soft_labels,
         )
     else:
         logger.info("Executing Student Supervised Baseline training (%s Init)...", init_type)

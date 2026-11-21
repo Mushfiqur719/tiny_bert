@@ -33,9 +33,12 @@ from src.data.split import apply_splits, load_splits
 from src.evaluation.metrics import (
     compute_classification_metrics,
     compute_metrics_from_eval_pred,
+    find_optimal_threshold,
+    predict_with_threshold,
 )
 from src.models.student import (
     create_student_config,
+    init_from_small_pretrained,
     init_from_teacher,
     init_random,
     save_student_checkpoint,
@@ -111,12 +114,18 @@ def train_student_baseline(
     )
 
     # 4. Student Model Initialization
+    num_hidden_layers = int(getattr(cfg.model, "num_hidden_layers", 4))
+    hidden_size = int(getattr(cfg.model, "hidden_size", 256))
+    num_attention_heads = int(getattr(cfg.model, "num_attention_heads", 4))
+    intermediate_size = int(getattr(cfg.model, "intermediate_size", 1024))
+    layer_selection = str(getattr(cfg.model, "layer_selection", "strided"))
+
     student_cfg = create_student_config(
         vocab_size=tokenizer.vocab_size,
-        hidden_size=256,
-        num_hidden_layers=4,
-        num_attention_heads=4,
-        intermediate_size=1024,
+        hidden_size=hidden_size,
+        num_hidden_layers=num_hidden_layers,
+        num_attention_heads=num_attention_heads,
+        intermediate_size=intermediate_size,
         num_labels=int(cfg.data.num_labels),
         dropout=float(cfg.model.dropout),
     )
@@ -127,9 +136,25 @@ def train_student_baseline(
         teacher_path = "experiments/teacher"
         logger.info("Loading fine-tuned Teacher model from '%s' for initialization...", teacher_path)
         teacher_model = AutoModelForSequenceClassification.from_pretrained(teacher_path)
-        model = init_from_teacher(teacher_model, student_cfg, strategy="projection")
+        model = init_from_teacher(
+            teacher_model,
+            student_cfg,
+            strategy="projection",
+            layer_selection=layer_selection,
+        )
+    elif init_type == "small_pretrained":
+        pretrained_small = str(getattr(cfg.model, "pretrained_small_name", "csebuetnlp/banglabert_small"))
+        model = init_from_small_pretrained(
+            pretrained_name=pretrained_small,
+            num_hidden_layers=num_hidden_layers,
+            num_labels=int(cfg.data.num_labels),
+            dropout=float(cfg.model.dropout),
+            layer_selection=layer_selection,
+        )
     else:
-        raise ValueError(f"Unknown init_type: '{init_type}'. Use 'random' or 'teacher_init'.")
+        raise ValueError(
+            f"Unknown init_type: '{init_type}'. Use 'random', 'teacher_init', or 'small_pretrained'."
+        )
 
     # 5. Training Arguments
     use_fp16 = bool(cfg.training.fp16) and torch.cuda.is_available()
@@ -137,6 +162,7 @@ def train_student_baseline(
     epochs = float(cfg.training.epochs)
     total_steps = int((len(train_ds) // batch_size + (1 if len(train_ds) % batch_size != 0 else 0)) * epochs)
     warmup_steps = int(total_steps * float(cfg.training.warmup_ratio))
+    lr_scheduler_type = str(getattr(cfg.training, "lr_scheduler_type", "cosine"))
 
     training_args = TrainingArguments(
         output_dir=str(exp.checkpoints_dir),
@@ -144,6 +170,7 @@ def train_student_baseline(
         per_device_train_batch_size=batch_size,
         per_device_eval_batch_size=batch_size * 2,
         learning_rate=float(cfg.training.lr),
+        lr_scheduler_type=lr_scheduler_type,
         weight_decay=float(cfg.training.weight_decay),
         warmup_steps=warmup_steps,
         max_grad_norm=float(cfg.training.gradient_clip),
@@ -186,18 +213,44 @@ def train_student_baseline(
     tokenizer.save_pretrained(str(best_ckpt_dir))
     save_student_checkpoint(trainer.model, tokenizer, exp.run_dir)
 
-    # 8. Test Set Evaluation (EXACTLY ONCE)
+    # 8. Tune Decision Threshold on Validation Split (Test set remains untouched)
+    val_prediction_output = trainer.predict(val_ds)
+    val_logits = val_prediction_output.predictions
+    if isinstance(val_logits, tuple):
+        val_logits = val_logits[0]
+    optimal_threshold, best_val_f1_cal = find_optimal_threshold(
+        logits=val_logits,
+        y_true=val_prediction_output.label_ids,
+    )
+    logger.info(
+        "Validation threshold calibration: optimal_threshold=%.2f (Val Macro-F1: %.4f)",
+        optimal_threshold,
+        best_val_f1_cal,
+    )
+
+    # 9. Test Set Evaluation (EXACTLY ONCE)
     logger.info("Evaluating Student on held-out test split (%d samples)...", len(test_ds))
     test_prediction_output = trainer.predict(test_ds)
     test_logits = test_prediction_output.predictions
     if isinstance(test_logits, tuple):
         test_logits = test_logits[0]
     test_preds = np.argmax(test_logits, axis=1)
+    test_preds_cal = predict_with_threshold(test_logits, threshold=optimal_threshold)
     test_labels = test_prediction_output.label_ids
 
+    # Persist logits so bootstrap CIs / McNemar can be computed later without re-running
+    np.save(exp.run_dir / "test_logits.npy", test_logits)
+    np.save(exp.run_dir / "test_labels.npy", test_labels)
+    np.save(exp.run_dir / "val_logits.npy", val_logits)
+    np.save(exp.run_dir / "val_labels.npy", val_prediction_output.label_ids)
+
     test_metrics = compute_classification_metrics(y_pred=test_preds, y_true=test_labels)
+    test_metrics_cal = compute_classification_metrics(y_pred=test_preds_cal, y_true=test_labels)
+    test_metrics["optimal_threshold"] = optimal_threshold
+    test_metrics["calibrated"] = test_metrics_cal
+
     logger.info("=" * 60)
-    logger.info("STUDENT BASELINE (%s) FINAL TEST SET METRICS:", init_type.upper())
+    logger.info("STUDENT BASELINE (%s) FINAL TEST SET METRICS (Threshold=0.50):", init_type.upper())
     logger.info("Accuracy:             %.4f", test_metrics["accuracy"])
     logger.info("F1 (Macro):           %.4f", test_metrics["f1_macro"])
     logger.info("Precision (Macro):    %.4f", test_metrics["precision_macro"])
@@ -205,9 +258,15 @@ def train_student_baseline(
     logger.info("F1 (Clickbait):       %.4f", test_metrics["f1_clickbait"])
     logger.info("F1 (Not-Clickbait):   %.4f", test_metrics["f1_not_clickbait"])
     logger.info("Confusion Matrix:     %s", test_metrics["confusion_matrix"])
+    logger.info("-" * 60)
+    logger.info("CALIBRATED TEST METRICS (Val-Tuned Threshold=%.2f):", optimal_threshold)
+    logger.info("Accuracy (Cal):       %.4f", test_metrics_cal["accuracy"])
+    logger.info("F1 Macro (Cal):       %.4f", test_metrics_cal["f1_macro"])
+    logger.info("F1 Clickbait (Cal):   %.4f", test_metrics_cal["f1_clickbait"])
+    logger.info("Confusion Matrix:     %s", test_metrics_cal["confusion_matrix"])
     logger.info("=" * 60)
 
-    scalar_test_metrics = {k: v for k, v in test_metrics.items() if k != "confusion_matrix"}
+    scalar_test_metrics = {k: v for k, v in test_metrics.items() if isinstance(v, (int, float))}
     exp.log_metrics({"split": "test", **scalar_test_metrics})
 
     test_metrics_path = exp.run_dir / "metrics.json"

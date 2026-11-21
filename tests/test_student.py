@@ -115,3 +115,37 @@ class TestStudentArchitecture:
         outputs = student_rand(**inputs)
         assert outputs.loss is not None
         assert outputs.loss.item() > 0.0
+
+    def test_teacher_init_projection_preserves_neutral_layernorm(self, student_config, teacher_and_tokenizer):
+        teacher, _ = teacher_and_tokenizer
+        student_proj = init_from_teacher(teacher, student_config, strategy="projection")
+
+        assert torch.allclose(student_proj.electra.embeddings.LayerNorm.weight, torch.ones(256))
+        assert torch.allclose(student_proj.electra.embeddings.LayerNorm.bias, torch.zeros(256))
+        for layer in student_proj.electra.encoder.layer:
+            assert torch.allclose(layer.attention.output.LayerNorm.weight, torch.ones(256))
+            assert torch.allclose(layer.attention.output.LayerNorm.bias, torch.zeros(256))
+            assert torch.allclose(layer.output.LayerNorm.weight, torch.ones(256))
+            assert torch.allclose(layer.output.LayerNorm.bias, torch.zeros(256))
+
+    def test_strided_layer_selection(self):
+        from src.models.student import _select_teacher_layers
+
+        assert _select_teacher_layers(12, 4, "strided") == [2, 5, 8, 11]
+        assert _select_teacher_layers(12, 4, "first") == [0, 1, 2, 3]
+        assert _select_teacher_layers(12, 4, "first4") == [0, 1, 2, 3]
+        assert _select_teacher_layers(12, 4, "last") == [8, 9, 10, 11]
+        assert _select_teacher_layers(12, 4, "last4") == [8, 9, 10, 11]
+
+    def test_v3_small_random_matches_small_pretrained_params(self):
+        from src.models.student import init_from_small_pretrained, init_small_random
+
+        m_rand = init_small_random(num_hidden_layers=4)
+        m_strided = init_from_small_pretrained(num_hidden_layers=4, layer_selection="strided")
+        m_last = init_from_small_pretrained(num_hidden_layers=4, layer_selection="last4")
+
+        p_rand = count_parameters(m_rand)["total_params"]
+        p_strided = count_parameters(m_strided)["total_params"]
+        p_last = count_parameters(m_last)["total_params"]
+        assert p_rand == p_strided == p_last
+        assert 7_000_000 < p_rand < 8_000_000

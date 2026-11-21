@@ -36,8 +36,13 @@ from transformers import (
     PreTrainedTokenizerBase,
 )
 
+from src.data.clean import clean_dataframe
+from src.data.load import load_raw
+from src.data.split import apply_splits, load_splits
 from src.efficiency.export_onnx import export_to_onnx, quantize_onnx_dynamic
+from src.evaluation.metrics import compute_classification_metrics
 from src.models.student import count_parameters
+from src.utils import load_config
 
 logger = logging.getLogger(__name__)
 
@@ -232,6 +237,44 @@ def get_checkpoint_disk_size_mb(model_dir_or_file: str | Path) -> float:
     return 0.0
 
 
+def evaluate_onnx_on_test_set(
+    onnx_path: str | Path,
+    tokenizer: PreTrainedTokenizerBase,
+    max_seq_len: int = 64,
+) -> dict[str, float]:
+    """Evaluate an exported ONNX (FP32 or INT8) model on the held-out BanglaBait test split."""
+    import onnxruntime as ort
+
+    cfg = load_config("configs/base.yaml")
+    labeled_df, _ = load_raw(cfg, hf_dataset_id=cfg.data.hf_dataset_id)
+    labeled_df = clean_dataframe(
+        labeled_df,
+        headline_col=cfg.data.text_col,
+        min_char_length=int(cfg.data.min_char_length),
+    )
+    labeled_df = labeled_df.drop(columns=["_was_cleaned"], errors="ignore").reset_index(drop=True)
+    _, _, test_df = apply_splits(labeled_df, load_splits(cfg))
+
+    headlines = test_df[cfg.data.text_col].tolist()
+    y_true = test_df[cfg.data.label_col].to_numpy()
+
+    session = ort.InferenceSession(str(onnx_path), providers=["CPUExecutionProvider"])
+    input_names = [inp.name for inp in session.get_inputs()]
+
+    preds = []
+    batch_size = 64
+    for start in range(0, len(headlines), batch_size):
+        batch = headlines[start : start + batch_size]
+        enc = tokenizer(batch, padding="max_length", truncation=True, max_length=max_seq_len, return_tensors="np")
+        feed = {k: v for k, v in enc.items() if k in input_names}
+        logits = session.run(None, feed)[0]
+        preds.append(np.argmax(logits, axis=-1))
+
+    y_pred = np.concatenate(preds, axis=0)
+    m = compute_classification_metrics(y_pred=y_pred, y_true=y_true)
+    return {"accuracy": m["accuracy"], "f1_macro": m["f1_macro"], "f1_clickbait": m["f1_clickbait"]}
+
+
 def run_full_benchmark(
     teacher_dir: str | Path = "experiments/teacher",
     student_dir: str | Path = "experiments/tinybanglabert_final",
@@ -290,9 +333,18 @@ def run_full_benchmark(
 
     logger.info("Benchmarking TinyBanglaBERT (ONNX FP32)...")
     s_onnx_bench = measure_onnx_latency_and_memory(student_onnx_fp32, tokenizer, n_iterations=n_iterations)
+    s_onnx_test = evaluate_onnx_on_test_set(student_onnx_fp32, tokenizer)
 
     logger.info("Benchmarking TinyBanglaBERT (ONNX INT8)...")
     s_int8_bench = measure_onnx_latency_and_memory(student_onnx_int8, tokenizer, n_iterations=n_iterations)
+    s_int8_test = evaluate_onnx_on_test_set(student_onnx_int8, tokenizer)
+    logger.info(
+        "ONNX Test Set Verification -> FP32 Acc/F1: %.4f / %.4f | INT8 Acc/F1: %.4f / %.4f",
+        s_onnx_test["accuracy"],
+        s_onnx_test["f1_macro"],
+        s_int8_test["accuracy"],
+        s_int8_test["f1_macro"],
+    )
 
     # Baseline numbers for ratios
     base_cpu_lat = t_cpu["mean_latency_ms"]
@@ -365,6 +417,10 @@ def run_full_benchmark(
         "student_pytorch_gpu": s_gpu,
         "student_onnx_cpu": s_onnx_bench,
         "student_int8_cpu": s_int8_bench,
+        "test_set_accuracy_verification": {
+            "onnx_fp32": s_onnx_test,
+            "onnx_int8": s_int8_test,
+        },
         "parameters": {
             "teacher": t_params["total_params"],
             "student": s_params["total_params"],

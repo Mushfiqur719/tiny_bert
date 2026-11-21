@@ -46,14 +46,30 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="List of alpha values to evaluate.",
     )
     p.add_argument("--epochs", type=int, default=3, help="Number of training epochs per trial.")
-    p.add_argument("--init", default="teacher_init", choices=["random", "teacher_init"], help="Student initialization type.")
+    p.add_argument(
+        "--init",
+        default="teacher_init",
+        choices=["random", "teacher_init", "small_pretrained"],
+        help="Student initialization type.",
+    )
     p.add_argument("--output-dir", default="experiments/tuning", help="Output directory for reports.")
+    p.add_argument("--lr", type=float, default=None, help="Override training.lr for all trials.")
+    p.add_argument(
+        "--override",
+        nargs="*",
+        default=[],
+        metavar="KEY=VALUE",
+        help="OmegaConf dotlist overrides, e.g. training.epochs=12",
+    )
     return p.parse_args(argv)
 
 
 def main(argv: list[str] | None = None) -> None:
     args = parse_args(argv)
-    cfg = load_config(args.config)
+    overrides = list(args.override or [])
+    if args.lr is not None:
+        overrides.append(f"training.lr={args.lr}")
+    cfg = load_config(args.config, overrides=overrides)
     seed_everything(args.seed)
 
     best_combo, results, report_md = run_grid_search_kd(

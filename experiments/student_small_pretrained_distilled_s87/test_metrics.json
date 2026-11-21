@@ -1,0 +1,45 @@
+{
+  "accuracy": 0.7942,
+  "f1_macro": 0.7751,
+  "precision_macro": 0.773,
+  "recall_macro": 0.7776,
+  "f1_not_clickbait": 0.8405,
+  "precision_not_clickbait": 0.8493,
+  "recall_not_clickbait": 0.832,
+  "f1_clickbait": 0.7097,
+  "precision_clickbait": 0.6967,
+  "recall_clickbait": 0.7233,
+  "confusion_matrix": [
+    [
+      817,
+      165
+    ],
+    [
+      145,
+      379
+    ]
+  ],
+  "optimal_threshold": 0.55,
+  "calibrated": {
+    "accuracy": 0.8035,
+    "f1_macro": 0.7832,
+    "precision_macro": 0.7835,
+    "recall_macro": 0.783,
+    "f1_not_clickbait": 0.8494,
+    "precision_not_clickbait": 0.8486,
+    "recall_not_clickbait": 0.8503,
+    "f1_clickbait": 0.717,
+    "precision_clickbait": 0.7184,
+    "recall_clickbait": 0.7156,
+    "confusion_matrix": [
+      [
+        835,
+        147
+      ],
+      [
+        149,
+        375
+      ]
+    ]
+  }
+}

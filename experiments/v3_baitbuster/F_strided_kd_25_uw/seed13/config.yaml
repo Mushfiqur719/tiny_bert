@@ -1,0 +1,13 @@
+{
+  "run_name": "F_strided_kd_25_uw",
+  "text_mode": "title",
+  "init": "strided",
+  "objective": "kd",
+  "frac": 25,
+  "num_layers": 4,
+  "params": 7420418,
+  "lr": 5e-05,
+  "T": 4.0,
+  "alpha": 0.5,
+  "seed": 13
+}

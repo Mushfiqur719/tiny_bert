@@ -1,0 +1,7 @@
+dataset,model_a,model_b,f1_a,f1_b,diff_pp,ci_lo_pp,ci_hi_pp,p_value,non_inferior_2pp,p_holm
+baitbuster,F_strided_kd_100_uw,F_strided_ce_100_uw,0.9807,0.9811,-0.04,-0.33,0.24,0.7432,True,1.0
+baitbuster,F_rand_kd_100_uw,F_rand_ce_100_uw,0.9788,0.9792,-0.04,-0.51,0.51,0.8178,True,1.0
+baitbuster,F_strided_kd_100_uw,F_rand_kd_100_uw,0.9807,0.9788,0.19,-0.46,0.84,0.5576,True,1.0
+baitbuster,F_strided_ce_100_uw,F_rand_ce_100_uw,0.9811,0.9792,0.18,-0.5,0.89,0.5774,True,1.0
+baitbuster,F_strided_kd_100_uw,teacher_base_uw,0.9807,0.988,-0.73,-1.46,-0.06,0.0314,True,0.1884
+baitbuster,F_strided_kd_100_uw,baseline_small_12l_ce_uw,0.9807,0.9868,-0.61,-1.35,0.04,0.0648,True,0.324

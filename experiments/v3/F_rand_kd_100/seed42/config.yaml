@@ -1,0 +1,13 @@
+{
+  "run_name": "F_rand_kd_100",
+  "text_mode": "title",
+  "init": "rand",
+  "objective": "kd",
+  "frac": 100,
+  "num_layers": 4,
+  "params": 7420418,
+  "lr": 5e-05,
+  "T": 4.0,
+  "alpha": 0.5,
+  "seed": 42
+}

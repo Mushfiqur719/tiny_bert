@@ -18,7 +18,7 @@ data:
 model:
   teacher_model_name: csebuetnlp/banglabert
   student_model_name: TinyBanglaBERT
-  max_seq_len: 128
+  max_seq_len: 64
   dropout: 0.1
   init_type: random
   num_hidden_layers: 4
@@ -28,9 +28,9 @@ model:
 training:
   output_dir: experiments
   run_name: student_random_baseline
-  epochs: 5
+  epochs: 20
   batch_size: 32
-  lr: 5.0e-05
+  lr: 0.0002
   weight_decay: 0.01
   warmup_ratio: 0.1
   gradient_clip: 1.0
@@ -41,7 +41,8 @@ training:
   greater_is_better: true
   fp16: true
   dataloader_num_workers: 0
-  early_stopping_patience: 3
+  lr_scheduler_type: cosine
+  early_stopping_patience: 4
 distillation:
   temperature: 4.0
   alpha: 0.7

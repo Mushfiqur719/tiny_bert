@@ -1,12 +1,12 @@
 {
   "run_name": "student_teacher_init_baseline",
   "seed": 42,
-  "git_commit": "dbdfba9",
-  "started_at": "2026-08-30T15:26:30.302823+00:00",
-  "finished_at": "2026-08-30T15:27:11.151912+00:00",
+  "git_commit": "5bcd650",
+  "started_at": "2026-11-19T22:10:15.357176+00:00",
+  "finished_at": "2026-11-19T22:11:37.340653+00:00",
   "python_version": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
   "torch_version": "2.11.0+cu128",
-  "platform": "Windows-11-10.0.26200-SP0",
+  "platform": "Windows-11-10.0.26300-SP0",
   "cuda_available": true,
   "cuda_device": "NVIDIA GeForce RTX 5050 Laptop GPU"
 }

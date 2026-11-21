@@ -7,7 +7,7 @@
   "bos_token_id": null,
   "classifier_dropout": null,
   "dtype": "float32",
-  "embedding_size": 256,
+  "embedding_size": 128,
   "eos_token_id": null,
   "hidden_act": "gelu",
   "hidden_dropout_prob": 0.1,

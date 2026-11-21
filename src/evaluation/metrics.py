@@ -95,3 +95,53 @@ def compute_metrics_from_eval_pred(eval_pred) -> dict[str, float]:
 
     # Return scalar metrics (omit nested confusion_matrix for Trainer logs)
     return {k: v for k, v in metrics.items() if isinstance(v, (int, float))}
+
+
+def find_optimal_threshold(
+    logits: np.ndarray,
+    y_true: Sequence[int] | np.ndarray,
+    low: float = 0.20,
+    high: float = 0.80,
+    step: float = 0.01,
+) -> tuple[float, float]:
+    """Find the probability threshold for class 1 that maximizes Macro-F1 on validation logits.
+
+    Args:
+        logits: Raw model logits of shape [N, 2].
+        y_true: Ground-truth binary labels of shape [N].
+        low: Minimum candidate threshold.
+        high: Maximum candidate threshold.
+        step: Grid step size.
+
+    Returns:
+        Tuple of (best_threshold, best_macro_f1).
+    """
+    logits = np.asarray(logits, dtype=np.float64)
+    y_true = np.asarray(y_true)
+
+    # Numerically stable softmax for class 1 probability
+    shifted = logits - np.max(logits, axis=1, keepdims=True)
+    exp_logits = np.exp(shifted)
+    probs_pos = exp_logits[:, 1] / np.sum(exp_logits, axis=1)
+
+    best_thresh = 0.50
+    best_f1 = float(f1_score(y_true, (probs_pos >= 0.50).astype(int), average="macro", zero_division=0))
+
+    thresholds = np.arange(low, high + step / 2.0, step)
+    for t in thresholds:
+        preds = (probs_pos >= t).astype(int)
+        score = float(f1_score(y_true, preds, average="macro", zero_division=0))
+        if score > best_f1:
+            best_f1 = score
+            best_thresh = float(round(t, 4))
+
+    return best_thresh, round(best_f1, 4)
+
+
+def predict_with_threshold(logits: np.ndarray, threshold: float = 0.50) -> np.ndarray:
+    """Convert [N, 2] logits into binary predictions using a probability threshold for class 1."""
+    logits = np.asarray(logits, dtype=np.float64)
+    shifted = logits - np.max(logits, axis=1, keepdims=True)
+    exp_logits = np.exp(shifted)
+    probs_pos = exp_logits[:, 1] / np.sum(exp_logits, axis=1)
+    return (probs_pos >= threshold).astype(int)

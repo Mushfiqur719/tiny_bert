@@ -1,0 +1,29 @@
+{
+  "split": "test",
+  "accuracy": 0.76,
+  "precision_macro": 0.7388,
+  "recall_macro": 0.7522,
+  "f1_macro": 0.7433,
+  "val_f1_macro": 0.7433,
+  "f1_not_clickbait": 0.8087,
+  "precision_not_clickbait": 0.8422,
+  "recall_not_clickbait": 0.7778,
+  "f1_clickbait": 0.678,
+  "precision_clickbait": 0.6355,
+  "recall_clickbait": 0.7266,
+  "ece": 0.1399,
+  "confusion_matrix": [
+    [
+      763,
+      218
+    ],
+    [
+      143,
+      380
+    ]
+  ],
+  "true_class_counts": {
+    "0": 981,
+    "1": 523
+  }
+}

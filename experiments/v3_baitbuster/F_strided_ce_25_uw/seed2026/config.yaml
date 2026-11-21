@@ -1,0 +1,13 @@
+{
+  "run_name": "F_strided_ce_25_uw",
+  "text_mode": "title",
+  "init": "strided",
+  "objective": "ce",
+  "frac": 25,
+  "num_layers": 4,
+  "params": 7420418,
+  "lr": 5e-05,
+  "T": null,
+  "alpha": null,
+  "seed": 2026
+}

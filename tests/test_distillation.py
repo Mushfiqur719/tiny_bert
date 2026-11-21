@@ -12,8 +12,9 @@ import pytest
 from transformers import AutoTokenizer
 
 from src.models.distillation import (
-    KnowledgeDistillationLoss,
     DistillationDataset,
+    IntermediateAlignmentModule,
+    KnowledgeDistillationLoss,
     load_teacher_soft_labels,
 )
 
@@ -115,3 +116,90 @@ class TestDistillationDatasetAndLoader:
         assert data["logits"].shape == (12044, 2)
         assert len(data["labels"]) == 12044
         assert len(data["headline_indices"]) == 12044
+
+
+class TestDistillationTrainerRegression:
+
+    def test_trainer_preserves_teacher_logits_and_uses_kd_loss(self, tmp_path):
+        from transformers import TrainingArguments
+        from src.models.student import create_student_config, init_random
+        from src.training.train_distill import DistillationTrainer
+
+        tokenizer = AutoTokenizer.from_pretrained("experiments/teacher")
+        headlines = ["শিরোনাম এক", "শিরোনাম দুই", "শিরোনাম তিন", "শিরোনাম চার"]
+        labels = [0, 1, 0, 1]
+        teacher_logits_a = torch.tensor([[5.0, -5.0], [-5.0, 5.0], [5.0, -5.0], [-5.0, 5.0]])
+        teacher_logits_b = torch.tensor([[-5.0, 5.0], [5.0, -5.0], [-5.0, 5.0], [5.0, -5.0]])
+
+        ds_a = DistillationDataset(headlines, labels, teacher_logits_a, tokenizer, max_seq_len=16)
+        ds_b = DistillationDataset(headlines, labels, teacher_logits_b, tokenizer, max_seq_len=16)
+
+        cfg = create_student_config(vocab_size=tokenizer.vocab_size, num_hidden_layers=1, hidden_size=32, num_attention_heads=2, intermediate_size=64)
+        model = init_random(cfg)
+        model.train()
+
+        kd_loss_fn = KnowledgeDistillationLoss(temperature=2.0, alpha=0.1)
+        args = TrainingArguments(
+            output_dir=str(tmp_path),
+            per_device_train_batch_size=4,
+            remove_unused_columns=False,
+            use_cpu=True,
+            report_to="none",
+        )
+        trainer_a = DistillationTrainer(model=model, args=args, train_dataset=ds_a, kd_loss_fn=kd_loss_fn)
+        trainer_b = DistillationTrainer(model=model, args=args, train_dataset=ds_b, kd_loss_fn=kd_loss_fn)
+
+        batch_a = next(iter(trainer_a.get_train_dataloader()))
+        batch_b = next(iter(trainer_b.get_train_dataloader()))
+
+        assert "teacher_logits" in batch_a, "Trainer stripped teacher_logits from batch!"
+        loss_a = trainer_a.compute_loss(model, batch_a)
+        loss_b = trainer_b.compute_loss(model, batch_b)
+        assert not torch.isclose(loss_a, loss_b, atol=1e-4), "KD loss ignored teacher_logits!"
+
+    def test_trainer_raises_if_teacher_logits_missing_in_train_mode(self, tmp_path):
+        from transformers import TrainingArguments
+        from src.models.student import create_student_config, init_random
+        from src.training.train_distill import DistillationTrainer
+
+        tokenizer = AutoTokenizer.from_pretrained("experiments/teacher")
+        cfg = create_student_config(vocab_size=tokenizer.vocab_size, num_hidden_layers=1, hidden_size=32, num_attention_heads=2, intermediate_size=64)
+        model = init_random(cfg)
+        model.train()
+
+        kd_loss_fn = KnowledgeDistillationLoss(temperature=2.0, alpha=0.5)
+        args = TrainingArguments(
+            output_dir=str(tmp_path),
+            remove_unused_columns=False,
+            use_cpu=True,
+            report_to="none",
+        )
+        trainer = DistillationTrainer(model=model, args=args, kd_loss_fn=kd_loss_fn)
+
+        inputs = tokenizer(["শিরোনাম এক"], padding="max_length", max_length=16, return_tensors="pt")
+        inputs["labels"] = torch.tensor([0])
+        with pytest.raises(ValueError, match="teacher_logits"):
+            trainer.compute_loss(model, inputs)
+
+    def test_intermediate_alignment_module_forward_and_grad(self):
+        align = IntermediateAlignmentModule(
+            student_hidden_size=32,
+            teacher_hidden_size=64,
+            teacher_layer_indices=[2, 5, 8, 11],
+            hidden_loss_weight=0.5,
+            attention_loss_weight=0.2,
+        )
+        bsz, seq_len = 3, 10
+        s_hidden = tuple(torch.randn(bsz, seq_len, 32, requires_grad=True) for _ in range(5))
+        t_hidden = tuple(torch.randn(bsz, seq_len, 64) for _ in range(13))
+        s_attn = tuple(torch.softmax(torch.randn(bsz, 4, seq_len, seq_len), dim=-1).requires_grad_(True) for _ in range(4))
+        t_attn = tuple(torch.softmax(torch.randn(bsz, 12, seq_len, seq_len), dim=-1) for _ in range(12))
+        mask = torch.ones(bsz, seq_len)
+
+        loss, breakdown = align(s_hidden, t_hidden, s_attn, t_attn, attention_mask=mask)
+        assert loss.ndim == 0
+        assert loss.item() > 0.0
+        assert breakdown["hidden_loss"] > 0.0
+        assert breakdown["attention_loss"] > 0.0
+        loss.backward()
+        assert align.projectors[0].weight.grad is not None

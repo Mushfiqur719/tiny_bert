@@ -1,0 +1,16 @@
+{
+  "run_name": "teacher_base_uw",
+  "dataset": "baitbuster",
+  "model_id": "csebuetnlp/banglabert",
+  "text_mode": "title",
+  "unweighted": true,
+  "label_smoothing": 0.05,
+  "rdrop_alpha": 0.0,
+  "llrd_factor": 0.9,
+  "lr": 2e-05,
+  "epochs": 6,
+  "batch_size": 32,
+  "max_length": 64,
+  "seed": 2026,
+  "params": 110618882
+}

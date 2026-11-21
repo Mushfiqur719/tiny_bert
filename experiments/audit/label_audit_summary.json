@@ -1,0 +1,11 @@
+{
+  "method": "oof_confident_threshold>=0.88",
+  "prune_threshold": 0.88,
+  "total_train_rows": 12044,
+  "flagged_noisy_rows": 771,
+  "flagged_pct": 6.4,
+  "given_not_cb_predicted_cb": 376,
+  "given_cb_predicted_not_cb": 395,
+  "clean_train_rows_remaining": 11273,
+  "dedup_train_pruned_rows": 614
+}

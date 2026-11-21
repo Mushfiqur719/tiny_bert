@@ -36,14 +36,19 @@ from src.data.split import apply_splits, load_splits
 from src.evaluation.metrics import (
     compute_classification_metrics,
     compute_metrics_from_eval_pred,
+    find_optimal_threshold,
+    predict_with_threshold,
 )
 from src.models.distillation import (
     DistillationDataset,
+    IntermediateAlignmentModule,
     KnowledgeDistillationLoss,
     load_teacher_soft_labels,
 )
 from src.models.student import (
+    _select_teacher_layers,
     create_student_config,
+    init_from_small_pretrained,
     init_from_teacher,
     init_random,
     save_student_checkpoint,
@@ -53,6 +58,7 @@ from src.training.dataset import BanglaHeadlineDataset, prepare_datasets
 from src.training.train_teacher import (
     MetricLoggingCallback,
     calculate_balanced_class_weights,
+    compute_rdrop_kl,
 )
 from src.utils.logging_utils import ExperimentLogger
 from src.utils.seeding import seed_everything
@@ -61,16 +67,39 @@ logger = logging.getLogger(__name__)
 
 
 class DistillationTrainer(Trainer):
-    """Custom Trainer implementing Hinton Knowledge Distillation Loss with precomputed teacher logits."""
+    """Custom Trainer implementing Hinton KD Loss + optional Intermediate Hidden & Attention KD."""
 
     def __init__(
         self,
         kd_loss_fn: KnowledgeDistillationLoss,
+        teacher_model: Optional[nn.Module] = None,
+        inter_align_module: Optional[IntermediateAlignmentModule] = None,
+        rdrop_alpha: float = 0.0,
         *args: Any,
         **kwargs: Any,
     ) -> None:
         super().__init__(*args, **kwargs)
         self.kd_loss_fn = kd_loss_fn
+        self.teacher_model = teacher_model
+        self.inter_align_module = inter_align_module
+        self.rdrop_alpha = float(rdrop_alpha)
+        if self.teacher_model is not None:
+            self.teacher_model.eval()
+            for p in self.teacher_model.parameters():
+                p.requires_grad = False
+
+    def create_optimizer(self):
+        optimizer = super().create_optimizer()
+        if self.inter_align_module is not None:
+            device = next(self.model.parameters()).device
+            self.inter_align_module.to(device)
+            existing_params = {id(p) for group in optimizer.param_groups for p in group["params"]}
+            extra_params = [p for p in self.inter_align_module.parameters() if id(p) not in existing_params]
+            if extra_params:
+                optimizer.add_param_group(
+                    {"params": extra_params, "lr": self.args.learning_rate, "weight_decay": 0.0}
+                )
+        return optimizer
 
     def compute_loss(
         self,
@@ -83,18 +112,70 @@ class DistillationTrainer(Trainer):
         labels = inputs.get("labels")
         teacher_logits = inputs.get("teacher_logits")
 
+        use_inter = (
+            model.training
+            and self.teacher_model is not None
+            and self.inter_align_module is not None
+        )
+        need_attns = use_inter and self.inter_align_module.attention_loss_weight > 0.0
+        need_hidden = use_inter and self.inter_align_module.hidden_loss_weight > 0.0
+
         # Forward pass on student
         student_inputs = {k: v for k, v in inputs.items() if k != "teacher_logits"}
+        if use_inter:
+            student_inputs["output_hidden_states"] = need_hidden
+            student_inputs["output_attentions"] = need_attns
+
         outputs = model(**student_inputs)
         student_logits = outputs.get("logits") if isinstance(outputs, dict) else outputs[0]
 
-        if teacher_logits is not None and model.training:
+        if model.training:
+            if teacher_logits is None:
+                raise ValueError(
+                    "teacher_logits is missing from the training batch! "
+                    "Ensure TrainingArguments(remove_unused_columns=False) is set."
+                )
             # Training mode: Apply Knowledge Distillation Loss
             loss, _ = self.kd_loss_fn(
                 student_logits=student_logits,
                 teacher_logits=teacher_logits,
                 labels=labels,
             )
+            if self.rdrop_alpha > 0.0:
+                outputs2 = model(**student_inputs)
+                student_logits2 = outputs2.get("logits") if isinstance(outputs2, dict) else outputs2[0]
+                loss2, _ = self.kd_loss_fn(
+                    student_logits=student_logits2,
+                    teacher_logits=teacher_logits,
+                    labels=labels,
+                )
+                rdrop_kl = compute_rdrop_kl(student_logits, student_logits2)
+                loss = 0.5 * (loss + loss2) + self.rdrop_alpha * rdrop_kl
+            if use_inter:
+                dev = student_logits.device
+                if next(self.teacher_model.parameters()).device != dev:
+                    self.teacher_model.to(dev)
+                if next(self.inter_align_module.parameters()).device != dev:
+                    self.inter_align_module.to(dev)
+                with torch.no_grad():
+                    t_inputs = {
+                        "input_ids": inputs["input_ids"],
+                        "attention_mask": inputs.get("attention_mask"),
+                        "output_hidden_states": need_hidden,
+                        "output_attentions": need_attns,
+                    }
+                    if "token_type_ids" in inputs:
+                        t_inputs["token_type_ids"] = inputs["token_type_ids"]
+                    t_out = self.teacher_model(**t_inputs)
+
+                inter_loss, _ = self.inter_align_module(
+                    student_hidden_states=getattr(outputs, "hidden_states", None),
+                    teacher_hidden_states=getattr(t_out, "hidden_states", None),
+                    student_attentions=getattr(outputs, "attentions", None),
+                    teacher_attentions=getattr(t_out, "attentions", None),
+                    attention_mask=inputs.get("attention_mask"),
+                )
+                loss = loss + inter_loss
         else:
             # Eval mode: Standard Cross-Entropy on ground-truth labels
             if labels is not None:
@@ -155,10 +236,21 @@ def train_student_distill(
     splits = load_splits(cfg)
     train_df, val_df, test_df = apply_splits(labeled_df, splits)
 
-    # 2. Class weights & Soft labels
+    # 2. Class weights & Soft labels (with automatic index alignment for clean/dedup train splits)
     class_weights = calculate_balanced_class_weights(train_df[cfg.data.label_col].tolist())
     soft_data = load_teacher_soft_labels(soft_labels_path)
     teacher_train_logits = soft_data["logits"]
+    current_train_indices = splits["labeled"]["train"]
+    saved_train_indices = soft_data.get("headline_indices")
+    if len(teacher_train_logits) != len(train_df) and saved_train_indices is not None:
+        idx_to_pos = {int(orig_idx): pos for pos, orig_idx in enumerate(saved_train_indices)}
+        aligned_positions = [idx_to_pos[int(i)] for i in current_train_indices]
+        teacher_train_logits = teacher_train_logits[aligned_positions]
+        logger.info(
+            "Aligned teacher soft labels to filtered train split (%d -> %d samples).",
+            len(saved_train_indices),
+            len(teacher_train_logits),
+        )
 
     # 3. Tokenizer & Datasets
     tokenizer_name = str(cfg.model.teacher_model_name)
@@ -188,12 +280,18 @@ def train_student_distill(
     )
 
     # 4. Student Model Initialization
+    num_hidden_layers = int(getattr(cfg.model, "num_hidden_layers", 4))
+    hidden_size = int(getattr(cfg.model, "hidden_size", 256))
+    num_attention_heads = int(getattr(cfg.model, "num_attention_heads", 4))
+    intermediate_size = int(getattr(cfg.model, "intermediate_size", 1024))
+    layer_selection = str(getattr(cfg.model, "layer_selection", "strided"))
+
     student_cfg = create_student_config(
         vocab_size=tokenizer.vocab_size,
-        hidden_size=256,
-        num_hidden_layers=4,
-        num_attention_heads=4,
-        intermediate_size=1024,
+        hidden_size=hidden_size,
+        num_hidden_layers=num_hidden_layers,
+        num_attention_heads=num_attention_heads,
+        intermediate_size=intermediate_size,
         num_labels=int(cfg.data.num_labels),
         dropout=float(cfg.model.dropout),
     )
@@ -204,16 +302,66 @@ def train_student_distill(
         teacher_path = "experiments/teacher"
         logger.info("Loading fine-tuned Teacher model from '%s' for initialization...", teacher_path)
         teacher_model = AutoModelForSequenceClassification.from_pretrained(teacher_path)
-        model = init_from_teacher(teacher_model, student_cfg, strategy="projection")
+        model = init_from_teacher(
+            teacher_model,
+            student_cfg,
+            strategy="projection",
+            layer_selection=layer_selection,
+        )
+    elif init_type == "small_pretrained":
+        pretrained_small = str(getattr(cfg.model, "pretrained_small_name", "csebuetnlp/banglabert_small"))
+        model = init_from_small_pretrained(
+            pretrained_name=pretrained_small,
+            num_hidden_layers=num_hidden_layers,
+            num_labels=int(cfg.data.num_labels),
+            dropout=float(cfg.model.dropout),
+            layer_selection=layer_selection,
+        )
     else:
-        raise ValueError(f"Unknown init_type: '{init_type}'. Use 'random' or 'teacher_init'.")
+        raise ValueError(
+            f"Unknown init_type: '{init_type}'. Use 'random', 'teacher_init', or 'small_pretrained'."
+        )
 
-    # 5. KD Loss Module
+    # 5. KD Loss Module & Optional Intermediate-Layer Alignment
     kd_loss_fn = KnowledgeDistillationLoss(
         temperature=T,
         alpha=a,
         class_weights=class_weights,
     )
+
+    use_inter_kd = bool(getattr(cfg.distillation, "intermediate_layers", False))
+    hidden_loss_weight = float(getattr(cfg.distillation, "hidden_loss_weight", 0.0))
+    attention_loss_weight = float(getattr(cfg.distillation, "attention_loss_weight", 0.0))
+
+    online_teacher = None
+    inter_align_module = None
+    if use_inter_kd and (hidden_loss_weight > 0.0 or attention_loss_weight > 0.0):
+        teacher_path = "experiments/teacher"
+        logger.info(
+            "Intermediate-layer KD enabled (hidden_w=%.2f, attn_w=%.2f). Loading frozen teacher from '%s'...",
+            hidden_loss_weight,
+            attention_loss_weight,
+            teacher_path,
+        )
+        if attention_loss_weight > 0.0:
+            model.config._attn_implementation = "eager"
+            online_teacher = AutoModelForSequenceClassification.from_pretrained(
+                teacher_path, attn_implementation="eager"
+            )
+        else:
+            online_teacher = AutoModelForSequenceClassification.from_pretrained(teacher_path)
+        t_layers = _select_teacher_layers(
+            num_teacher_layers=online_teacher.config.num_hidden_layers,
+            num_student_layers=model.config.num_hidden_layers,
+            layer_selection=layer_selection,
+        )
+        inter_align_module = IntermediateAlignmentModule(
+            student_hidden_size=model.config.hidden_size,
+            teacher_hidden_size=online_teacher.config.hidden_size,
+            teacher_layer_indices=t_layers,
+            hidden_loss_weight=hidden_loss_weight,
+            attention_loss_weight=attention_loss_weight,
+        )
 
     # 6. Training Arguments
     use_fp16 = bool(cfg.training.fp16) and torch.cuda.is_available()
@@ -221,6 +369,7 @@ def train_student_distill(
     epochs = float(cfg.training.epochs)
     total_steps = int((len(train_ds) // batch_size + (1 if len(train_ds) % batch_size != 0 else 0)) * epochs)
     warmup_steps = int(total_steps * float(cfg.training.warmup_ratio))
+    lr_scheduler_type = str(getattr(cfg.training, "lr_scheduler_type", "cosine"))
 
     training_args = TrainingArguments(
         output_dir=str(exp.checkpoints_dir),
@@ -228,6 +377,7 @@ def train_student_distill(
         per_device_train_batch_size=batch_size,
         per_device_eval_batch_size=batch_size * 2,
         learning_rate=float(cfg.training.lr),
+        lr_scheduler_type=lr_scheduler_type,
         weight_decay=float(cfg.training.weight_decay),
         warmup_steps=warmup_steps,
         max_grad_norm=float(cfg.training.gradient_clip),
@@ -238,6 +388,7 @@ def train_student_distill(
         greater_is_better=bool(cfg.training.greater_is_better),
         fp16=use_fp16,
         dataloader_num_workers=int(cfg.training.dataloader_num_workers),
+        remove_unused_columns=False,
         save_total_limit=2,
         logging_strategy="epoch",
         seed=effective_seed,
@@ -250,6 +401,8 @@ def train_student_distill(
         MetricLoggingCallback(exp_logger=exp),
     ]
 
+    rdrop_alpha = float(getattr(cfg.training, "rdrop_alpha", 0.0))
+
     trainer = DistillationTrainer(
         model=model,
         args=training_args,
@@ -258,6 +411,9 @@ def train_student_distill(
         compute_metrics=compute_metrics_from_eval_pred,
         callbacks=callbacks,
         kd_loss_fn=kd_loss_fn,
+        teacher_model=online_teacher,
+        inter_align_module=inter_align_module,
+        rdrop_alpha=rdrop_alpha,
     )
 
     # 7. Train
@@ -270,18 +426,44 @@ def train_student_distill(
     tokenizer.save_pretrained(str(best_ckpt_dir))
     save_student_checkpoint(trainer.model, tokenizer, exp.run_dir)
 
-    # 9. Test Set Evaluation (EXACTLY ONCE)
+    # 9. Tune Decision Threshold on Validation Split (Test set remains untouched)
+    val_prediction_output = trainer.predict(val_ds)
+    val_logits = val_prediction_output.predictions
+    if isinstance(val_logits, tuple):
+        val_logits = val_logits[0]
+    optimal_threshold, best_val_f1_cal = find_optimal_threshold(
+        logits=val_logits,
+        y_true=val_prediction_output.label_ids,
+    )
+    logger.info(
+        "Validation threshold calibration: optimal_threshold=%.2f (Val Macro-F1: %.4f)",
+        optimal_threshold,
+        best_val_f1_cal,
+    )
+
+    # 10. Test Set Evaluation (EXACTLY ONCE)
     logger.info("Evaluating Distilled Student on held-out test split (%d samples)...", len(test_ds))
     test_prediction_output = trainer.predict(test_ds)
     test_logits = test_prediction_output.predictions
     if isinstance(test_logits, tuple):
         test_logits = test_logits[0]
     test_preds = np.argmax(test_logits, axis=1)
+    test_preds_cal = predict_with_threshold(test_logits, threshold=optimal_threshold)
     test_labels = test_prediction_output.label_ids
 
+    # Persist logits so bootstrap CIs / McNemar can be computed later without re-running
+    np.save(exp.run_dir / "test_logits.npy", test_logits)
+    np.save(exp.run_dir / "test_labels.npy", test_labels)
+    np.save(exp.run_dir / "val_logits.npy", val_logits)
+    np.save(exp.run_dir / "val_labels.npy", val_prediction_output.label_ids)
+
     test_metrics = compute_classification_metrics(y_pred=test_preds, y_true=test_labels)
+    test_metrics_cal = compute_classification_metrics(y_pred=test_preds_cal, y_true=test_labels)
+    test_metrics["optimal_threshold"] = optimal_threshold
+    test_metrics["calibrated"] = test_metrics_cal
+
     logger.info("=" * 60)
-    logger.info("STUDENT DISTILLED (%s) FINAL TEST SET METRICS:", init_type.upper())
+    logger.info("STUDENT DISTILLED (%s) FINAL TEST SET METRICS (Threshold=0.50):", init_type.upper())
     logger.info("Temperature:          %.2f | Alpha: %.2f", T, a)
     logger.info("Accuracy:             %.4f", test_metrics["accuracy"])
     logger.info("F1 (Macro):           %.4f", test_metrics["f1_macro"])
@@ -290,9 +472,17 @@ def train_student_distill(
     logger.info("F1 (Clickbait):       %.4f", test_metrics["f1_clickbait"])
     logger.info("F1 (Not-Clickbait):   %.4f", test_metrics["f1_not_clickbait"])
     logger.info("Confusion Matrix:     %s", test_metrics["confusion_matrix"])
+    logger.info("-" * 60)
+    logger.info("CALIBRATED TEST METRICS (Val-Tuned Threshold=%.2f):", optimal_threshold)
+    logger.info("Accuracy (Cal):       %.4f", test_metrics_cal["accuracy"])
+    logger.info("F1 Macro (Cal):       %.4f", test_metrics_cal["f1_macro"])
+    logger.info("F1 Clickbait (Cal):   %.4f", test_metrics_cal["f1_clickbait"])
+    logger.info("Confusion Matrix:     %s", test_metrics_cal["confusion_matrix"])
     logger.info("=" * 60)
 
-    scalar_test_metrics = {k: v for k, v in test_metrics.items() if k != "confusion_matrix"}
+    scalar_test_metrics = {
+        k: v for k, v in test_metrics.items() if isinstance(v, (int, float))
+    }
     exp.log_metrics({"split": "test", "temperature": T, "alpha": a, **scalar_test_metrics})
 
     test_metrics_path = exp.run_dir / "metrics.json"

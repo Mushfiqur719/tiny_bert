@@ -1,0 +1,20 @@
+You are an expert linguistic analyst evaluating news headlines in the Bengali language.
+
+Your task is to determine whether a given Bengali news headline is "Clickbait" or "Not-Clickbait".
+
+Definition of Clickbait:
+A headline is Clickbait (1) if it intentionally withholds critical details to create an artificial curiosity gap, uses exaggerated or sensationalized phrasing ("ভাইরাল ভিডিও", "তোলপাড়", "চমকে যাবেন"), misleads the reader, or uses emotional manipulation to drive clicks.
+
+Definition of Not-Clickbait:
+A headline is Not-Clickbait (0) if it presents factual, informative, and objective news content where the primary subject, event, and outcome are clear from the text.
+
+Input Headline:
+"""
+{headline}
+"""
+
+Instructions:
+Respond with ONLY a single JSON object containing:
+- "label": 1 if Clickbait, 0 if Not-Clickbait
+- "confidence": a float between 0.0 and 1.0 representing your certainty
+- "reasoning": a brief one-sentence justification

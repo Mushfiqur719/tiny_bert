@@ -1,0 +1,184 @@
+{
+  "summary": {
+    "temperature_cal": 1.7375,
+    "aurc": 0.10268,
+    "max_coverage_at_90pct_acc": 61.49,
+    "max_coverage_at_92pct_acc": 36.52,
+    "max_coverage_at_95pct_acc": 7.24,
+    "peak_selective_acc_pct": 97.5
+  },
+  "selective_table": [
+    {
+      "Coverage (%)": 100.0,
+      "Retained Samples": 1506,
+      "Confidence Threshold": 0.5005,
+      "Selective Accuracy (%)": 80.54,
+      "Selective Macro-F1": 0.7895,
+      "Selective Clickbait-F1": 0.7314,
+      "Error Risk (%)": 19.46
+    },
+    {
+      "Coverage (%)": 90.0,
+      "Retained Samples": 1355,
+      "Confidence Threshold": 0.6526,
+      "Selective Accuracy (%)": 83.69,
+      "Selective Macro-F1": 0.8199,
+      "Selective Clickbait-F1": 0.7646,
+      "Error Risk (%)": 16.31
+    },
+    {
+      "Coverage (%)": 85.0,
+      "Retained Samples": 1280,
+      "Confidence Threshold": 0.7081,
+      "Selective Accuracy (%)": 84.92,
+      "Selective Macro-F1": 0.8321,
+      "Selective Clickbait-F1": 0.7784,
+      "Error Risk (%)": 15.08
+    },
+    {
+      "Coverage (%)": 80.0,
+      "Retained Samples": 1205,
+      "Confidence Threshold": 0.7517,
+      "Selective Accuracy (%)": 85.98,
+      "Selective Macro-F1": 0.8441,
+      "Selective Clickbait-F1": 0.7947,
+      "Error Risk (%)": 14.02
+    },
+    {
+      "Coverage (%)": 75.0,
+      "Retained Samples": 1130,
+      "Confidence Threshold": 0.7796,
+      "Selective Accuracy (%)": 87.26,
+      "Selective Macro-F1": 0.8571,
+      "Selective Clickbait-F1": 0.81,
+      "Error Risk (%)": 12.74
+    },
+    {
+      "Coverage (%)": 70.0,
+      "Retained Samples": 1054,
+      "Confidence Threshold": 0.8058,
+      "Selective Accuracy (%)": 88.33,
+      "Selective Macro-F1": 0.8674,
+      "Selective Clickbait-F1": 0.8215,
+      "Error Risk (%)": 11.67
+    },
+    {
+      "Coverage (%)": 60.0,
+      "Retained Samples": 904,
+      "Confidence Threshold": 0.8376,
+      "Selective Accuracy (%)": 90.38,
+      "Selective Macro-F1": 0.8905,
+      "Selective Clickbait-F1": 0.8523,
+      "Error Risk (%)": 9.62
+    },
+    {
+      "Coverage (%)": 50.0,
+      "Retained Samples": 753,
+      "Confidence Threshold": 0.8597,
+      "Selective Accuracy (%)": 90.84,
+      "Selective Macro-F1": 0.8966,
+      "Selective Clickbait-F1": 0.8617,
+      "Error Risk (%)": 9.16
+    },
+    {
+      "Coverage (%)": 40.0,
+      "Retained Samples": 602,
+      "Confidence Threshold": 0.8701,
+      "Selective Accuracy (%)": 91.69,
+      "Selective Macro-F1": 0.9101,
+      "Selective Clickbait-F1": 0.8853,
+      "Error Risk (%)": 8.31
+    },
+    {
+      "Coverage (%)": 30.0,
+      "Retained Samples": 452,
+      "Confidence Threshold": 0.8774,
+      "Selective Accuracy (%)": 92.92,
+      "Selective Macro-F1": 0.9283,
+      "Selective Clickbait-F1": 0.92,
+      "Error Risk (%)": 7.08
+    }
+  ],
+  "cascade_table": [
+    {
+      "Edge Coverage (%)": 100.0,
+      "Cloud Deferral (%)": 0.0,
+      "Cloud Calls Saved (%)": 100.0,
+      "System Accuracy (%)": 80.54,
+      "System Macro-F1": 0.7895,
+      "System Clickbait-F1": 0.7314,
+      "Amortized Latency (Edge+GPU ms)": 4.0,
+      "Amortized Latency (Edge+CPU ms)": 4.0
+    },
+    {
+      "Edge Coverage (%)": 90.0,
+      "Cloud Deferral (%)": 10.0,
+      "Cloud Calls Saved (%)": 90.0,
+      "System Accuracy (%)": 82.27,
+      "System Macro-F1": 0.8054,
+      "System Clickbait-F1": 0.7474,
+      "Amortized Latency (Edge+GPU ms)": 5.26,
+      "Amortized Latency (Edge+CPU ms)": 16.34
+    },
+    {
+      "Edge Coverage (%)": 80.0,
+      "Cloud Deferral (%)": 20.0,
+      "Cloud Calls Saved (%)": 80.0,
+      "System Accuracy (%)": 83.2,
+      "System Macro-F1": 0.8145,
+      "System Clickbait-F1": 0.7574,
+      "Amortized Latency (Edge+GPU ms)": 6.52,
+      "Amortized Latency (Edge+CPU ms)": 28.67
+    },
+    {
+      "Edge Coverage (%)": 75.0,
+      "Cloud Deferral (%)": 25.0,
+      "Cloud Calls Saved (%)": 75.0,
+      "System Accuracy (%)": 83.13,
+      "System Macro-F1": 0.8133,
+      "System Clickbait-F1": 0.7553,
+      "Amortized Latency (Edge+GPU ms)": 7.15,
+      "Amortized Latency (Edge+CPU ms)": 34.84
+    },
+    {
+      "Edge Coverage (%)": 70.0,
+      "Cloud Deferral (%)": 30.0,
+      "Cloud Calls Saved (%)": 70.0,
+      "System Accuracy (%)": 83.0,
+      "System Macro-F1": 0.8115,
+      "System Clickbait-F1": 0.7524,
+      "Amortized Latency (Edge+GPU ms)": 7.78,
+      "Amortized Latency (Edge+CPU ms)": 41.01
+    },
+    {
+      "Edge Coverage (%)": 60.0,
+      "Cloud Deferral (%)": 40.0,
+      "Cloud Calls Saved (%)": 60.0,
+      "System Accuracy (%)": 83.6,
+      "System Macro-F1": 0.8177,
+      "System Clickbait-F1": 0.76,
+      "Amortized Latency (Edge+GPU ms)": 9.04,
+      "Amortized Latency (Edge+CPU ms)": 53.34
+    },
+    {
+      "Edge Coverage (%)": 50.0,
+      "Cloud Deferral (%)": 50.0,
+      "Cloud Calls Saved (%)": 50.0,
+      "System Accuracy (%)": 83.2,
+      "System Macro-F1": 0.8131,
+      "System Clickbait-F1": 0.7537,
+      "Amortized Latency (Edge+GPU ms)": 10.3,
+      "Amortized Latency (Edge+CPU ms)": 65.68
+    },
+    {
+      "Edge Coverage (%)": 0.0,
+      "Cloud Deferral (%)": 100.0,
+      "Cloud Calls Saved (%)": 0.0,
+      "System Accuracy (%)": 83.73,
+      "System Macro-F1": 0.8174,
+      "System Clickbait-F1": 0.7572,
+      "Amortized Latency (Edge+GPU ms)": 12.6,
+      "Amortized Latency (Edge+CPU ms)": 123.36
+    }
+  ]
+}

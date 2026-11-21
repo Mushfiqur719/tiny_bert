@@ -1,0 +1,11 @@
+{
+  "run_name": "teacher_base_tb",
+  "model_id": "csebuetnlp/banglabert",
+  "text_mode": "title_body",
+  "lr": 2e-05,
+  "epochs": 6,
+  "batch_size": 16,
+  "max_length": 256,
+  "seed": 2026,
+  "params": 110618882
+}

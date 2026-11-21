@@ -1,0 +1,2 @@
+timestamp,epoch,step,split,val_loss,val_accuracy,val_f1_macro,val_f1_clickbait,val_f1_not_clickbait
+2026-11-20T09:16:58.384728+00:00,1,377,val,0.4737,0.7975,0.78,0.7179,0.8421

@@ -42,7 +42,7 @@ RUN_SPECS = [
         "dir": "experiments/teacher",
         "params": "110.6M",
         "type": "Teacher (12L / 768H)",
-        "init": "Pre-trained",
+        "init": "Pre-trained (Base)",
         "training": "Supervised CE",
     },
     {
@@ -61,25 +61,61 @@ RUN_SPECS = [
         "params": "11.55M",
         "type": "Student (4L / 256H)",
         "init": "Random Gaussian",
-        "training": "KD Loss (T=2.0, a=0.1)",
+        "training": "KD Loss (T=4.0, a=0.1)",
     },
     {
         "id": "student_teacher_init_baseline",
-        "name": "Student: Teacher Init + Supervised",
+        "name": "Student: Teacher-PCA Init + Supervised",
         "dir": "experiments/student_teacher_init_baseline",
         "params": "11.55M",
         "type": "Student (4L / 256H)",
-        "init": "Teacher Projection",
+        "init": "Teacher PCA Projection",
         "training": "Supervised CE",
     },
     {
         "id": "student_teacher_init_distilled",
-        "name": "Student: Teacher Init + Distilled",
+        "name": "Student: Teacher-PCA Init + Distilled",
         "dir": "experiments/student_teacher_init_distilled",
         "params": "11.55M",
         "type": "Student (4L / 256H)",
-        "init": "Teacher Projection",
-        "training": "KD Loss (T=2.0, a=0.1)",
+        "init": "Teacher PCA Projection",
+        "training": "KD Loss (T=4.0, a=0.1)",
+    },
+    {
+        "id": "student_small_pretrained_baseline",
+        "name": "Student: Small-Pretrained (4L) + Supervised",
+        "dir": "experiments/student_small_pretrained_baseline",
+        "params": "7.42M",
+        "type": "Student (4L / 256H, 128E)",
+        "init": "Pre-trained Strided (4L)",
+        "training": "Supervised CE",
+    },
+    {
+        "id": "student_small_pretrained_distilled",
+        "name": "TinyBanglaBERT-4L (Small-Pretrained + KD)",
+        "dir": "experiments/student_small_pretrained_distilled",
+        "params": "7.42M",
+        "type": "Student (4L / 256H, 128E)",
+        "init": "Pre-trained Strided (4L)",
+        "training": "KD Loss (T=4.0, a=0.5)",
+    },
+    {
+        "id": "student_small_6l_distilled",
+        "name": "TinyBanglaBERT-6L (Small-Pretrained 6L + KD)",
+        "dir": "experiments/student_small_6l_distilled",
+        "params": "9.00M",
+        "type": "Student (6L / 256H, 128E)",
+        "init": "Pre-trained Strided (6L)",
+        "training": "KD Loss (T=4.0, a=0.5)",
+    },
+    {
+        "id": "student_small_12l_distilled",
+        "name": "BanglaBERT-Small-12L (Full 12L + KD)",
+        "dir": "experiments/student_small_12l_distilled",
+        "params": "13.73M",
+        "type": "Compact 12L (12L / 256H, 128E)",
+        "init": "Pre-trained Full (12L)",
+        "training": "KD Loss (T=4.0, a=0.5)",
     },
 ]
 
@@ -157,15 +193,12 @@ def plot_f1_comparison(df: pd.DataFrame, output_path: str | Path = "experiments/
     plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
     fig, ax = plt.subplots(figsize=(10, 6), dpi=300)
 
-    names = [
-        "Teacher\n(BanglaBERT)",
-        "Student\n(Rand + Base)",
-        "Student\n(Rand + Distill)",
-        "Student\n(Tr-Init + Base)",
-        "Student\n(Tr-Init + Distill)",
-    ]
+    names = [r["id"].replace("student_", "").replace("_", "\n") for r in RUN_SPECS if (Path(r["dir"]) / "metrics.json").exists()]
+    if len(names) != len(df):
+        names = df["Model / Configuration"].tolist()
     f1_scores = df["Test Macro F1"].tolist()
-    colors = ["#2b5c8f", "#7f8c8d", "#3498db", "#e67e22", "#27ae60"]
+    palette = ["#2b5c8f", "#7f8c8d", "#3498db", "#e67e22", "#d35400", "#8e44ad", "#27ae60", "#16a085", "#2c3e50"]
+    colors = palette[: len(f1_scores)]
 
     bars = ax.bar(names, f1_scores, color=colors, width=0.55, edgecolor="black", linewidth=0.8)
 
@@ -218,8 +251,16 @@ def run_ablation_analysis(
     plot_path = out_path / "ablation_f1_comparison.png"
     plot_f1_comparison(df, plot_path)
 
-    # Select best student based on Validation Macro-F1
-    student_df = df[df["_run_id"] != "teacher"].copy()
+    # Select best 4-layer student based on Validation Macro-F1
+    four_layer_ids = {
+        "student_random_baseline",
+        "student_random_distilled",
+        "student_teacher_init_baseline",
+        "student_teacher_init_distilled",
+        "student_small_pretrained_baseline",
+        "student_small_pretrained_distilled",
+    }
+    student_df = df[df["_run_id"].isin(four_layer_ids)].copy()
     best_student_row = student_df.loc[student_df["Val Macro F1"].idxmax()]
     best_student_id = best_student_row["_run_id"]
     best_student_dir = Path(best_student_row["_run_dir"])

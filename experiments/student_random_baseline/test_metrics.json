@@ -1,22 +1,45 @@
 {
-  "accuracy": 0.7463,
-  "f1_macro": 0.7313,
-  "precision_macro": 0.7272,
-  "recall_macro": 0.7432,
-  "f1_not_clickbait": 0.7948,
-  "precision_not_clickbait": 0.8409,
-  "recall_not_clickbait": 0.7536,
-  "f1_clickbait": 0.6678,
-  "precision_clickbait": 0.6134,
-  "recall_clickbait": 0.7328,
+  "accuracy": 0.7656,
+  "f1_macro": 0.739,
+  "precision_macro": 0.7418,
+  "recall_macro": 0.7366,
+  "f1_not_clickbait": 0.8223,
+  "precision_not_clickbait": 0.8129,
+  "recall_not_clickbait": 0.832,
+  "f1_clickbait": 0.6556,
+  "precision_clickbait": 0.6707,
+  "recall_clickbait": 0.6412,
   "confusion_matrix": [
     [
-      740,
-      242
+      817,
+      165
     ],
     [
-      140,
-      384
+      188,
+      336
     ]
-  ]
+  ],
+  "optimal_threshold": 0.64,
+  "calibrated": {
+    "accuracy": 0.7636,
+    "f1_macro": 0.733,
+    "precision_macro": 0.7403,
+    "recall_macro": 0.728,
+    "f1_not_clickbait": 0.8234,
+    "precision_not_clickbait": 0.8027,
+    "recall_not_clickbait": 0.8452,
+    "f1_clickbait": 0.6426,
+    "precision_clickbait": 0.678,
+    "recall_clickbait": 0.6107,
+    "confusion_matrix": [
+      [
+        830,
+        152
+      ],
+      [
+        204,
+        320
+      ]
+    ]
+  }
 }

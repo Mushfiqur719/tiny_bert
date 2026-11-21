@@ -1,0 +1,16 @@
+{
+  "run_name": "baseline_small_12l_ce_uw",
+  "dataset": "baitbuster",
+  "model_id": "csebuetnlp/banglabert_small",
+  "text_mode": "title",
+  "unweighted": true,
+  "label_smoothing": 0.05,
+  "rdrop_alpha": 0.0,
+  "llrd_factor": 0.9,
+  "lr": 5e-05,
+  "epochs": 8,
+  "batch_size": 32,
+  "max_length": 64,
+  "seed": 42,
+  "params": 13738498
+}

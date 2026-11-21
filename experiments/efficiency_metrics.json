@@ -2,84 +2,96 @@
   "teacher_pytorch_cpu": {
     "device": "cpu",
     "n_iterations": 200,
-    "mean_latency_ms": 116.825,
-    "median_latency_ms": 114.792,
-    "p90_latency_ms": 123.485,
-    "p95_latency_ms": 125.457,
-    "min_latency_ms": 108.544,
-    "max_latency_ms": 182.247,
-    "throughput_fps": 8.6,
+    "mean_latency_ms": 123.362,
+    "median_latency_ms": 119.308,
+    "p90_latency_ms": 138.129,
+    "p95_latency_ms": 152.847,
+    "min_latency_ms": 106.298,
+    "max_latency_ms": 202.55,
+    "throughput_fps": 8.1,
     "peak_memory_mb": 0.27
   },
   "teacher_pytorch_gpu": {
     "device": "cuda",
     "n_iterations": 200,
-    "mean_latency_ms": 13.789,
-    "median_latency_ms": 12.748,
-    "p90_latency_ms": 18.445,
-    "p95_latency_ms": 20.04,
-    "min_latency_ms": 8.562,
-    "max_latency_ms": 24.072,
-    "throughput_fps": 72.5,
+    "mean_latency_ms": 12.599,
+    "median_latency_ms": 12.602,
+    "p90_latency_ms": 13.703,
+    "p95_latency_ms": 14.064,
+    "min_latency_ms": 9.232,
+    "max_latency_ms": 15.791,
+    "throughput_fps": 79.4,
     "peak_memory_mb": 437.0
   },
   "student_pytorch_cpu": {
     "device": "cpu",
     "n_iterations": 200,
-    "mean_latency_ms": 9.978,
-    "median_latency_ms": 9.507,
-    "p90_latency_ms": 12.494,
-    "p95_latency_ms": 13.679,
-    "min_latency_ms": 7.046,
-    "max_latency_ms": 17.395,
-    "throughput_fps": 100.2,
+    "mean_latency_ms": 11.735,
+    "median_latency_ms": 11.276,
+    "p90_latency_ms": 14.411,
+    "p95_latency_ms": 15.636,
+    "min_latency_ms": 8.422,
+    "max_latency_ms": 20.711,
+    "throughput_fps": 85.2,
     "peak_memory_mb": 0.27
   },
   "student_pytorch_gpu": {
     "device": "cuda",
     "n_iterations": 200,
-    "mean_latency_ms": 5.948,
-    "median_latency_ms": 5.078,
-    "p90_latency_ms": 8.742,
-    "p95_latency_ms": 9.745,
-    "min_latency_ms": 3.036,
-    "max_latency_ms": 14.335,
-    "throughput_fps": 168.1,
-    "peak_memory_mb": 478.07
+    "mean_latency_ms": 5.503,
+    "median_latency_ms": 4.817,
+    "p90_latency_ms": 7.985,
+    "p95_latency_ms": 8.387,
+    "min_latency_ms": 3.305,
+    "max_latency_ms": 11.641,
+    "throughput_fps": 181.7,
+    "peak_memory_mb": 461.94
   },
   "student_onnx_cpu": {
     "device": "cpu (onnxruntime)",
     "n_iterations": 200,
-    "mean_latency_ms": 5.149,
-    "median_latency_ms": 5.116,
-    "p90_latency_ms": 5.768,
-    "p95_latency_ms": 6.095,
-    "min_latency_ms": 3.284,
-    "max_latency_ms": 6.996,
-    "throughput_fps": 194.2,
-    "peak_memory_mb": 0.03
+    "mean_latency_ms": 9.204,
+    "median_latency_ms": 7.934,
+    "p90_latency_ms": 12.963,
+    "p95_latency_ms": 15.123,
+    "min_latency_ms": 4.705,
+    "max_latency_ms": 43.71,
+    "throughput_fps": 108.6,
+    "peak_memory_mb": 0.02
   },
   "student_int8_cpu": {
     "device": "cpu (onnxruntime)",
     "n_iterations": 200,
-    "mean_latency_ms": 4.112,
-    "median_latency_ms": 3.823,
-    "p90_latency_ms": 5.212,
-    "p95_latency_ms": 5.592,
-    "min_latency_ms": 3.171,
-    "max_latency_ms": 7.224,
-    "throughput_fps": 243.2,
+    "mean_latency_ms": 4.001,
+    "median_latency_ms": 3.889,
+    "p90_latency_ms": 4.584,
+    "p95_latency_ms": 5.137,
+    "min_latency_ms": 2.992,
+    "max_latency_ms": 6.407,
+    "throughput_fps": 249.9,
     "peak_memory_mb": 0.02
+  },
+  "test_set_accuracy_verification": {
+    "onnx_fp32": {
+      "accuracy": 0.8054,
+      "f1_macro": 0.7895,
+      "f1_clickbait": 0.7314
+    },
+    "onnx_int8": {
+      "accuracy": 0.8081,
+      "f1_macro": 0.7917,
+      "f1_clickbait": 0.7331
+    }
   },
   "parameters": {
     "teacher": 110618882,
-    "student": 11549442,
-    "param_compression_ratio": 9.58
+    "student": 7420418,
+    "param_compression_ratio": 14.91
   },
   "disk_size_mb": {
-    "teacher_fp32": 422.23,
-    "student_fp32": 44.07,
-    "student_onnx_fp32": 44.15,
-    "student_onnx_int8": 11.22
+    "teacher_fp32": 422.76,
+    "student_fp32": 28.31,
+    "student_onnx_fp32": 28.4,
+    "student_onnx_int8": 7.29
   }
 }

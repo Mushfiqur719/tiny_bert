@@ -1,5 +1,5 @@
 Model Variant,Runtime / Format,Parameters,Disk Size (MB),CPU Latency (Mean ± P95),CPU Throughput,GPU Latency (Mean),Peak Memory (CPU),Size Reduction,CPU Speedup
-Teacher (BanglaBERT),PyTorch FP32,"110,618,882",422.23 MB,116.83 ms / 125.46 ms,8.6 fps,13.79 ms,0.27 MB,1.00x (Baseline),1.00x (Baseline)
-TinyBanglaBERT-final,PyTorch FP32,"11,549,442",44.07 MB,9.98 ms / 13.68 ms,100.2 fps,5.95 ms,0.27 MB,9.58x smaller,11.71x faster
-TinyBanglaBERT-final (ONNX),ONNX Runtime FP32,"11,549,442",44.15 MB,5.15 ms / 6.09 ms,194.2 fps,N/A,0.03 MB,9.56x smaller,22.69x faster
-TinyBanglaBERT-final (INT8),ONNX Runtime INT8,"11,549,442 (8-bit)",11.22 MB,4.11 ms / 5.59 ms,243.2 fps,N/A,0.02 MB,37.63x smaller,28.41x faster
+Teacher (BanglaBERT),PyTorch FP32,"110,618,882",422.76 MB,123.36 ms / 152.85 ms,8.1 fps,12.60 ms,0.27 MB,1.00x (Baseline),1.00x (Baseline)
+TinyBanglaBERT-final,PyTorch FP32,"7,420,418",28.31 MB,11.73 ms / 15.64 ms,85.2 fps,5.50 ms,0.27 MB,14.93x smaller,10.51x faster
+TinyBanglaBERT-final (ONNX),ONNX Runtime FP32,"7,420,418",28.40 MB,9.20 ms / 15.12 ms,108.6 fps,N/A,0.02 MB,14.89x smaller,13.40x faster
+TinyBanglaBERT-final (INT8),ONNX Runtime INT8,"7,420,418 (8-bit)",7.29 MB,4.00 ms / 5.14 ms,249.9 fps,N/A,0.02 MB,57.99x smaller,30.83x faster
