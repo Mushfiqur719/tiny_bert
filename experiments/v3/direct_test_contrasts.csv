@@ -1,0 +1,7 @@
+dataset,model_a,model_b,f1_a,f1_b,diff_pp,ci_lo_pp,ci_hi_pp,p_value,non_inferior_2pp,p_holm
+banglabait,F_strided_kd_100,F_strided_ce_100,0.7537,0.7451,0.86,-0.45,2.1,0.1956,True,0.5868
+banglabait,F_rand_kd_100,F_rand_ce_100,0.7222,0.7239,-0.17,-1.67,1.27,0.8196,True,1.0
+banglabait,F_strided_kd_100,F_rand_kd_100,0.7537,0.7222,3.14,1.49,4.77,0.0002,True,0.0012
+banglabait,F_strided_ce_100,F_rand_ce_100,0.7451,0.7239,2.12,0.32,3.95,0.018,True,0.09
+banglabait,F_strided_kd_100,teacher_base,0.7537,0.7723,-1.86,-3.65,-0.13,0.0356,False,0.1424
+banglabait,F_strided_kd_100,baseline_small_12l_ce,0.7537,0.7543,-0.06,-1.71,1.56,0.9412,True,1.0

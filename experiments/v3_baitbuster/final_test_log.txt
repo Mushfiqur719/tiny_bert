@@ -1,0 +1,1 @@
+[2026-11-21T06:52:10.696178+00:00] Invoked final_test.py dataset=baitbuster models=['teacher_base_uw', 'baseline_small_12l_ce_uw', 'F_strided_kd_100_uw', 'F_strided_ce_100_uw', 'F_rand_kd_100_uw', 'F_rand_ce_100_uw'], seeds=[13, 42, 87, 1234, 2026]

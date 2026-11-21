@@ -115,6 +115,7 @@ class DistillationDataset(Dataset):
         teacher_logits: torch.Tensor,
         tokenizer: PreTrainedTokenizerBase,
         max_seq_len: int = 128,
+        bodies: Optional[list[str]] = None,
     ) -> None:
         """
         Args:
@@ -123,6 +124,7 @@ class DistillationDataset(Dataset):
             teacher_logits: Pre-computed teacher logits [N, num_classes].
             tokenizer: Tokenizer.
             max_seq_len: Maximum token sequence length.
+            bodies: Optional list of article body strings for sentence-pair tokenization.
         """
         if len(headlines) != len(labels) or len(headlines) != len(teacher_logits):
             raise ValueError(
@@ -130,17 +132,28 @@ class DistillationDataset(Dataset):
             )
 
         self.headlines = headlines
+        self.bodies = list(bodies) if bodies is not None else None
         self.labels = [int(l) for l in labels]
         self.teacher_logits = teacher_logits.clone().detach().float()
         self.max_seq_len = max_seq_len
 
-        self.encodings = tokenizer(
-            self.headlines,
-            padding="max_length",
-            truncation=True,
-            max_length=max_seq_len,
-            return_tensors="pt",
-        )
+        if self.bodies is not None:
+            self.encodings = tokenizer(
+                self.headlines,
+                self.bodies,
+                padding="max_length",
+                truncation="only_second",
+                max_length=max_seq_len,
+                return_tensors="pt",
+            )
+        else:
+            self.encodings = tokenizer(
+                self.headlines,
+                padding="max_length",
+                truncation=True,
+                max_length=max_seq_len,
+                return_tensors="pt",
+            )
 
     def __len__(self) -> int:
         return len(self.headlines)
@@ -178,3 +191,119 @@ def load_teacher_soft_labels(
         len(data["labels"]),
     )
     return data
+
+
+class IntermediateAlignmentModule(nn.Module):
+    """Computes intermediate hidden-state and attention-map distillation losses.
+
+    Aligns Student layers [0, 1, 2, 3] with Teacher layers (e.g. [2, 5, 8, 11]):
+      1. Hidden-State Loss: Projects Student hidden states [B, L, D_s] -> [B, L, D_t]
+         via learnable linear layers (discarded at inference) and computes masked
+         cosine-distance loss (1 - cos_sim) over non-padding tokens.
+      2. Attention-Map Loss: Groups Teacher's H_t heads into H_s head groups
+         (e.g., 12 -> 4 groups of 3 heads) and computes masked KL divergence
+         between Student and Teacher attention distributions.
+    """
+
+    def __init__(
+        self,
+        student_hidden_size: int = 256,
+        teacher_hidden_size: int = 768,
+        teacher_layer_indices: Optional[list[int]] = None,
+        hidden_loss_weight: float = 0.5,
+        attention_loss_weight: float = 0.2,
+    ) -> None:
+        super().__init__()
+        if teacher_layer_indices is None:
+            teacher_layer_indices = [2, 5, 8, 11]
+        self.teacher_layer_indices = list(teacher_layer_indices)
+        self.num_aligned_layers = len(self.teacher_layer_indices)
+        self.hidden_loss_weight = float(hidden_loss_weight)
+        self.attention_loss_weight = float(attention_loss_weight)
+
+        self.projectors = nn.ModuleList(
+            [
+                nn.Linear(student_hidden_size, teacher_hidden_size)
+                for _ in range(self.num_aligned_layers)
+            ]
+        )
+
+    def forward(
+        self,
+        student_hidden_states: Optional[tuple[torch.Tensor, ...]],
+        teacher_hidden_states: Optional[tuple[torch.Tensor, ...]],
+        student_attentions: Optional[tuple[torch.Tensor, ...]],
+        teacher_attentions: Optional[tuple[torch.Tensor, ...]],
+        attention_mask: Optional[torch.Tensor] = None,
+    ) -> tuple[torch.Tensor, dict[str, float]]:
+        """Compute weighted intermediate hidden + attention distillation loss."""
+        device = self.projectors[0].weight.device
+        hidden_loss = torch.tensor(0.0, device=device)
+        attn_loss = torch.tensor(0.0, device=device)
+
+        if attention_mask is not None:
+            mask = attention_mask.float()  # [B, L]
+            valid_tokens = mask.sum().clamp_min(1.0)
+        else:
+            mask = None
+            valid_tokens = None
+
+        # 1. Hidden-state alignment (indices 1..N in HF hidden_states correspond to encoder layers 0..N-1)
+        if (
+            self.hidden_loss_weight > 0.0
+            and student_hidden_states is not None
+            and teacher_hidden_states is not None
+        ):
+            layer_h_losses = []
+            for s_idx, t_idx in enumerate(self.teacher_layer_indices):
+                h_s = self.projectors[s_idx](student_hidden_states[s_idx + 1])  # [B, L, D_t]
+                h_t = teacher_hidden_states[t_idx + 1].detach()                 # [B, L, D_t]
+                cos_dist = 1.0 - F.cosine_similarity(h_s, h_t, dim=-1)          # [B, L]
+                if mask is not None:
+                    l_h = (cos_dist * mask).sum() / valid_tokens
+                else:
+                    l_h = cos_dist.mean()
+                layer_h_losses.append(l_h)
+            hidden_loss = torch.stack(layer_h_losses).mean()
+
+        # 2. Attention distribution alignment
+        if (
+            self.attention_loss_weight > 0.0
+            and student_attentions is not None
+            and teacher_attentions is not None
+        ):
+            layer_a_losses = []
+            for s_idx, t_idx in enumerate(self.teacher_layer_indices):
+                a_s = student_attentions[s_idx]              # [B, H_s, L, L]
+                a_t = teacher_attentions[t_idx].detach()     # [B, H_t, L, L]
+                bsz, h_s_cnt, seq_len, _ = a_s.shape
+                h_t_cnt = a_t.shape[1]
+
+                if h_t_cnt != h_s_cnt and h_t_cnt % h_s_cnt == 0:
+                    group_size = h_t_cnt // h_s_cnt
+                    a_t_target = a_t.view(bsz, h_s_cnt, group_size, seq_len, seq_len).mean(dim=2)
+                elif h_t_cnt != h_s_cnt:
+                    a_t_target = a_t.mean(dim=1, keepdim=True).expand_as(a_s)
+                else:
+                    a_t_target = a_t
+
+                # KL(a_t || a_s) over last dimension (attention probabilities per query token)
+                log_a_s = a_s.clamp_min(1e-7).log()
+                a_t_clamped = a_t_target.clamp_min(1e-7)
+                kl_per_query = F.kl_div(log_a_s, a_t_clamped, reduction="none").sum(dim=-1)  # [B, H_s, L]
+                kl_per_token = kl_per_query.mean(dim=1)  # [B, L]
+                if mask is not None:
+                    l_a = (kl_per_token * mask).sum() / valid_tokens
+                else:
+                    l_a = kl_per_token.mean()
+                layer_a_losses.append(l_a)
+            attn_loss = torch.stack(layer_a_losses).mean()
+
+        total_inter_loss = (self.hidden_loss_weight * hidden_loss) + (
+            self.attention_loss_weight * attn_loss
+        )
+        return total_inter_loss, {
+            "hidden_loss": float(hidden_loss.item()),
+            "attention_loss": float(attn_loss.item()),
+            "total_inter_loss": float(total_inter_loss.item()),
+        }

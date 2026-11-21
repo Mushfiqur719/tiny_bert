@@ -1,0 +1,12 @@
+{
+  "run_name": "student_small_pretrained_distilled_s13",
+  "seed": 13,
+  "git_commit": "5bcd650",
+  "started_at": "2026-11-19T22:26:30.927126+00:00",
+  "finished_at": "2026-11-19T22:28:22.907206+00:00",
+  "python_version": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+  "torch_version": "2.11.0+cu128",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "cuda_available": true,
+  "cuda_device": "NVIDIA GeForce RTX 5050 Laptop GPU"
+}

@@ -29,6 +29,7 @@ from transformers import AutoModelForSequenceClassification, AutoTokenizer
 from src.data.clean import clean_dataframe
 from src.data.load import load_raw
 from src.data.split import apply_splits, load_splits
+from src.evaluation.stats import holm_correction
 from src.utils import load_config, seed_everything
 
 logger = logging.getLogger(__name__)
@@ -220,26 +221,36 @@ def run_full_mcnemar_suite(
 
     logger.info("Total test instances for statistical testing: %d", n_test)
 
-    # Generate predictions for all models
+    # Generate predictions for all available models
     model_paths = {
         "teacher": "experiments/teacher",
         "tinybanglabert_final": "experiments/tinybanglabert_final",
-        "random_baseline": "experiments/student_random_baseline",
-        "random_distilled": "experiments/student_random_distilled",
+        "small_pretrained_baseline": "experiments/student_small_pretrained_baseline",
+        "teacher_init_distilled": "experiments/student_teacher_init_distilled",
         "teacher_init_baseline": "experiments/student_teacher_init_baseline",
+        "random_distilled": "experiments/student_random_distilled",
+        "random_baseline": "experiments/student_random_baseline",
+        "small_6l_distilled": "experiments/student_small_6l_distilled",
+        "small_12l_distilled": "experiments/student_small_12l_distilled",
     }
 
     preds = {}
     for key, path in model_paths.items():
-        preds[key] = get_model_test_predictions(path, test_headlines)
+        if (Path(path) / "config.json").exists():
+            preds[key] = get_model_test_predictions(path, test_headlines)
 
-    # Comparisons to run:
-    comparisons = [
-        ("teacher", "tinybanglabert_final", "Teacher (BanglaBERT)", "TinyBanglaBERT-final"),
-        ("tinybanglabert_final", "random_baseline", "TinyBanglaBERT-final", "Student (Random Init + Supervised)"),
-        ("tinybanglabert_final", "random_distilled", "TinyBanglaBERT-final", "Student (Random Init + Distilled)"),
-        ("tinybanglabert_final", "teacher_init_baseline", "TinyBanglaBERT-final", "Student (Teacher Init + Supervised)"),
+    # Comparisons to run (filtered to available models):
+    candidate_comparisons = [
+        ("teacher", "tinybanglabert_final", "Teacher (BanglaBERT)", "TinyBanglaBERT-4L (Final)"),
+        ("tinybanglabert_final", "small_pretrained_baseline", "TinyBanglaBERT-4L (Final)", "Student (Small-Pretrained 4L + Supervised)"),
+        ("tinybanglabert_final", "teacher_init_distilled", "TinyBanglaBERT-4L (Final)", "Student (Teacher-PCA Init + Distilled)"),
+        ("tinybanglabert_final", "teacher_init_baseline", "TinyBanglaBERT-4L (Final)", "Student (Teacher-PCA Init + Supervised)"),
+        ("tinybanglabert_final", "random_distilled", "TinyBanglaBERT-4L (Final)", "Student (Random Init + Distilled)"),
+        ("tinybanglabert_final", "random_baseline", "TinyBanglaBERT-4L (Final)", "Student (Random Init + Supervised)"),
+        ("teacher_init_distilled", "teacher_init_baseline", "Student (Teacher-PCA Init + Distilled)", "Student (Teacher-PCA Init + Supervised)"),
+        ("small_12l_distilled", "tinybanglabert_final", "BanglaBERT-Small-12L + KD", "TinyBanglaBERT-4L (Final)"),
     ]
+    comparisons = [c for c in candidate_comparisons if c[0] in preds and c[1] in preds]
 
     results = []
     table_rows = []
@@ -255,16 +266,21 @@ def run_full_mcnemar_suite(
         )
         results.append(res)
 
+    adj_p = holm_correction([r["p_value"] for r in results]) if results else []
+    for res, p_holm in zip(results, adj_p):
+        res["p_value_holm"] = round(float(p_holm), 6)
         c = res["counts"]
+        p_holm_str = "p < 0.001" if p_holm < 0.001 else f"p = {p_holm:.4f}"
         table_rows.append({
-            "Comparison (Model A vs. Model B)": f"{name_a} vs. {name_b}",
+            "Comparison (Model A vs. Model B)": f"{res['model_a']} vs. {res['model_b']}",
             "Both Correct (n00)": c["both_correct_n00"],
             "A Only (b)": c["a_only_correct_n01"],
             "B Only (c)": c["b_only_correct_n10"],
             "Both Wrong (n11)": c["both_wrong_n11"],
             "Discordant Pairs (b + c)": c["discordant_pairs"],
             "McNemar p-value": res["p_value_formatted"],
-            "Significant (α=0.05)": "Yes (p < 0.05)" if res["is_significant_alpha_05"] else "No (p ≥ 0.05)",
+            "Holm-Adjusted p": p_holm_str,
+            "Significant (α=0.05)": "Yes (p < 0.05)" if p_holm < 0.05 else "No (p ≥ 0.05)",
         })
 
     df = pd.DataFrame(table_rows)

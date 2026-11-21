@@ -1,0 +1,5 @@
+{
+  "model": "BiLSTM-2L",
+  "seed": 1234,
+  "params": 4755970
+}

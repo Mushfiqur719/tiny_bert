@@ -32,6 +32,7 @@ class BanglaHeadlineDataset(Dataset):
         labels: Optional[Sequence[int]] = None,
         tokenizer: Optional[PreTrainedTokenizerBase] = None,
         max_seq_len: int = 128,
+        bodies: Optional[Sequence[str]] = None,
     ) -> None:
         """
         Args:
@@ -39,22 +40,34 @@ class BanglaHeadlineDataset(Dataset):
             labels: List of integer class labels (0 or 1), or None for inference.
             tokenizer: HuggingFace Tokenizer.
             max_seq_len: Maximum sequence length for truncation and padding.
+            bodies: Optional list of article body strings for sentence-pair tokenization.
         """
         if tokenizer is None:
             raise ValueError("A HuggingFace tokenizer must be provided.")
 
         self.headlines = list(headlines)
+        self.bodies = list(bodies) if bodies is not None else None
         self.labels = [int(l) for l in labels] if labels is not None else None
         self.max_seq_len = max_seq_len
 
-        # Pre-tokenize all headlines for efficient batching and training
-        self.encodings = tokenizer(
-            self.headlines,
-            padding="max_length",
-            truncation=True,
-            max_length=max_seq_len,
-            return_tensors="pt",
-        )
+        # Pre-tokenize all headlines (or title+body pairs) for efficient batching
+        if self.bodies is not None:
+            self.encodings = tokenizer(
+                self.headlines,
+                self.bodies,
+                padding="max_length",
+                truncation="only_second",
+                max_length=max_seq_len,
+                return_tensors="pt",
+            )
+        else:
+            self.encodings = tokenizer(
+                self.headlines,
+                padding="max_length",
+                truncation=True,
+                max_length=max_seq_len,
+                return_tensors="pt",
+            )
 
     def __len__(self) -> int:
         return len(self.headlines)

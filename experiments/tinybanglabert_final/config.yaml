@@ -18,17 +18,19 @@ data:
 model:
   teacher_model_name: csebuetnlp/banglabert
   student_model_name: TinyBanglaBERT
-  max_seq_len: 128
+  max_seq_len: 64
   dropout: 0.1
-  init_type: teacher_init
+  init_type: small_pretrained
+  pretrained_small_name: csebuetnlp/banglabert_small
+  layer_selection: strided
   num_hidden_layers: 4
   hidden_size: 256
   num_attention_heads: 4
   intermediate_size: 1024
 training:
   output_dir: experiments
-  run_name: student_teacher_init_baseline
-  epochs: 5
+  run_name: student_small_pretrained_distilled
+  epochs: 12
   batch_size: 32
   lr: 5.0e-05
   weight_decay: 0.01
@@ -41,12 +43,14 @@ training:
   greater_is_better: true
   fp16: true
   dataloader_num_workers: 0
-  early_stopping_patience: 3
+  lr_scheduler_type: cosine
+  early_stopping_patience: 4
 distillation:
   temperature: 4.0
-  alpha: 0.7
-  intermediate_layers: true
-  hidden_loss_weight: 0.1
+  alpha: 0.5
+  intermediate_layers: false
+  hidden_loss_weight: 0.0
+  attention_loss_weight: 0.0
 optuna:
   n_trials: 30
   timeout_sec: 7200

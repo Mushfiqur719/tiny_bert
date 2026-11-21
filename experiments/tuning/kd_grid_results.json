@@ -1,172 +1,140 @@
 {
   "best_params": {
-    "temperature": 2.0,
+    "temperature": 4.0,
     "alpha": 0.1,
-    "val_f1_macro": 0.6999,
-    "val_accuracy": 0.7092,
-    "val_f1_clickbait": 0.6473,
-    "val_loss": 0.5505
+    "val_f1_macro": 0.7751,
+    "val_accuracy": 0.7961,
+    "val_loss": 0.6169,
+    "val_f1_clickbait": 0.7062
   },
   "grid_results": [
     {
       "temperature": 2.0,
       "alpha": 0.1,
-      "val_f1_macro": 0.6999,
-      "val_accuracy": 0.7092,
-      "val_f1_clickbait": 0.6473,
-      "val_loss": 0.5505
-    },
-    {
-      "temperature": 1.0,
-      "alpha": 0.1,
-      "val_f1_macro": 0.6993,
-      "val_accuracy": 0.7085,
-      "val_f1_clickbait": 0.6468,
-      "val_loss": 0.5505
-    },
-    {
-      "temperature": 1.0,
-      "alpha": 0.3,
-      "val_f1_macro": 0.6993,
-      "val_accuracy": 0.7085,
-      "val_f1_clickbait": 0.6468,
-      "val_loss": 0.5505
-    },
-    {
-      "temperature": 1.0,
-      "alpha": 0.5,
-      "val_f1_macro": 0.6993,
-      "val_accuracy": 0.7085,
-      "val_f1_clickbait": 0.6468,
-      "val_loss": 0.5505
-    },
-    {
-      "temperature": 1.0,
-      "alpha": 0.7,
-      "val_f1_macro": 0.6993,
-      "val_accuracy": 0.7085,
-      "val_f1_clickbait": 0.6468,
-      "val_loss": 0.5505
-    },
-    {
-      "temperature": 1.0,
-      "alpha": 0.9,
-      "val_f1_macro": 0.6993,
-      "val_accuracy": 0.7085,
-      "val_f1_clickbait": 0.6468,
-      "val_loss": 0.5505
+      "val_f1_macro": 0.7698,
+      "val_accuracy": 0.7895,
+      "val_loss": 0.555,
+      "val_f1_clickbait": 0.7023
     },
     {
       "temperature": 2.0,
       "alpha": 0.3,
-      "val_f1_macro": 0.6993,
-      "val_accuracy": 0.7085,
-      "val_f1_clickbait": 0.6468,
-      "val_loss": 0.5505
+      "val_f1_macro": 0.7644,
+      "val_accuracy": 0.7902,
+      "val_loss": 0.5548,
+      "val_f1_clickbait": 0.6865
     },
     {
       "temperature": 2.0,
       "alpha": 0.5,
-      "val_f1_macro": 0.6993,
-      "val_accuracy": 0.7085,
-      "val_f1_clickbait": 0.6468,
-      "val_loss": 0.5505
+      "val_f1_macro": 0.7662,
+      "val_accuracy": 0.7862,
+      "val_loss": 0.5341,
+      "val_f1_clickbait": 0.6979
     },
     {
       "temperature": 2.0,
       "alpha": 0.7,
-      "val_f1_macro": 0.6993,
-      "val_accuracy": 0.7085,
-      "val_f1_clickbait": 0.6468,
-      "val_loss": 0.5505
-    },
-    {
-      "temperature": 2.0,
-      "alpha": 0.9,
-      "val_f1_macro": 0.6993,
-      "val_accuracy": 0.7085,
-      "val_f1_clickbait": 0.6468,
-      "val_loss": 0.5505
+      "val_f1_macro": 0.7669,
+      "val_accuracy": 0.7875,
+      "val_loss": 0.5089,
+      "val_f1_clickbait": 0.6975
     },
     {
       "temperature": 4.0,
       "alpha": 0.1,
-      "val_f1_macro": 0.6993,
-      "val_accuracy": 0.7085,
-      "val_f1_clickbait": 0.6468,
-      "val_loss": 0.5505
+      "val_f1_macro": 0.7751,
+      "val_accuracy": 0.7961,
+      "val_loss": 0.6169,
+      "val_f1_clickbait": 0.7062
     },
     {
       "temperature": 4.0,
       "alpha": 0.3,
-      "val_f1_macro": 0.6993,
-      "val_accuracy": 0.7085,
-      "val_f1_clickbait": 0.6468,
-      "val_loss": 0.5505
+      "val_f1_macro": 0.7675,
+      "val_accuracy": 0.7895,
+      "val_loss": 0.5605,
+      "val_f1_clickbait": 0.6961
     },
     {
       "temperature": 4.0,
       "alpha": 0.5,
-      "val_f1_macro": 0.6993,
-      "val_accuracy": 0.7085,
-      "val_f1_clickbait": 0.6468,
-      "val_loss": 0.5505
+      "val_f1_macro": 0.77,
+      "val_accuracy": 0.7902,
+      "val_loss": 0.6152,
+      "val_f1_clickbait": 0.7019
     },
     {
       "temperature": 4.0,
       "alpha": 0.7,
-      "val_f1_macro": 0.6993,
-      "val_accuracy": 0.7085,
-      "val_f1_clickbait": 0.6468,
-      "val_loss": 0.5505
+      "val_f1_macro": 0.7693,
+      "val_accuracy": 0.7862,
+      "val_loss": 0.5164,
+      "val_f1_clickbait": 0.7067
     },
     {
-      "temperature": 4.0,
-      "alpha": 0.9,
-      "val_f1_macro": 0.6993,
-      "val_accuracy": 0.7085,
-      "val_f1_clickbait": 0.6468,
-      "val_loss": 0.5505
+      "temperature": 6.0,
+      "alpha": 0.1,
+      "val_f1_macro": 0.7713,
+      "val_accuracy": 0.7935,
+      "val_loss": 0.6026,
+      "val_f1_clickbait": 0.7001
+    },
+    {
+      "temperature": 6.0,
+      "alpha": 0.3,
+      "val_f1_macro": 0.7668,
+      "val_accuracy": 0.7815,
+      "val_loss": 0.5722,
+      "val_f1_clickbait": 0.7081
+    },
+    {
+      "temperature": 6.0,
+      "alpha": 0.5,
+      "val_f1_macro": 0.7667,
+      "val_accuracy": 0.7849,
+      "val_loss": 0.608,
+      "val_f1_clickbait": 0.7017
+    },
+    {
+      "temperature": 6.0,
+      "alpha": 0.7,
+      "val_f1_macro": 0.7652,
+      "val_accuracy": 0.7829,
+      "val_loss": 0.5194,
+      "val_f1_clickbait": 0.7008
     },
     {
       "temperature": 8.0,
       "alpha": 0.1,
-      "val_f1_macro": 0.6993,
-      "val_accuracy": 0.7085,
-      "val_f1_clickbait": 0.6468,
-      "val_loss": 0.5505
+      "val_f1_macro": 0.7709,
+      "val_accuracy": 0.7888,
+      "val_loss": 0.6199,
+      "val_f1_clickbait": 0.7066
     },
     {
       "temperature": 8.0,
       "alpha": 0.3,
-      "val_f1_macro": 0.6993,
-      "val_accuracy": 0.7085,
-      "val_f1_clickbait": 0.6468,
-      "val_loss": 0.5505
+      "val_f1_macro": 0.7657,
+      "val_accuracy": 0.7802,
+      "val_loss": 0.5714,
+      "val_f1_clickbait": 0.7073
     },
     {
       "temperature": 8.0,
       "alpha": 0.5,
-      "val_f1_macro": 0.6993,
-      "val_accuracy": 0.7085,
-      "val_f1_clickbait": 0.6468,
-      "val_loss": 0.5505
+      "val_f1_macro": 0.7636,
+      "val_accuracy": 0.7822,
+      "val_loss": 0.6062,
+      "val_f1_clickbait": 0.6974
     },
     {
       "temperature": 8.0,
       "alpha": 0.7,
-      "val_f1_macro": 0.6993,
-      "val_accuracy": 0.7085,
-      "val_f1_clickbait": 0.6468,
-      "val_loss": 0.5505
-    },
-    {
-      "temperature": 8.0,
-      "alpha": 0.9,
-      "val_f1_macro": 0.6993,
-      "val_accuracy": 0.7085,
-      "val_f1_clickbait": 0.6468,
-      "val_loss": 0.5505
+      "val_f1_macro": 0.7679,
+      "val_accuracy": 0.7855,
+      "val_loss": 0.5218,
+      "val_f1_clickbait": 0.7039
     }
   ]
 }

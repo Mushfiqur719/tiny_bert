@@ -1,240 +1,110 @@
-# TinyBanglaBERT 🔬
+# TinyBanglaBERT (v3)
 
 <div align="center">
 
 [![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.2%2B-EE4C2C.svg?logo=pytorch&logoColor=white)](https://pytorch.org/)
-[![HuggingFace](https://img.shields.io/badge/%F0%9F%A4%97%20HuggingFace-Transformers-yellow.svg)](https://huggingface.co/)
-[![ONNX](https://img.shields.io/badge/ONNX-Runtime%20Quantized-005CED.svg?logo=onnx&logoColor=white)](https://onnxruntime.ai/)
+[![HuggingFace](https://img.shields.io/badge/HuggingFace-Transformers-yellow.svg)](https://huggingface.co/)
+[![ONNX](https://img.shields.io/badge/ONNX-Runtime%20INT8-005CED.svg?logo=onnx&logoColor=white)](https://onnxruntime.ai/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests: 88/88 Passed](https://img.shields.io/badge/Tests-88%2F88%20Passing-brightgreen.svg)]()
-[![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 
-**A Lightweight Knowledge-Distilled Transformer for Real-Time, Explainable Bangla Clickbait Detection on Edge Devices**
+**Pre-Trained Compact Initialisation vs. Distillation Objectives in Low-Resource Bengali Clickbait Detection**
 
-[**Research Paper (IEEE Format)**](experiments/IEEE_PAPER_REPORT.md) • [**Full Results Chapter**](experiments/FINAL_RESULTS.md) • [**Reproduction Manual**](REPRODUCE.md) • [**LaTeX Manuscript**](experiments/ieee_manuscript.tex)
+[**v3 Research Report**](experiments/v3/V3_RESEARCH_REPORT.md) • [**Pre-Registration**](PREREG.md) • [**Related Work**](RELATED_WORK.md) • [**LaTeX Manuscript**](experiments/ieee_manuscript.tex)
 
 </div>
 
 ---
 
-## 📌 Executive Summary
+## Research Question
 
-Deploying large transformer language models (such as `csebuetnlp/banglabert` with 110.6M parameters) on resource-constrained edge environments (e.g., mobile web browsers, low-power smartphones, client-side news feed extensions) is severely hindered by memory footprints and inference latency.
+> *In low-resource fine-tuning of compact neural encoders, does warm-start pre-trained initialisation matter more than the distillation objective, and how does this interact with data scale and calibration?*
 
-**TinyBanglaBERT** is a custom 4-layer, 256-hidden, 4-attention-head Bengali transformer architecture (11.55M parameters) trained via task-specific **Knowledge Distillation** and **Orthogonal PCA Projection Initialization**.
-
-### 🌟 Key Research Findings
-
-1. **9.6× Parameter Reduction**: Shrinks the model from 110.6M to 11.55M parameters, reducing disk storage from 422.0 MB to 44.1 MB (and **11.2 MB** in INT8 ONNX format).
-2. **14.8× CPU Speedup**: Achieves single-headline CPU latency of **5.15 ms** (243.3 headlines/sec throughput) compared to Teacher PyTorch's 76.22 ms.
-3. **90.3% In-Domain Macro-F1 Retention**: Achieves **0.7431 Macro-F1** (75.63% accuracy) on the untouched BanglaBait test split vs. Teacher's 0.8233 F1.
-4. **Superior Cross-Domain Generalization**: Evaluated zero-shot on 10,000 human-annotated headlines from `abdalimran/BaitBuster-Bangla`, TinyBanglaBERT achieves **0.7553 Macro-F1** (gaining +1.22% F1) while the Teacher degrades to 0.7282 F1 (dropping -9.51% F1) — demonstrating that compact distillation acts as an effective regularizer against domain overfitting.
-5. **Faithful Explainability**: SHAP and LIME token attribution methods achieve high agreement (**82.5% Directional Sign Agreement**, **0.551 Top-3 Token Jaccard**), proving transparent decision boundaries for Bengali syntax and morphology.
+All v3 experiments follow a pre-registered (`PREREG.md`), leak-free protocol: MinHash LSH near-duplicate clustering ($J \ge 0.9$), 10-fold `StratifiedGroupKFold` (0% cross-split leakage), code-enforced test-set locking (`src/utils/test_guard.py`), 5-fold out-of-fold teacher soft labels, five random seeds (`[13, 42, 87, 1234, 2026]`), and 10,000-resample paired bootstrap non-inferiority testing ($\Delta = -2.0$ pp Macro-F1, Holm-corrected).
 
 ---
 
-## 📊 Performance & Benchmark Summary
+## Key Empirical Findings (5-Seed Held-Out Test & Mixed-Effects)
 
-### 1. In-Domain & Cross-Domain Test Performance
-
-| Model Configuration | Parameters | Checkpoint Size | In-Domain Test F1 | In-Domain Accuracy | Cross-Domain Test F1 | Cross-Domain Accuracy | Generalization Δ F1 |
-|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **Teacher (`csebuetnlp/banglabert`)** | 110.6M | 422.0 MB | **0.8233** | **84.20%** | 0.7282 | 73.10% | -0.0951 (-11.5%) |
-| Student (Random Init + Distilled) | 11.55M | 44.1 MB | 0.7302 | 73.97% | 0.7390 | 74.20% | +0.0088 (+1.2%) |
-| Student (Teacher Init + Baseline) | 11.55M | 44.1 MB | 0.7348 | 74.57% | 0.7441 | 74.70% | +0.0093 (+1.3%) |
-| **TinyBanglaBERT (Teacher Init + Distilled)** | **11.55M** | **44.1 MB** | **0.7431** | **75.63%** | **0.7553** | **75.60%** | **+0.0122 (+1.6%)** |
-
-### 2. Efficiency & Latency Benchmark (Intel Core i7-13700H CPU, Batch=1, SeqLen=64)
-
-| Model Runtime Engine | Precision | Disk Size | RAM Footprint | Mean Latency | p95 Latency | Throughput | Speedup vs. Teacher |
-|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| Teacher (PyTorch Native) | FP32 | 422.0 MB | 512.4 MB | 76.22 ms | 88.10 ms | 13.1 fps | 1.00× (Baseline) |
-| TinyBanglaBERT (PyTorch Native) | FP32 | 44.1 MB | 64.2 MB | 16.48 ms | 19.30 ms | 60.7 fps | 4.62× |
-| TinyBanglaBERT (ONNX Runtime) | FP32 | 44.1 MB | 38.5 MB | 10.82 ms | 12.45 ms | 92.4 fps | 7.04× |
-| **TinyBanglaBERT (ONNX Quantized)** | **INT8** | **11.2 MB** | **22.1 MB** | **5.15 ms** | **6.40 ms** | **243.3 fps** | **14.80×** |
+1. **Initialisation Dominates Distillation Objective (H1 Confirmed via Direct Wald Contrast):** On a strictly parameter-matched 4-layer architecture (**7.42M params**, **14.9×** smaller than BanglaBERT-Base and **1.85×** smaller than Small-12L), centered full-interaction mixed-effects regression confirms $\beta_{\text{strided}} - \beta_{\text{kd}}$ = **+2.26 pp** ($p = 1.03 \times 10^{-15}$) on *BanglaBait* and **+1.78 pp** ($p = 2.51 \times 10^{-13}$) on *BaitBuster-Bangla*.
+2. **H2 Partially Supported & Calibration Gains:** `strided × KD` is significant on *BanglaBait* (**-1.30 pp**, $p = 0.001$) but not on *BaitBuster* ($p = 0.448$); `KD × log_frac_c` is marginal on *BanglaBait* ($p = 0.052$) and null on *BaitBuster* ($p = 0.395$). Across both datasets, KD reduces Expected Calibration Error (ECE) by **13.8%–54.6%**.
+3. **Formal Non-Inferiority ($\Delta = -2.0$ pp) & Channel Audit:**
+   - ***BanglaBait* ($n = 1,504$):** `TinyBanglaBERT-4L (strided + KD)` reaches **77.86% Acc / 0.7537 Macro-F1**, formally non-inferior to 3× deeper Small-12L (**-0.06 pp**, $p_{\text{Holm}} = 1.00$), superior to `rand + KD` by **+3.14 pp** ($p_{\text{Holm}} = 0.0012$), but **not** non-inferior to Base (-1.86 pp, CI `[-3.65, -0.13]`).
+   - ***BaitBuster-Bangla* ($n = 1,000$):** All models saturate near 98% (98.10% vs. 98.82% Base; 1.90% vs. 1.18% error); a channel audit shows 94.7% of non-clickbait rows come from a single channel (*Independent Television*).
+4. **Cross-Genre Adaptation (News → YouTube, $N = 10,000$):** 1% ($n = 100$) threshold recalibration lifts Macro-F1 by **+5 to +7 pp** (`teacher_base`: `0.7852 → 0.8549`; `F_strided_kd_100`: `0.7570 → 0.8192`; `F_rand_kd_100`: `0.8115 → 0.8565`).
+5. **Unified ONNX CPU Efficiency (Batch 1, Length 64, 4 Threads):** `TinyBanglaBERT-4L` achieves **16.3× like-for-like INT8 speedup** (1.77 ms vs. 28.79 ms Base INT8) and **25.8× like-for-like FP32 speedup** (2.89 ms vs. 74.46 ms Base FP32; 42.1× cross-precision), and **3.1×** over Small-12L INT8 (5.56 ms).
 
 ---
 
-## 📈 Visualizations & Figures
+## Held-Out Test Summary (5 Seeds)
 
-Publication-ready 300 DPI figures generated from empirical evaluation:
+| Dataset / Model | Params | Test Acc (Mean ± Std) | Test Macro-F1 (Mean ± Std) | Non-Inferior ($\Delta = -2.0$ pp) |
+|---|---:|---:|---:|---|
+| *BaitBuster* — BanglaBERT-Base (12L) | 110.62M | 98.82% ± 0.22% | 0.9880 ± 0.0023 | Reference |
+| *BaitBuster* — BanglaBERT-Small (12L) | 13.74M | 98.70% ± 0.17% | 0.9868 ± 0.0017 | True (vs. Base) |
+| ***BaitBuster* — TinyBanglaBERT-4L (`strided + KD`)** | **7.42M** | **98.10% ± 0.14%** | **0.9807 ± 0.0014** | **True (vs. Both)** |
+| *BanglaBait* — BanglaBERT-Base (`title + body`) | 110.62M | 81.35% ± 0.78% | 0.7934 ± 0.0074 | +2.11 pp vs. Title |
+| *BanglaBait* — BanglaBERT-Base (`title`) | 110.62M | 79.35% ± 0.65% | 0.7723 ± 0.0034 | Reference (Title) |
+| *BanglaBait* — BanglaBERT-Small (12L, `title`) | 13.74M | 77.63% ± 0.88% | 0.7543 ± 0.0078 | Reference (Small) |
+| ***BanglaBait* — TinyBanglaBERT-4L (`strided + KD`)** | **7.42M** | **77.86% ± 0.56%** | **0.7537 ± 0.0063** | **True (vs. Small-12L)** |
+
+---
+
+## Unified ONNX CPU Efficiency (ONNX Runtime 1.29.0)
+
+| Model | Precision | 1-Thread p50 | 4-Thread p50 | 4-Thread p95 | Disk Size | Speedup (4T) |
+|---|---|---:|---:|---:|---:|---:|
+| BanglaBERT-Base (110.6M) | FP32 | 190.56 ms | 74.46 ms | 88.78 ms | 422.25 MB | 1.0× |
+| BanglaBERT-Base (110.6M) | INT8 | 99.67 ms | 28.79 ms | 35.67 ms | 177.75 MB | 2.6× |
+| BanglaBERT-Small-12L (13.7M) | INT8 | 10.18 ms | 5.56 ms | 6.97 ms | 25.59 MB | 13.4× |
+| **TinyBanglaBERT-4L (7.42M)** | **FP32** | 5.17 ms | 2.89 ms | 3.77 ms | 28.41 MB | 25.8× |
+| **TinyBanglaBERT-4L (7.42M)** | **INT8** | **3.48 ms** | **1.77 ms** | **2.39 ms** | **19.20 MB** | **42.1×** |
+
+---
+
+## Publication Figures (300 DPI)
 
 <div align="center">
 
-| Figure 1: 4-Way Ablation Analysis | Figure 2: Efficiency-Accuracy Tradeoff |
+| Fig. 1: Factorial Learning Curves (H1 & H2) | Fig. 2: Calibration (ECE) & Teacher Fidelity |
 |:---:|:---:|
-| ![Ablation](experiments/figures/fig1_ablation_f1_accuracy.png) | ![Efficiency](experiments/figures/fig2_efficiency_tradeoff.png) |
+| ![Fig 1](experiments/v3/figures/fig1_v3_factorial_interactions.png) | ![Fig 2](experiments/v3/figures/fig2_v3_calibration_agreement.png) |
 
-| Figure 3: Latency & Speedup Breakdown | Figure 4: Cross-Domain Generalization |
+| Fig. 3: Held-Out Test Non-Inferiority Forest Plot | Fig. 4: Cross-Genre 1% Recalibration |
 |:---:|:---:|
-| ![Latency](experiments/figures/fig3_latency_speedup_breakdown.png) | ![Generalization](experiments/figures/fig4_crossdomain_generalization.png) |
+| ![Fig 3](experiments/v3/figures/fig3_v3_test_noninferiority.png) | ![Fig 4](experiments/v3/figures/fig4_v3_crossgenre_recalibration.png) |
 
-| Figure 5: SHAP vs. LIME Agreement | Figure 6: Test Confusion Matrices |
+| Fig. 5: ONNX CPU Speedup & Cascade RTT | Fig. 6: Held-Out Test Confusion Matrices |
 |:---:|:---:|
-| ![Explainability](experiments/figures/fig5_explainability_agreement.png) | ![Confusion Matrices](experiments/figures/fig6_confusion_matrices.png) |
+| ![Fig 5](experiments/v3/figures/fig5_v3_efficiency_cascade.png) | ![Fig 6](experiments/v3/figures/fig6_v3_confusion_matrices.png) |
 
 </div>
 
 ---
 
-## 🔍 Explainability (SHAP & LIME)
+## Reproducing the v3 Pipeline
 
-TinyBanglaBERT includes first-class support for token attribution explainability via both **SHAP (KernelExplainer)** and **LIME (LimeTextExplainer)**.
+```powershell
+# 1. Generate leak-free MinHash splits & nested subsets
+.venv\Scripts\python.exe -m scripts.make_splits_v3
+.venv\Scripts\python.exe -m scripts.make_splits_v3_baitbuster
 
-```bash
-# Run side-by-side SHAP and LIME token attribution on a headline
-python -m scripts.explain --headline "ফেসবুকে এই ছবিটি দেখে চমকে যাবেন আপনিও!"
+# 2. Train Phase E teachers, baselines & 5-fold OOF distillation targets
+.venv\Scripts\python.exe -m scripts.train_v3_phase_e --dataset baitbuster --unweighted --label-smoothing 0.05 --llrd 0.9 --models teacher_oof teacher_base small_12l
+.venv\Scripts\python.exe -m scripts.train_v3_phase_e --dataset banglabait --text-mode title --models bilstm teacher_oof teacher_base small_12l
+
+# 3. Run Phase F controlled factorial grid & Phase G mechanism analysis
+.venv\Scripts\python.exe -m scripts.run_v3_grid --dataset baitbuster --unweighted --inits rand strided --objs ce kd --fracs 10 25 50 100
+.venv\Scripts\python.exe -m scripts.run_v3_grid --dataset banglabait --text-mode title --inits rand strided --objs ce kd --fracs 10 25 50 100
+.venv\Scripts\python.exe -m scripts.analyze_v3_mechanism --dataset baitbuster
+.venv\Scripts\python.exe -m scripts.analyze_v3_mechanism --dataset banglabait
+
+# 4. Run Phase J locked one-time test, Phase K cross-genre & Phase L efficiency
+$env:TBB_ALLOW_TEST="1"; .venv\Scripts\python.exe -m scripts.final_test --dataset baitbuster --models teacher_base_uw baseline_small_12l_ce_uw F_strided_kd_100_uw F_strided_ce_100_uw F_rand_kd_100_uw F_rand_ce_100_uw
+$env:TBB_ALLOW_TEST="1"; .venv\Scripts\python.exe -m scripts.final_test --dataset banglabait --models teacher_base teacher_base_tb baseline_small_12l_ce F_strided_kd_100 F_strided_ce_100 F_rand_kd_100 F_rand_ce_100
+.venv\Scripts\python.exe -m scripts.evaluate_v3_crossgenre
+.venv\Scripts\python.exe -m scripts.benchmark_v3_efficiency
+
+# 5. Verify all 337 consistency, guard, dedup & unit tests
+.venv\Scripts\pytest.exe tests/test_metric_consistency.py tests/test_guard.py tests/test_dedup.py tests/test_docs_consistency.py -q
 ```
-
-**Output:**
-```
-================================================================================
-Headline: ফেসবুকে এই ছবিটি দেখে চমকে যাবেন আপনিও!
-Predicted Class: CLICKBAIT (Confidence: 94.8%)
-================================================================================
-Top Attributing Tokens (SHAP):
-  [+] চমকে      (+0.342)  --> Pushes toward Clickbait
-  [+] যাবেন     (+0.218)  --> Pushes toward Clickbait
-  [+] আপনিও    (+0.185)  --> Pushes toward Clickbait
-
-Top Attributing Tokens (LIME):
-  [+] চমকে      (+0.311)  --> Pushes toward Clickbait
-  [+] যাবেন     (+0.194)  --> Pushes toward Clickbait
-  [+] ছবিটি      (+0.102)  --> Pushes toward Clickbait
-
-Cross-Method Token Agreement: Jaccard=0.67, Sign Agreement=100.0%
-================================================================================
-```
-
----
-
-## 📂 Repository Structure
-
-```
-tinybanglabert/
-├── configs/                                 # Strict YAML experiment configurations
-│   ├── base.yaml                            # Shared architecture and dataset defaults
-│   ├── teacher_baseline.yaml                # Teacher fine-tuning config
-│   ├── student_teacher_init_distilled.yaml  # Winning distillation config
-│   └── student_random_baseline.yaml         # Ablation baseline configs
-├── data/
-│   ├── raw/                                 # Untracked raw data (auto-downloaded)
-│   └── processed/
-│       ├── splits.json                      # Deterministic 80/10/10 split indices (tracked)
-│       └── data_report.md                   # Dataset hygiene and NFC normalization audit
-├── experiments/                             # Empirical results, reports, and publication artifacts
-│   ├── figures/                             # 300 DPI high-resolution figures (fig1 to fig6)
-│   ├── FINAL_RESULTS.md                     # Thesis Results Chapter package
-│   ├── IEEE_PAPER_REPORT.md                 # IEEE formatted conference manuscript draft
-│   ├── ieee_manuscript.tex                  # Ready-to-compile IEEEtran LaTeX source
-│   ├── ablation_table.csv                   # 4-way ablation results
-│   ├── efficiency_table.csv                 # PyTorch vs. ONNX INT8 benchmarks
-│   ├── significance_table.csv               # McNemar exact binomial test matrix
-│   ├── crossdomain_table.csv                # BaitBuster-Bangla 10k zero-shot benchmark
-│   └── explainability/examples.md           # Qualitative SHAP/LIME explanation case studies
-├── scripts/                                 # Executable CLI entry points
-│   ├── prepare_data.py                      # Data acquisition, cleaning, and stratification
-│   ├── train.py                             # Unified training & distillation pipeline
-│   ├── evaluate.py                          # Multi-metric evaluation runner
-│   ├── explain.py                           # SHAP & LIME CLI explainer
-│   ├── benchmark.py                         # Efficiency, latency, and memory profiler
-│   ├── tune_kd.py                           # Optuna hyperparameter tuning (T, alpha)
-│   └── generate_all_figures.py              # Visual plot generator
-├── src/                                     # Modular Python source library
-│   ├── data/                                # Cleaners, loaders, splitters, crossdomain pipelines
-│   ├── models/                              # Teacher, Student (TinyBanglaBERT), KD Loss
-│   ├── training/                            # Baseline, Distillation, and Grid Search Trainers
-│   ├── evaluation/                          # Metrics, McNemar exact tests, Ablation, Cross-Domain
-│   ├── explainability/                      # SHAP runner, LIME runner, Jaccard agreement
-│   ├── efficiency/                          # ONNX exporter, INT8 quantizer, Latency profiler
-│   └── utils/                               # Seeding, Config loader, Experiment logger
-├── tests/                                   # Complete Unit Test Suite (88 passing tests)
-├── CITATION.cff                             # GitHub native citation metadata
-├── CONTRIBUTING.md                          # Open-source contribution guidelines
-├── LICENSE                                  # MIT License
-├── pyproject.toml                           # PEP 517/518 build specification
-├── README.md                                # Master project documentation
-├── REPRODUCE.md                             # Step-by-step reproduction guide
-└── requirements.txt                         # Pinned pip requirements
-```
-
----
-
-## ⚡ Quick Start
-
-### 1. Installation
-
-```bash
-# Clone repository
-git clone https://github.com/your-username/tinybanglabert.git
-cd tinybanglabert
-
-# Create and activate virtual environment
-python -m venv .venv
-.venv\Scripts\activate       # Windows
-# source .venv/bin/activate  # Linux / macOS
-
-# Install package in development mode
-pip install -e ".[dev]"
-```
-
-### 2. Verify Installation (Unit Tests)
-
-```bash
-pytest tests/ -v
-# Expected: 88 passed in ~45s
-```
-
-### 3. End-to-End Execution Pipeline
-
-```bash
-# Step 1: Prepare and clean dataset (NFC normalization + 80/10/10 split)
-python -m scripts.prepare_data
-
-# Step 2: Fine-tune Teacher model
-python -m scripts.train --config configs/teacher_baseline.yaml
-
-# Step 3: Distil TinyBanglaBERT Student
-python -m scripts.train --config configs/student_teacher_init_distilled.yaml
-
-# Step 4: Export to ONNX and run dynamic INT8 Quantization
-python -m src.efficiency.export_onnx \
-    --model_dir experiments/tinybanglabert_final \
-    --output_dir experiments/tinybanglabert_final/onnx \
-    --quantize
-
-# Step 5: Benchmark CPU latency and memory
-python -m scripts.benchmark --config configs/student_teacher_init_distilled.yaml
-
-# Step 6: Run statistical McNemar significance testing
-python -m src.evaluation.mcnemar_test
-
-# Step 7: Evaluate zero-shot cross-domain generalization
-python -m src.evaluation.crossdomain_eval
-
-# Step 8: Generate all publication figures
-python -m scripts.generate_all_figures
-```
-
----
-
-## 📜 Citation
-
-If you use TinyBanglaBERT, its architecture, or distilled checkpoints in your research, please cite our work:
-
-```bibtex
-@article{rahman2026tinybanglabert,
-  title   = {TinyBanglaBERT: A Lightweight Knowledge-Distilled Transformer for Real-Time Explainable Bangla Clickbait Detection on Edge Devices},
-  author  = {Rahman, Mushfiqur},
-  year    = {2026},
-  journal = {arXiv preprint},
-  url     = {https://github.com/mushfiqur-rahman/tinybanglabert}
-}
-```
-
----
-
-## 📄 License
-
-This repository is distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.

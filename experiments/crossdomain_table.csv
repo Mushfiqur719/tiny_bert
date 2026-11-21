@@ -1,5 +1,5 @@
 Model,Evaluation Domain,Accuracy,Macro F1,Macro Precision,Macro Recall,Clickbait F1,Non-CB F1,Confusion Matrix
-Teacher (BanglaBERT),In-Domain (BanglaBait Test),0.8420,0.8233,0.8288,0.8187,0.7657,0.8808,"[[879, 103], [135, 389]]"
-Teacher (BanglaBERT),Cross-Domain (Unseen Dataset),0.7322 (-0.1098),0.7282 (-0.0951),0.7605,0.7976,0.6950,0.7613,"[[4271, 2593], [85, 3051]]"
-TinyBanglaBERT-final,In-Domain (BanglaBait Test),0.7563,0.7431,0.7390,0.7575,0.6850,0.8013,"[[740, 242], [125, 399]]"
-TinyBanglaBERT-final,Cross-Domain (Unseen Dataset),0.7579 (+0.0016),0.7553 (+0.0122),0.7843,0.8152,0.7299,0.7806,"[[4308, 2373], [48, 3271]]"
+Teacher (BanglaBERT),In-Domain (BanglaBait Test),0.8373,0.8174,0.8243,0.8121,0.7572,0.8808,"[[879, 103], [142, 382]]"
+Teacher (BanglaBERT),Cross-Domain (Unseen Dataset),0.7542 (-0.0831),0.7514 (-0.0660),0.7807,0.8119,0.7253,0.7776,"[[4297, 2399], [59, 3245]]"
+TinyBanglaBERT-final,In-Domain (BanglaBait Test),0.8054,0.7895,0.7853,0.7952,0.7314,0.8475,"[[814, 168], [125, 399]]"
+TinyBanglaBERT-final,Cross-Domain (Unseen Dataset),0.7470 (-0.0584),0.7459 (-0.0436),0.7684,0.7836,0.7288,0.7629,"[[4071, 2245], [285, 3399]]"

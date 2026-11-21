@@ -1,0 +1,1 @@
+[2026-11-21T07:37:38.284071+00:00] Invoked final_test.py dataset=banglabait models=['teacher_base', 'teacher_base_tb', 'baseline_small_12l_ce', 'F_strided_kd_100', 'F_strided_ce_100', 'F_rand_kd_100', 'F_rand_ce_100'], seeds=[13, 42, 87, 1234, 2026]

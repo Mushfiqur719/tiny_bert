@@ -46,10 +46,12 @@ import json
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
+
+from src.utils.test_guard import assert_test_access, TestSetLocked
 
 logger = logging.getLogger(__name__)
 
@@ -187,16 +189,28 @@ def load_splits(cfg) -> dict:
 def apply_splits(
     labeled_df: pd.DataFrame,
     splits: dict,
-) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    split: Optional[str] = None,
+) -> Union[tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame], pd.DataFrame]:
     """Slice *labeled_df* using the indices in *splits*.
 
     Args:
         labeled_df: The cleaned labeled DataFrame (must be indexed 0..N-1).
         splits: Dict as returned by ``load_splits`` / ``create_splits``.
+        split: Optional split selector ('train', 'val', or 'test').
+               If 'test', assert_test_access() is strictly enforced.
 
     Returns:
-        Tuple of (train_df, val_df, test_df), each with reset index.
+        If split is provided, returns that single DataFrame.
+        If split is None, returns (train_df, val_df, test_df).
     """
+    if split == "train":
+        return labeled_df.loc[splits["labeled"]["train"]].reset_index(drop=True)
+    elif split == "val":
+        return labeled_df.loc[splits["labeled"]["val"]].reset_index(drop=True)
+    elif split == "test":
+        assert_test_access()
+        return labeled_df.loc[splits["labeled"]["test"]].reset_index(drop=True)
+
     train_df = labeled_df.loc[splits["labeled"]["train"]].reset_index(drop=True)
     val_df   = labeled_df.loc[splits["labeled"]["val"]].reset_index(drop=True)
     test_df  = labeled_df.loc[splits["labeled"]["test"]].reset_index(drop=True)

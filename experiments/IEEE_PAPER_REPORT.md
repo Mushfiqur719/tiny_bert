@@ -1,180 +1,163 @@
-# TinyBanglaBERT: A Lightweight Knowledge-Distilled Transformer for Real-Time Bengali Clickbait Detection on Resource-Constrained Edge Devices
+# Initialisation vs. Distillation in Low-Resource Fine-Tuning: An Empirical Study on Compact Bengali Clickbait Encoders
 
-**Conference / Journal Submission Ready (IEEE Format)**
+**Author:** Mushfiqur Rahman  
+**Affiliation:** Department of Computer Science and Engineering, Independent University, Bangladesh (Dhaka, Bangladesh)  
+**Pre-Registration:** `PREREG.md` | **Locked Config:** `experiments/v3/LOCKED_CONFIG.yaml`  
 
 ---
 
 ## Abstract
-Clickbait headline detection in low-resource Indic languages, particularly Bengali, has predominantly relied on heavy pre-trained language models (such as BanglaBERT with ~110M parameters). While these large models achieve competitive classification accuracy, their significant parameter footprint, high latency, and heavy memory requirements prevent deployment on resource-constrained client environments, such as browser extensions and mobile devices. In this work, we propose **TinyBanglaBERT**, a lightweight, 4-layer student transformer model (~11.55M parameters, ~9.58x compression) trained via knowledge distillation and structural teacher-projection initialization. 
 
-Extensive empirical evaluations demonstrate that TinyBanglaBERT retains **`90.26%` of the Teacher's Macro-F1** (`0.7431` vs. `0.8233`) and **`89.82%` of accuracy** (`75.63%` vs. `84.20%`) on the in-domain BanglaBait test set ($N = 1,506$). On CPU edge hardware, TinyBanglaBERT combined with ONNX Runtime achieves an inference latency of **`5.15 ms` per headline** (**`22.69x` faster** than the Teacher) and **`4.11 ms` in dynamic INT8 quantization** (**`28.41x` faster**, achieving **`243.2 headlines/second`** at **`11.22 MB` disk size**). Pairwise exact binomial McNemar tests confirm the statistical distribution of errors, while dual SHAP and LIME explainability proves high lexical concordance on sensational indicators. Furthermore, on an unseen zero-shot cross-domain benchmark of 10,000 human-annotated headlines (`BaitBuster-Bangla`), TinyBanglaBERT exhibits superior domain invariance, gaining **`+1.22%` Macro-F1** (`0.7553`), whereas the 110M Teacher drops by **`-9.51%`** (`0.7282`), retaining **`103.7%`** of Teacher performance.
+Deploying large pre-trained language models such as BanglaBERT (110.62M parameters, 422.25 MB) on resource-constrained edge hardware is limited by latency and memory budgets. While task-specific knowledge distillation (KD) is widely used to compress transformers, prior studies often confound weight initialisation with the distillation objective. In this pre-registered, leak-free empirical study, we ask: *in low-resource fine-tuning, does compact pre-trained initialisation matter more than the distillation objective?*
 
-**Index Terms** — Bengali Natural Language Processing, Knowledge Distillation, Clickbait Detection, Transformer Compression, Model Explainability, Edge AI, ONNX Runtime.
-
----
-
-## I. Introduction
-Clickbait—the deliberate practice of using sensationalized, misleading, or ambiguous headlines to entice user clicks—poses a critical challenge to digital information integrity. In Bengali, spoken by over 230 million people, digital clickbait has proliferated rapidly across social media platforms and online news portals.
-
-While transformer architectures such as BanglaBERT have achieved strong baseline classification numbers, their high computational overhead (110.6M parameters, >420 MB memory footprint) renders them impractical for real-time edge processing (e.g., client-side browser DOM filtering, mobile applications).
-
-To bridge the gap between classification accuracy and edge deployability, this paper introduces **TinyBanglaBERT**, establishing four key contributions:
-1. **Architecture & Initialization:** A 4-layer compact student architecture with an orthogonal PCA teacher-projection mechanism ($W_p \in \mathbb{R}^{768 \times 256}$) transferring lower-layer representations from BanglaBERT.
-2. **Distillation Optimization:** A temperature-softened distillation framework ($T=2.0, \alpha=0.1$) yielding 90.3% in-domain knowledge retention at ~10x parameter reduction.
-3. **Edge Performance & INT8 Quantization:** Export to ONNX Runtime and dynamic INT8 quantization achieving 5.15 ms CPU latency and an 11.22 MB footprint.
-4. **Explainability & Generalization:** Multi-framework SHAP/LIME token attribution analysis and zero-shot cross-domain evaluation on 10,000 external human-labeled samples.
+Using a strictly parameter-matched 4-layer architecture (**TinyBanglaBERT-4L**, 7.42M parameters — 14.9× smaller than BanglaBERT-Base and 1.85× smaller than BanglaBERT-Small-12L), we evaluate a controlled factorial grid across initialisation (`rand` vs. `strided` layers `{2, 5, 8, 11}`), objective (Cross-Entropy vs. 5-fold out-of-fold Logit KD), four nested training fractions (10%, 25%, 50%, 100%), and five random seeds across two MinHash-deduplicated Bengali clickbait benchmarks: **BanglaBait** (news headlines, $N = 15,032$) and **BaitBuster-Bangla** (YouTube titles, $N = 10,000$). A full-interaction linear mixed-effects model with centered $\log(\text{fraction})$ confirms **H1** via direct Wald contrasts ($\beta_{\text{strided}} - \beta_{\text{kd}}$): strided initialisation outperforms KD by **+2.26 pp** ($\chi^2 = 64.37, p = 1.03 \times 10^{-15}$) on BanglaBait and **+1.78 pp** ($\chi^2 = 53.56, p = 2.51 \times 10^{-13}$) on BaitBuster-Bangla. **H2 is partially supported**: the `strided × kd` interaction is significant on BanglaBait (**-1.30 pp**, $p = 0.001$) but not on BaitBuster-Bangla ($p = 0.448$), while `kd × log(frac)` is marginal on BanglaBait ($p = 0.052$) and null on BaitBuster ($p = 0.395$). Across both datasets, KD reduces Expected Calibration Error (ECE) by **13.8%–54.6%**. On locked one-time held-out tests (10,000-resample paired bootstrap, Holm-corrected, $\Delta = -2.0$ pp non-inferiority margin), TinyBanglaBERT-4L achieves **77.86% accuracy (0.7537 Macro-F1)** on BanglaBait — formally non-inferior to Small-12L (-0.06 pp, $p_{\text{Holm}} = 1.00$), superior to random-init KD by +3.14 pp ($p_{\text{Holm}} = 0.0012$), but **not** non-inferior to BanglaBERT-Base (-1.86 pp, 95% CI `[-3.65, -0.13]`). On BaitBuster-Bangla, all models saturate near 98% (98.10% vs. 98.82% Base; 1.90% vs. 1.18% error rate); a channel-level audit reveals that 94.7% of non-clickbait rows come from a single channel, explaining the ceiling effect. Under unified ONNX Runtime CPU benchmarking (4 threads), TinyBanglaBERT-4L achieves a **16.3× like-for-like INT8 speedup** (1.77 ms vs. 28.79 ms) and a **25.8× like-for-like FP32 speedup** (2.89 ms vs. 74.46 ms; 42.1× cross-precision).
 
 ---
 
-## II. Methodology & Mathematical Formulation
+## 1. Introduction & Pre-Registered Hypotheses
 
-```
-                     ┌────────────────────────────────────────────────────────┐
-                     │          Teacher: BanglaBERT (12 Layers, 768H)         │
-                     └──────────────────────────┬─────────────────────────────┘
-                                                │ (Soft Logits z_T / T)
-                                                ▼
-     Ground Truth Labels y ────────► ┌──────────────────────┐
-                                     │ Distillation Loss L  │ ◄──── Student Logits z_S
-                                     └──────────────────────┘
-                                                ▲
-                                                │
-                     ┌──────────────────────────┴─────────────────────────────┐
-                     │      Student: TinyBanglaBERT (4 Layers, 256H)          │
-                     │      Init: Orthogonal PCA Projection W_p (768 -> 256)  │
-                     └────────────────────────────────────────────────────────┘
-```
+Large pre-trained transformers such as BanglaBERT (Bhattacharjee et al., Findings of NAACL 2022) deliver strong performance on Bengali NLU, yet their 110.6M-parameter footprint and high CPU latency hinder client-side deployment. Knowledge Distillation (Hinton et al., 2015; Sanh et al., 2019; Jiao et al., 2020; Wang et al., 2020) is the standard compression method, while Turc et al. (2019) (*Well-Read Students Learn Better: On the Importance of Pre-training Compact Models*) showed on English GLUE that pre-training compact students before fine-tuning can outweigh task-specific distillation from scratch.
 
-### A. Distillation Objective
-The student model is trained using Hinton's knowledge distillation loss $\mathcal{L}_{\text{KD}}$, defined as a convex combination of weighted Cross-Entropy ($\mathcal{L}_{\text{CE}}$) and Kullback-Leibler divergence ($\mathcal{L}_{\text{KL}}$) over temperature-scaled probabilities:
-
-$$\mathcal{L}_{\text{total}} = \alpha \mathcal{L}_{\text{CE}}\left(\sigma(z_S), y\right) + (1 - \alpha) T^2 \mathcal{L}_{\text{KL}}\left(\sigma\left(\frac{z_S}{T}\right), \sigma\left(\frac{z_T}{T}\right)\right)$$
-
-where $z_S, z_T$ represent student and teacher classification logits, $T$ denotes temperature scaling ($T=2.0$), $\alpha$ is the hard-loss weight ($\alpha=0.1$), and $\sigma(\cdot)$ is the softmax function.
-
-### B. Teacher-Projected Initialization
-Instead of random Gaussian initialization, the student’s token embedding matrix $E_S \in \mathbb{R}^{V \times 256}$ and transformer layers $\{0, 1, 2, 3\}$ are projected from the Teacher's pre-trained weights $E_T \in \mathbb{R}^{V \times 768}$ using an orthogonal linear projection matrix $W_p \in \mathbb{R}^{768 \times 256}$ computed via Principal Component Analysis (PCA):
-
-$$E_S = E_T W_p, \quad \text{where } W_p^T W_p = I$$
+We pre-register two hypotheses in `PREREG.md`:
+- **H1 (Initialisation Dominance):** On a fixed 7.42M-parameter 4-layer architecture, strided pre-trained initialisation changes Macro-F1 more than switching from Cross-Entropy (CE) to Knowledge Distillation (KD).
+- **H2 (Objective–Init & Data Interaction):** The Macro-F1 benefit of KD over CE shrinks as initialisation quality improves and as labelled training data increases.
 
 ---
 
-## III. Experimental Results & Discussion
+## 2. Data Hygiene & Channel-Confounding Audit
 
-### A. In-Domain Classification Performance (BanglaBait Test Split)
-Table I outlines the classification performance on the test split ($N = 1,506$).
+Both **BanglaBait** (Mahtab et al., RANLP 2023) and **BaitBuster-Bangla** (Al Imran et al., Data in Brief, 2024) undergo Unicode NFC normalisation and MinHash LSH clustering ($J \ge 0.9$, 128 permutations, character 3-shingles) followed by 10-fold `StratifiedGroupKFold` splitting (Fold 0 = Test, Fold 1 = Val, Folds 2–9 = Train), guaranteeing zero cross-split near-duplicate leakage:
 
-#### TABLE I: In-Domain Test Performance on BanglaBait Dataset
-| Model | Layers | Hidden | Params | Accuracy | Macro F1 | Macro Prec | Macro Rec | Clickbait F1 | Non-CB F1 |
-|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **Teacher (BanglaBERT)** | 12 | 768 | 110.6M | **84.20%** | **0.8233** | 0.8288 | 0.8187 | **0.7657** | 0.8808 |
-| **TinyBanglaBERT-final** | 4 | 256 | **11.55M** | **75.63%** | **0.7431** | 0.7390 | 0.7575 | **0.6850** | 0.8013 |
+| Benchmark | Genre | Clean Total | Train (80%) | Val (10%) | Test (10%) | Conflicts Dropped | Cross-Split Leakage |
+|---|---|---:|---:|---:|---:|---:|---:|
+| **BanglaBait** | News headlines + body | 15,032 | 12,025 | 1,503 | 1,504 | 24 rows (11 groups) | 0 groups (0.00%) |
+| **BaitBuster-Bangla** | YouTube video titles | 10,000 | 8,000 | 1,000 | 1,000 | 0 rows | 0 groups (0.00%) |
 
-![Figure 1: Ablation Performance](figures/fig1_ablation_f1_accuracy.png)
-*Fig. 1. Test Macro-F1 and Accuracy across Teacher and Student Ablation configurations.*
+- **Classical 5-Seed Validation Baselines on BanglaBait:** TF-IDF + Logistic Regression (**0.6922** Macro-F1, 71.52% Acc) and 2-layer BiLSTM (**0.7342 ± 0.0065** Macro-F1, 75.45% Acc).
+- **Channel-Confounding Audit on BaitBuster-Bangla:** Auditing the 10,000 human-annotated gold rows by `channel_id` reveals only 13 unique channels where channel identity is almost 1:1 confounded with the label: *Independent Television* alone accounts for **4,124 / 4,356 (94.7%)** of all non-clickbait rows (0.00% clickbait), while the top four clickbait channels (*Ruposhi Bangla Tv* 3,395; *LocalBD* 1,062; *No1 News Bd* 784; *StarBuzz Bangla* 423) are **98.0%–100.0%** clickbait. A balanced channel-disjoint split is therefore structurally impossible on the 10k gold subset, explaining why even randomly initialised 4L models saturate near 98%. We treat BanglaBait as our primary unconfounded benchmark and report BaitBuster transparently with this caveat.
 
 ---
 
-### B. Factorial Ablation Study
-To isolate the effect of initialization versus distillation, all four combinations were trained under identical budgets.
+## 3. Core Factorial Grid & Mechanism Analysis (Validation Split)
 
-#### TABLE II: Full Factorial Ablation Study ($2 \times 2$)
-| Model Configuration | Init Strategy | Objective | Parameters | Val F1 | Test Acc | Test F1 | Clickbait F1 | Non-CB F1 |
-|:---|:---|:---|:---:|:---:|:---:|:---:|:---:|:---:|
-| **Teacher Baseline** | Pre-trained | CE | 110.6M | 0.8065 | 84.20% | 0.8233 | 0.7657 | 0.8808 |
-| **1. Random + Supervised** | Random Gaussian | CE | 11.55M | 0.7448 | 74.63% | 0.7313 | 0.6678 | 0.7948 |
-| **2. Random + Distilled** | Random Gaussian | KD ($T=2, \alpha=0.1$) | 11.55M | 0.7448 | 74.63% | 0.7313 | 0.6678 | 0.7948 |
-| **3. Teacher-Init + Supervised** | Teacher Projection | CE | 11.55M | **0.7462** | **75.63%** | **0.7431** | **0.6850** | 0.8013 |
-| **4. Teacher-Init + Distilled** | Teacher Projection | KD ($T=2, \alpha=0.1$) | 11.55M | **0.7462** | **75.63%** | **0.7431** | **0.6850** | 0.8013 |
+![Figure 1: Factorial Interactions](v3/figures/fig1_v3_factorial_interactions.png)
+*Fig. 1. 5-seed Validation Macro-F1 (Mean ± Std) across 10%, 25%, 50%, and 100% nested training fractions on (a) BanglaBait and (b) BaitBuster-Bangla for the parameter-matched 7.42M 4-layer architecture.*
 
-**Key Finding:** Teacher-projected initialization provided a **`+1.18%` improvement in Test Macro-F1** (`0.7431` vs `0.7313`) and a **`+1.72%` boost in Clickbait F1** (`0.6850` vs `0.6678`), proving that structural embedding alignment prevents representation collapse in small transformers.
+### Table I: Controlled 5-Seed Factorial Grid on Validation Split (7.42M 4L Architecture)
+| Dataset / Init | Obj. | 10% Data | 25% Data | 50% Data | 100% Data | 100% ECE ↓ | 100% Teacher Agreement |
+|---|---|---:|---:|---:|---:|---:|---:|
+| *BanglaBait* — `rand` | CE | 0.6554 ± 0.0144 | 0.6997 ± 0.0108 | 0.7224 ± 0.0085 | 0.7513 ± 0.0077 | 0.0820 | 83.34% |
+| *BanglaBait* — `rand` | KD | 0.6764 ± 0.0134 | 0.7297 ± 0.0087 | 0.7492 ± 0.0054 | 0.7555 ± 0.0054 | 0.0707 | 84.72% |
+| *BanglaBait* — `strided` | CE | 0.7213 ± 0.0048 | 0.7463 ± 0.0057 | 0.7603 ± 0.0078 | 0.7732 ± 0.0046 | 0.0994 | 86.77% |
+| *BanglaBait* — `strided` | KD | **0.7323 ± 0.0057** | **0.7551 ± 0.0053** | **0.7673 ± 0.0042** | **0.7747 ± 0.0062** | **0.0808** | **88.13%** |
+| *BaitBuster* — `rand` | CE | 0.9174 ± 0.0072 | 0.9642 ± 0.0026 | 0.9746 ± 0.0007 | 0.9805 ± 0.0009 | 0.0174 | 98.72% |
+| *BaitBuster* — `rand` | KD | 0.9114 ± 0.0101 | 0.9639 ± 0.0037 | 0.9725 ± 0.0031 | 0.9811 ± 0.0029 | 0.0079 | 98.78% |
+| *BaitBuster* — `strided` | CE | 0.9610 ± 0.0018 | 0.9745 ± 0.0016 | 0.9796 ± 0.0012 | 0.9851 ± 0.0014 | 0.0122 | 99.10% |
+| *BaitBuster* — `strided` | KD | **0.9615 ± 0.0025** | **0.9741 ± 0.0016** | **0.9809 ± 0.0015** | **0.9866 ± 0.0017** | **0.0080** | **99.28%** |
+
+### Table II: Full-Interaction Linear Mixed-Effects Model (Centered `log_frac_c`, Percentage Points)
+Formula: `f1_macro ~ C(init) * C(objective) * log_frac_c + (1 | seed)`
+
+| Factor / Contrast | BanglaBait $\beta$ (pp) | BanglaBait $p$-value | BaitBuster $\beta$ (pp) | BaitBuster $p$-value |
+|---|---:|---:|---:|---:|
+| `C(init)[T.strided]` | +4.30 [+3.80, +4.90] | $< 0.0001$ | +1.60 [+1.10, +2.10] | $< 0.0001$ |
+| `C(objective)[T.kd]` | +2.05 [+1.50, +2.60] | $< 0.0001$ | -0.20 [-0.70, +0.30] | 0.434 |
+| **Direct H1 Wald Contrast ($\beta_{\text{strided}} - \beta_{\text{kd}}$)** | **+2.26 [+1.71, +2.81]** | **$1.03 \times 10^{-15}$** | **+1.78 [+1.30, +2.26]** | **$2.51 \times 10^{-13}$** |
+| `strided × kd` (**H2a — partial**) | -1.30 [-2.10, -0.60] | 0.001 | +0.30 [-0.40, +0.90] | 0.448 |
+| `log_frac_c` | +4.10 [+3.60, +4.60] | $< 0.0001$ | +2.70 [+2.30, +3.10] | $< 0.0001$ |
+| `strided × log_frac_c` | -1.90 [-2.50, -1.20] | $< 0.0001$ | -1.70 [-2.20, -1.10] | $< 0.0001$ |
+| `kd × log_frac_c` (**H2b — partial**) | -0.60 [-1.30, +0.00] | 0.052 | +0.20 [-0.30, +0.80] | 0.395 |
+| 3-way interaction | +0.30 [-0.70, +1.20] | 0.587 | -0.20 [-1.00, +0.60] | 0.633 |
+
+![Figure 2: Calibration and Agreement](v3/figures/fig2_v3_calibration_agreement.png)
+*Fig. 2. Mechanism analysis at 100% data: (a) Expected Calibration Error (ECE ↓) comparing CE vs. KD (13.8%–54.6% reduction); (b) Student–Teacher prediction fidelity (%) across both benchmarks.*
 
 ---
 
-### C. Computational Efficiency, CPU Latency & Edge Quantization
-Single-headline inference latency was benchmarked over $N = 200$ iterations on CPU and GPU.
+## 4. One-Time Locked Held-Out Test & Cross-Genre Results
 
-#### TABLE III: Computational Efficiency & Latency Benchmark ($B=1, L=128$)
-| Model Variant | Runtime / Precision | Parameters | Disk Size | CPU Latency (Mean / P95) | CPU Throughput | GPU Latency | Memory (CPU) | Speedup vs. Teacher |
-|:---|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **Teacher (BanglaBERT)** | PyTorch FP32 | 110,618,882 | 422.23 MB | 116.83 ms / 125.46 ms | 8.6 fps | 13.79 ms | 0.27 MB | 1.00x |
-| **TinyBanglaBERT-final** | PyTorch FP32 | 11,549,442 | 44.07 MB | 9.98 ms / 13.68 ms | 100.2 fps | **5.95 ms** | 0.27 MB | **11.71x** |
-| **TinyBanglaBERT-final** | ONNX Runtime FP32 | 11,549,442 | 44.15 MB | **5.15 ms / 6.09 ms** | **194.2 fps** | N/A | **0.03 MB** | **22.69x** |
-| **TinyBanglaBERT-final** | ONNX Runtime INT8 | 11,549,442 | **11.22 MB** | **4.11 ms / 5.59 ms** | **243.2 fps** | N/A | **0.02 MB** | **28.41x** |
+![Figure 3: Held-Out Test Non-Inferiority Forest Plot](v3/figures/fig3_v3_test_noninferiority.png)
+*Fig. 3. 10,000-resample paired bootstrap Macro-F1 differences (95% CIs) against reference models with the pre-registered $\Delta = -2.0$ pp non-inferiority boundary (dashed red line).*
+
+### Table III: Held-Out Test Results (5-Seed Mean ± Std, 10,000 Paired Bootstrap Resamples, Holm-Corrected)
+| Dataset / Model | Params | Test Acc (%) | Test Macro-F1 | Non-Inferior ($\Delta = -2.0$ pp)? |
+|---|---:|---:|---:|---|
+| *BanglaBait* — Teacher (`title+body`) | 110.62M | 81.35 ± 0.78 | 0.7934 ± 0.0074 | Superior (+2.11 pp vs Title, $p_{\text{Holm}} = 0.028$) |
+| *BanglaBait* — Teacher (`title`) | 110.62M | 79.35 ± 0.65 | 0.7723 ± 0.0034 | Reference (Title) |
+| *BanglaBait* — Small-12L (`title`) | 13.74M | 77.63 ± 0.88 | 0.7543 ± 0.0078 | Reference (Small-12L) |
+| ***BanglaBait* — 4L Strided + KD** | **7.42M** | **77.86 ± 0.56** | **0.7537 ± 0.0063** | **True vs. Small-12L (-0.06 pp) / False vs. Base (-1.86 pp)** |
+| *BanglaBait* — 4L Strided + CE | 7.42M | 76.42 ± 0.66 | 0.7451 ± 0.0035 | False (Both) |
+| *BanglaBait* — 4L Rand + CE | 7.42M | 75.51 ± 0.76 | 0.7239 ± 0.0046 | False (Both) |
+| *BanglaBait* — 4L Rand + KD | 7.42M | 75.27 ± 1.10 | 0.7222 ± 0.0078 | False (Both) |
+| *BaitBuster* — Teacher Base (12L) | 110.62M | 98.82 ± 0.22 | 0.9880 ± 0.0023 | Reference (1.18% error) |
+| *BaitBuster* — Small-12L (CE) | 13.74M | 98.70 ± 0.17 | 0.9868 ± 0.0017 | True (vs. Base) |
+| ***BaitBuster* — 4L Strided + KD** | **7.42M** | **98.10 ± 0.14** | **0.9807 ± 0.0014** | **True (Both; 1.90% error, near ceiling)** |
+| *BaitBuster* — 4L Strided + CE | 7.42M | 98.14 ± 0.23 | 0.9811 ± 0.0024 | True (Both) |
+| *BaitBuster* — 4L Rand + CE | 7.42M | 97.96 ± 0.27 | 0.9792 ± 0.0028 | True (Both) |
+| *BaitBuster* — 4L Rand + KD | 7.42M | 97.92 ± 0.34 | 0.9788 ± 0.0035 | True (Both) |
+
+### Table IV: Direct Held-Out Test Contrasts on BanglaBait (10,000 Paired Bootstrap Resamples)
+| Direct Contrast | Diff (pp) | 95% CI (pp) | $p_{\text{raw}}$ | $p_{\text{Holm}}$ |
+|---|---:|---:|---:|---:|
+| `Strided + KD` vs. `Rand + KD` (Init under KD) | **+3.14** | `[+1.49, +4.77]` | 0.0002 | **0.0012** |
+| `Strided + CE` vs. `Rand + CE` (Init under CE) | +2.12 | `[+0.32, +3.95]` | 0.0180 | 0.0900 |
+| `Strided + KD` vs. `Strided + CE` (KD under Strided) | +0.86 | `[-0.45, +2.10]` | 0.1956 | 0.5868 |
+| `Rand + KD` vs. `Rand + CE` (KD under Rand) | -0.17 | `[-1.67, +1.27]` | 0.8196 | 1.0000 |
+| `Strided + KD` vs. `Small-12L` | -0.06 | `[-1.71, +1.56]` | 0.9412 | 1.0000 (NI: True) |
+| `Strided + KD` vs. `Teacher Base` | -1.86 | `[-3.65, -0.13]` | 0.0356 | 0.1424 (NI: False) |
+
+### Table V: Full Cross-Genre Evaluation (News → YouTube, $N = 10,000$, True Prevalence = 56.44%)
+| Model (Trained on BanglaBait) | Zero-Shot Acc | Zero-Shot Macro-F1 [95% CI] | 1% Recalibrated Acc | 1% Recalibrated Macro-F1 [95% CI] |
+|---|---:|---|---:|---|
+| `teacher_base` (110.6M) | 78.66% | 0.7852 [0.7669, 0.8057] | 85.51% | 0.8549 [0.8400, 0.8735] |
+| `baseline_small_12l_ce` (13.7M) | 79.73% | 0.7963 [0.7724, 0.8220] | 84.68% | 0.8464 [0.8394, 0.8582] |
+| `F_strided_kd_100` (7.42M) | 75.93% | 0.7570 [0.7387, 0.7802] | 81.93% | 0.8192 [0.8130, 0.8276] |
+| `F_strided_ce_100` (7.42M) | 75.40% | 0.7520 [0.7296, 0.7684] | 78.79% | 0.7877 [0.7755, 0.7987] |
+| **`F_rand_kd_100` (7.42M)** | **81.21%** | **0.8115 [0.7802, 0.8350]** | **85.80%** | **0.8565 [0.8474, 0.8650]** |
+
+*Cross-genre nuance:* `F_rand_kd_100` outperforms `F_strided_kd_100` out-of-genre (0.8115 vs. 0.7570 zero-shot; 0.8565 vs. 0.8192 recalibrated), indicating that news-pre-trained strided representations over-specialise to formal journalistic syntax under YouTube vernacular shift.
 
 <p align="center">
-  <img src="figures/fig2_efficiency_tradeoff.png" width="48%" />
-  <img src="figures/fig3_latency_speedup_breakdown.png" width="48%" />
+  <img src="v3/figures/fig4_v3_crossgenre_recalibration.png" width="52%" />
+  <img src="v3/figures/fig6_v3_confusion_matrices.png" width="46%" />
 </p>
-<p align="center">
-  <em>Fig. 2 (Left): Macro-F1 vs. Model Footprint (MB) Pareto frontier. Fig. 3 (Right): CPU latency and real-time throughput.</em>
-</p>
+<p align="center"><em>Fig. 4 (Left): Cross-genre zero-shot vs. 1% threshold recalibration on BaitBuster-Bangla (N=10,000). Fig. 6 (Right): Held-out test confusion matrices (Seed 42) across both benchmarks.</em></p>
 
 ---
 
-### D. Statistical Significance Testing (McNemar's Exact Test)
-Exact binomial McNemar tests were conducted to examine error distributions across all 1,506 test instances.
+## 5. Unified ONNX CPU Efficiency & Cascade RTT
 
-#### TABLE IV: Pairwise Exact Binomial McNemar Contingency Results
-| Pairwise Comparison | $n_{00}$ (Both Correct) | $b$ (A Only) | $c$ (B Only) | $n_{11}$ (Both Wrong) | Discordant ($b+c$) | McNemar $p$-value | Significant ($\alpha=0.05$)? |
-|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **Teacher vs. TinyBanglaBERT-final** | 1038 | 230 | 101 | 137 | 331 | **`p < 0.001`** | **Yes ($p < 0.05$)** |
-| **TinyBanglaBERT vs. Random Baseline** | 998 | 141 | 126 | 241 | 267 | **`p = 0.3916`** | No ($p \ge 0.05$) |
-| **TinyBanglaBERT vs. Random Distilled** | 998 | 141 | 126 | 241 | 267 | **`p = 0.3916`** | No ($p \ge 0.05$) |
-| **TinyBanglaBERT vs. Teacher-Init Baseline** | 1139 | 0 | 0 | 367 | 0 | **`p = 1.0000`** | Identical Discrete Predictions |
+![Figure 5: Efficiency and Cascade RTT](v3/figures/fig5_v3_efficiency_cascade.png)
+*Fig. 5. (a) Unified ONNX Runtime CPU latency (p50, 4 threads, FP32 vs. INT8); (b) Edge–cloud cascade effective latency under 0 ms, 50 ms, and 150 ms mobile network RTT.*
 
-**Interpretation:** The Teacher significantly outperformed the Student ($p < 0.001$) on nuanced syntactic boundary cases. Meanwhile, Teacher-projected initialization reduced unforced errors over random initialization ($b=141$ vs $c=126$).
+### Table VI: Model × Precision × Thread Latency Benchmark (ONNX Runtime 1.29.0, Batch 1, Length 64)
+| Model | Precision | 1-Thread p50 | 4-Thread p50 | 4-Thread p95 | Disk Size | Like-for-Like Speedup (4T) |
+|---|---|---:|---:|---:|---:|---:|
+| BanglaBERT-Base (110.6M) | FP32 | 190.56 ms | 74.46 ms | 88.78 ms | 422.25 MB | 1.0× (FP32 ref) |
+| BanglaBERT-Base (110.6M) | INT8 | 99.67 ms | 28.79 ms | 35.67 ms | 177.75 MB | 1.0× (INT8 ref) |
+| BanglaBERT-Small-12L (13.7M) | FP32 | 15.06 ms | 8.72 ms | 10.36 ms | 52.68 MB | 8.5× (FP32) |
+| BanglaBERT-Small-12L (13.7M) | INT8 | 10.18 ms | 5.56 ms | 6.97 ms | 25.59 MB | 5.2× (INT8) |
+| **TinyBanglaBERT-4L (7.42M)** | **FP32** | **5.17 ms** | **2.89 ms** | **3.77 ms** | **28.41 MB** | **25.8× (FP32)** |
+| **TinyBanglaBERT-4L (7.42M)** | **INT8** | **3.48 ms** | **1.77 ms** | **2.39 ms** | **19.20 MB** | **16.3× (INT8) / 42.1× cross-prec.** |
 
----
-
-### E. Interpretability & Cross-Method Concordance (SHAP vs. LIME)
-
-![Figure 5: Explainability Concordance](figures/fig5_explainability_agreement.png)
-*Fig. 5. Distribution of Top-3 Token Jaccard Overlap and Sign Polarity Agreement between SHAP and LIME.*
-
-#### TABLE V: Cross-Method Concordance Summary ($N=15$ Test Headlines)
-| Explainability Concordance Metric | Value | Theoretical Interpretation |
-|:---|:---:|:---|
-| **Mean Top-3 Feature Jaccard Overlap** | **`32.67%`** (Median: `20.00%`) | Demonstrates substantial agreement on primary decision-driving tokens. |
-| **Mean Sign (Polarity) Agreement** | **`48.81%`** | Consistent polarity on whether words induce or suppress clickbait. |
-| **Dominant Positive Features (+ Clickbait)** | *‘কি’*, *‘কেন’*, *‘ভিডিও’*, *‘ভাইরাল’*, *‘!’*, *‘?’* | Rhetorical questions, curiosity gaps, and sensational punctuation. |
-| **Dominant Negative Features (- Non-Clickbait)** | *‘মন্ত্রী’*, *‘সরকার’*, *‘পুলিশ’*, *‘ঢাকা’*, *‘জানালেন’* | Named entities, political bodies, and formal event verbs. |
+In an edge–cloud deferral cascade (Tiny-4L INT8 on-device + Base FP32 cloud), escalating 10% of uncertain headlines yields **14.22 ms** (50 ms RTT) and **24.22 ms** (150 ms RTT) effective latency compared to **124.46 ms** ($50 + 74.46$) and **224.46 ms** ($150 + 74.46$) for cloud-only inference.
 
 ---
 
-### F. Zero-Shot Cross-Domain Generalization & Domain Invariance
-Generalization was evaluated on 10,000 human-annotated external headlines from `BaitBuster-Bangla`.
+## 6. Limitations, Ethics & Reproducibility
 
-#### TABLE VI: In-Domain vs. Cross-Domain Zero-Shot Generalization
-| Model | Evaluation Domain | Accuracy | Macro F1 | Macro Prec | Macro Rec | Clickbait F1 | Non-CB F1 | Generalization $\Delta$ |
-|:---|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **Teacher (BanglaBERT)** | In-Domain *(BanglaBait)* | **0.8420** | **0.8233** | 0.8288 | 0.8187 | **0.7657** | 0.8808 | Baseline |
-| **Teacher (BanglaBERT)** | Cross-Domain *(BaitBuster)* | 0.7322 | 0.7282 | 0.7605 | 0.7976 | 0.6950 | 0.7613 | **`-9.51%` F1 Drop** |
-| **TinyBanglaBERT-final** | In-Domain *(BanglaBait)* | 0.7563 | 0.7431 | 0.7390 | 0.7575 | 0.6850 | 0.8013 | Baseline |
-| **TinyBanglaBERT-final** | Cross-Domain *(BaitBuster)* | **0.7579** | **0.7553** | **0.7843** | **0.8152** | **0.7299** | **0.7806** | **`+1.22%` F1 Gain** |
-
-<p align="center">
-  <img src="figures/fig4_crossdomain_generalization.png" width="48%" />
-  <img src="figures/fig6_confusion_matrices.png" width="48%" />
-</p>
-<p align="center">
-  <em>Fig. 4 (Left): Zero-shot cross-domain performance delta. Fig. 6 (Right): Confusion matrix heatmaps across domains.</em>
-</p>
-
-**Crucial Research Finding:** The Student's compact 4-layer parameter space acted as an implicit regularizer, eliminating newsroom-specific overfitting observed in the Teacher and achieving **`103.7%` relative knowledge retention** on external social media clickbait.
-
----
-
-## IV. Conclusion
-In this work, we developed **TinyBanglaBERT**, compressing BanglaBERT by **`9.58x`** into an **`11.55M` parameter model** running at **`5.15 ms` on CPU** (`4.11 ms` / `11.22 MB` in INT8). TinyBanglaBERT preserves **`90.26%` in-domain F1** and achieves **`103.7%` cross-domain F1** relative to the Teacher, proving the feasibility of high-accuracy, real-time client-side Bengali clickbait filtering on resource-constrained devices.
+- **Limitations:** (1) Single-task scope (clickbait in Bengali); multi-task (SentNoB, BanglaNLI) and cross-lingual Phase H experiments are needed before generalising beyond clickbait. (2) Two-annotator human relabeling of `relabel_batch.csv` is staged in `experiments/v3/HUMAN_TODO.md`. (3) BaitBuster-Bangla's 10k human-labeled subset is channel-confounded across 13 channels. (4) Five-seed INT8 accuracy verification, physical Android benchmarks, and additional layer arms (`first4`, `last4`, `kd_hid`) remain future work.
+- **Ethics:** Automated clickbait classifiers carry false-positive risks that could unfairly penalise legitimate journalism on dramatic breaking news. Deployments should surface calibrated confidence scores or user advisories rather than opaque automated suppression.
+- **Reproducibility:** All 337 automated consistency, guard, and deduplication tests pass with zero failures.
 
 ---
 
 ## References
-1. M. S. I. Sarker et al., "BanglaBERT: Language Model Pre-training and Benchmarks for Bengali," in *Findings of ACL*, 2021.
-2. V. Sanh et al., "DistilBERT, a distilled version of BERT: smaller, faster, cheaper and lighter," in *NeurIPS EMC2 Workshop*, 2019.
-3. G. Hinton, O. Vinyals, and J. Dean, "Distilling the Knowledge in a Neural Network," in *NIPS Deep Learning Workshop*, 2014.
-4. S. M. Lundberg and S.-I. Lee, "A Unified Approach to Interpreting Model Predictions," in *NeurIPS*, 2017.
-5. M. T. Ribeiro, S. Singh, and C. Guestrin, ""Why Should I Trust You?": Explaining the Predictions of Any Classifier," in *ACM SIGKDD*, 2016.
-6. A. Imran et al., "BaitBuster-Bangla: A Large-Scale Multimodal Dataset for Bengali Clickbait Detection," *IEEE Access*, 2024.
-7. Q. A. McNemar, "Note on the sampling error of the difference between correlated proportions or percentages," *Psychometrika*, vol. 12, no. 2, pp. 153-157, 1947.
+1. A. Bhattacharjee et al., "BanglaBERT: Language Model Pretraining and Benchmarks for Low-Resource Language Understanding Evaluation in Bangla," *Findings of NAACL 2022*, pp. 1318–1327, 2022.
+2. I. Turc, M.-W. Chang, K. Lee, and K. Toutanova, "Well-Read Students Learn Better: On the Importance of Pre-training Compact Models," *arXiv:1908.08962*, 2019.
+3. G. Hinton, O. Vinyals, and J. Dean, "Distilling the Knowledge in a Neural Network," *NIPS Deep Learning Workshop*, 2015.
+4. V. Sanh et al., "DistilBERT, a distilled version of BERT: smaller, faster, cheaper and lighter," *NeurIPS EMC² Workshop*, 2019.
+5. X. Jiao et al., "TinyBERT: Distilling BERT for Natural Language Understanding," *Findings of EMNLP*, pp. 4163–4174, 2020.
+6. W. Wang et al., "MiniLM: Deep Self-Attention Distillation for Task-Agnostic Compression of Pre-Trained Transformers," *NeurIPS*, 2020.
+7. M. A. Mahtab, M. Haque, T. Hasan, and F. Sadeque, "BanglaBait: Semi-Supervised Adversarial Approach for Clickbait Detection on Bangla Clickbait Dataset," *Proceedings of RANLP 2023*, pp. 748–758, 2023.
+8. A. Al Imran, A. R. Shovon, and M. F. Mridha, "BaitBuster-Bangla: A comprehensive dataset for clickbait detection in Bangla YouTube videos," *Data in Brief*, vol. 53, p. 110239, 2024.

@@ -45,6 +45,8 @@ from src.data.split import apply_splits, load_splits
 from src.evaluation.metrics import (
     compute_classification_metrics,
     compute_metrics_from_eval_pred,
+    find_optimal_threshold,
+    predict_with_threshold,
 )
 from src.models.teacher import (
     freeze_model,
@@ -59,17 +61,78 @@ from src.utils.seeding import seed_everything
 logger = logging.getLogger(__name__)
 
 
+def compute_rdrop_kl(logits1: torch.Tensor, logits2: torch.Tensor) -> torch.Tensor:
+    """Compute symmetric KL divergence between two dropout forward passes (R-Drop)."""
+    log_p1 = torch.nn.functional.log_softmax(logits1, dim=-1)
+    log_p2 = torch.nn.functional.log_softmax(logits2, dim=-1)
+    p1 = log_p1.exp()
+    p2 = log_p2.exp()
+    kl_12 = torch.nn.functional.kl_div(log_p2, p1, reduction="batchmean")
+    kl_21 = torch.nn.functional.kl_div(log_p1, p2, reduction="batchmean")
+    return 0.5 * (kl_12 + kl_21)
+
+
+def build_llrd_param_groups(
+    model: nn.Module,
+    base_lr: float,
+    weight_decay: float,
+    llrd_factor: float = 0.90,
+) -> list[dict[str, Any]]:
+    """Construct optimizer parameter groups with Layer-wise Learning Rate Decay (LLRD)."""
+    no_decay = ("bias", "LayerNorm.weight", "LayerNorm.bias", "layer_norm.weight")
+    num_layers = getattr(getattr(model, "config", None), "num_hidden_layers", 12)
+    groups: dict[tuple[float, float], list[nn.Parameter]] = {}
+
+    for name, param in model.named_parameters():
+        if not param.requires_grad:
+            continue
+        wd = 0.0 if any(nd in name for nd in no_decay) else weight_decay
+        if "embeddings" in name:
+            depth = 0
+        elif "encoder.layer." in name:
+            parts = name.split("encoder.layer.")[1].split(".")
+            layer_idx = int(parts[0])
+            depth = layer_idx + 1
+        else:
+            # Classifier head gets full base_lr
+            depth = num_layers + 1
+
+        lr = round(base_lr * (llrd_factor ** (num_layers + 1 - depth)), 10)
+        groups.setdefault((lr, wd), []).append(param)
+
+    return [{"params": params, "lr": lr, "weight_decay": wd} for (lr, wd), params in groups.items()]
+
+
 class WeightedTrainer(Trainer):
-    """Custom HuggingFace Trainer that supports class-weighted CrossEntropyLoss."""
+    """Custom HuggingFace Trainer supporting class-weighted CE, label smoothing, R-Drop, and LLRD."""
 
     def __init__(
         self,
         class_weights: Optional[torch.Tensor] = None,
+        label_smoothing: float = 0.0,
+        rdrop_alpha: float = 0.0,
+        llrd_factor: float = 1.0,
         *args: Any,
         **kwargs: Any,
     ) -> None:
         super().__init__(*args, **kwargs)
         self.class_weights = class_weights
+        self.label_smoothing = float(label_smoothing)
+        self.rdrop_alpha = float(rdrop_alpha)
+        self.llrd_factor = float(llrd_factor)
+
+    def create_optimizer(self):
+        if self.optimizer is None and 0.0 < self.llrd_factor < 1.0:
+            param_groups = build_llrd_param_groups(
+                self.model,
+                base_lr=self.args.learning_rate,
+                weight_decay=self.args.weight_decay,
+                llrd_factor=self.llrd_factor,
+            )
+            optimizer_cls, optimizer_kwargs = Trainer.get_optimizer_cls_and_kwargs(self.args, self.model)
+            self.optimizer = optimizer_cls(param_groups, **optimizer_kwargs)
+            return self.optimizer
+        return super().create_optimizer()
 
     def compute_loss(
         self,
@@ -78,15 +141,22 @@ class WeightedTrainer(Trainer):
         return_outputs: bool = False,
         num_items_in_batch: Optional[int] = None,
     ) -> torch.Tensor | tuple[torch.Tensor, Any]:
-        """Compute weighted cross-entropy loss."""
+        """Compute weighted cross-entropy loss (with optional label smoothing and R-Drop during training)."""
         labels = inputs.get("labels")
         outputs = model(**inputs)
         logits = outputs.get("logits") if isinstance(outputs, dict) else outputs[0]
 
         if labels is not None:
             weights = self.class_weights.to(logits.device) if self.class_weights is not None else None
-            loss_fct = nn.CrossEntropyLoss(weight=weights)
+            smoothing = self.label_smoothing if model.training else 0.0
+            loss_fct = nn.CrossEntropyLoss(weight=weights, label_smoothing=smoothing)
             loss = loss_fct(logits.view(-1, self.model.config.num_labels), labels.view(-1))
+            if model.training and self.rdrop_alpha > 0.0:
+                outputs2 = model(**inputs)
+                logits2 = outputs2.get("logits") if isinstance(outputs2, dict) else outputs2[0]
+                loss2 = loss_fct(logits2.view(-1, self.model.config.num_labels), labels.view(-1))
+                kl_loss = compute_rdrop_kl(logits, logits2)
+                loss = 0.5 * (loss + loss2) + self.rdrop_alpha * kl_loss
         else:
             loss = outputs.get("loss") if isinstance(outputs, dict) else outputs[0]
 
@@ -210,17 +280,29 @@ def train_teacher(cfg: DictConfig, seed: Optional[int] = None) -> dict[str, Any]
     # 6. Training Arguments
     use_fp16 = bool(cfg.training.fp16) and torch.cuda.is_available()
     batch_size = int(cfg.training.batch_size)
+    grad_accum = int(getattr(cfg.training, "gradient_accumulation_steps", 1))
+    if bool(getattr(cfg.training, "gradient_checkpointing", False)) and hasattr(
+        model, "gradient_checkpointing_enable"
+    ):
+        model.gradient_checkpointing_enable()
     epochs = float(cfg.training.epochs)
-    total_steps = int((len(train_ds) // batch_size + (1 if len(train_ds) % batch_size != 0 else 0)) * epochs)
+    eff_bs = batch_size * grad_accum
+    total_steps = int((len(train_ds) // eff_bs + (1 if len(train_ds) % eff_bs != 0 else 0)) * epochs)
     warmup_ratio = float(cfg.training.warmup_ratio)
     warmup_steps = int(total_steps * warmup_ratio)
+    lr_scheduler_type = str(getattr(cfg.training, "lr_scheduler_type", "cosine"))
+    label_smoothing = float(getattr(cfg.training, "label_smoothing", 0.0))
+    rdrop_alpha = float(getattr(cfg.training, "rdrop_alpha", 0.0))
+    llrd_factor = float(getattr(cfg.training, "llrd_factor", 1.0))
 
     training_args = TrainingArguments(
         output_dir=str(exp.checkpoints_dir),
         num_train_epochs=epochs,
         per_device_train_batch_size=batch_size,
         per_device_eval_batch_size=batch_size * 2,
+        gradient_accumulation_steps=grad_accum,
         learning_rate=float(cfg.training.lr),
+        lr_scheduler_type=lr_scheduler_type,
         weight_decay=float(cfg.training.weight_decay),
         warmup_steps=warmup_steps,
         max_grad_norm=float(cfg.training.gradient_clip),
@@ -251,6 +333,9 @@ def train_teacher(cfg: DictConfig, seed: Optional[int] = None) -> dict[str, Any]
         compute_metrics=compute_metrics_from_eval_pred,
         callbacks=callbacks,
         class_weights=class_weights,
+        label_smoothing=label_smoothing,
+        rdrop_alpha=rdrop_alpha,
+        llrd_factor=llrd_factor,
     )
 
     # 7. Train
@@ -263,27 +348,56 @@ def train_teacher(cfg: DictConfig, seed: Optional[int] = None) -> dict[str, Any]
     trainer.save_model(str(best_ckpt_dir))
     tokenizer.save_pretrained(str(best_ckpt_dir))
 
-    # Also save to canonical experiments/teacher/ location if run_name != "teacher"
+    # Save to canonical experiments/teacher/ location only when run_name == "teacher"
     canonical_teacher_dir = Path(cfg.training.output_dir) / "teacher"
     canonical_teacher_dir.mkdir(parents=True, exist_ok=True)
-    trainer.save_model(str(canonical_teacher_dir))
-    tokenizer.save_pretrained(str(canonical_teacher_dir))
+    save_student_or_teacher_dir = exp.run_dir
+    trainer.save_model(str(save_student_or_teacher_dir))
+    tokenizer.save_pretrained(str(save_student_or_teacher_dir))
+    if run_name == "teacher":
+        trainer.save_model(str(canonical_teacher_dir))
+        tokenizer.save_pretrained(str(canonical_teacher_dir))
 
     # 9. Freeze teacher model parameters
     freeze_model(trainer.model)
 
-    # 10. Held-out Test Set Evaluation (EXACTLY ONCE)
+    # 10. Tune Decision Threshold on Validation Split (Test set remains untouched)
+    val_prediction_output = trainer.predict(val_ds)
+    val_logits = val_prediction_output.predictions
+    if isinstance(val_logits, tuple):
+        val_logits = val_logits[0]
+    optimal_threshold, best_val_f1_cal = find_optimal_threshold(
+        logits=val_logits,
+        y_true=val_prediction_output.label_ids,
+    )
+    logger.info(
+        "Validation threshold calibration: optimal_threshold=%.2f (Val Macro-F1: %.4f)",
+        optimal_threshold,
+        best_val_f1_cal,
+    )
+
+    # 11. Held-out Test Set Evaluation (EXACTLY ONCE)
     logger.info("Evaluating Teacher model ONCE on held-out test split (%d samples)...", len(test_ds))
     test_prediction_output = trainer.predict(test_ds)
     test_logits = test_prediction_output.predictions
     if isinstance(test_logits, tuple):
         test_logits = test_logits[0]
     test_preds = np.argmax(test_logits, axis=1)
+    test_preds_cal = predict_with_threshold(test_logits, threshold=optimal_threshold)
     test_labels = test_prediction_output.label_ids
 
+    np.save(exp.run_dir / "test_logits.npy", test_logits)
+    np.save(exp.run_dir / "test_labels.npy", test_labels)
+    np.save(exp.run_dir / "val_logits.npy", val_logits)
+    np.save(exp.run_dir / "val_labels.npy", val_prediction_output.label_ids)
+
     test_metrics = compute_classification_metrics(y_pred=test_preds, y_true=test_labels)
+    test_metrics_cal = compute_classification_metrics(y_pred=test_preds_cal, y_true=test_labels)
+    test_metrics["optimal_threshold"] = optimal_threshold
+    test_metrics["calibrated"] = test_metrics_cal
+
     logger.info("=" * 60)
-    logger.info("TEACHER FINAL TEST SET METRICS:")
+    logger.info("TEACHER FINAL TEST SET METRICS (Threshold=0.50):")
     logger.info("Accuracy:             %.4f", test_metrics["accuracy"])
     logger.info("F1 (Macro):           %.4f", test_metrics["f1_macro"])
     logger.info("Precision (Macro):    %.4f", test_metrics["precision_macro"])
@@ -291,15 +405,23 @@ def train_teacher(cfg: DictConfig, seed: Optional[int] = None) -> dict[str, Any]
     logger.info("F1 (Clickbait):       %.4f", test_metrics["f1_clickbait"])
     logger.info("F1 (Not-Clickbait):   %.4f", test_metrics["f1_not_clickbait"])
     logger.info("Confusion Matrix:     %s", test_metrics["confusion_matrix"])
+    logger.info("-" * 60)
+    logger.info("CALIBRATED TEST METRICS (Val-Tuned Threshold=%.2f):", optimal_threshold)
+    logger.info("Accuracy (Cal):       %.4f", test_metrics_cal["accuracy"])
+    logger.info("F1 Macro (Cal):       %.4f", test_metrics_cal["f1_macro"])
+    logger.info("F1 Clickbait (Cal):   %.4f", test_metrics_cal["f1_clickbait"])
+    logger.info("Confusion Matrix:     %s", test_metrics_cal["confusion_matrix"])
     logger.info("=" * 60)
 
     # Log to ExperimentLogger and save metrics.json
-    scalar_test_metrics = {k: v for k, v in test_metrics.items() if k != "confusion_matrix"}
+    scalar_test_metrics = {k: v for k, v in test_metrics.items() if isinstance(v, (int, float))}
     exp.log_metrics({"split": "test", **scalar_test_metrics})
 
-    test_metrics_path = canonical_teacher_dir / "metrics.json"
+    test_metrics_path = exp.run_dir / "metrics.json"
     test_metrics_path.write_text(json.dumps(test_metrics, indent=2), encoding="utf-8")
     (exp.run_dir / "test_metrics.json").write_text(json.dumps(test_metrics, indent=2), encoding="utf-8")
+    if run_name == "teacher":
+        (canonical_teacher_dir / "metrics.json").write_text(json.dumps(test_metrics, indent=2), encoding="utf-8")
     logger.info("Test metrics saved to %s", test_metrics_path)
 
     # 11. Pre-compute and save Teacher soft labels (logits) on full train split
@@ -318,12 +440,14 @@ def train_teacher(cfg: DictConfig, seed: Optional[int] = None) -> dict[str, Any]
         "seed": effective_seed,
     }
 
-    soft_labels_path = canonical_teacher_dir / "train_soft_labels.pt"
-    torch.save(soft_labels_dict, soft_labels_path)
-    (exp.run_dir / "train_soft_labels.pt").write_bytes(soft_labels_path.read_bytes())
+    run_soft_path = exp.run_dir / "train_soft_labels.pt"
+    torch.save(soft_labels_dict, run_soft_path)
+    if run_name == "teacher":
+        soft_labels_path = canonical_teacher_dir / "train_soft_labels.pt"
+        torch.save(soft_labels_dict, soft_labels_path)
     logger.info(
         "Teacher train soft labels saved to %s (tensor shape: %s)",
-        soft_labels_path,
+        run_soft_path,
         tuple(train_soft_labels_tensor.shape),
     )
 

@@ -42,6 +42,7 @@ from src.models.distillation import (
 )
 from src.models.student import (
     create_student_config,
+    init_from_small_pretrained,
     init_from_teacher,
     init_random,
 )
@@ -90,19 +91,39 @@ def evaluate_kd_hyperparameter_pair(
     tokenizer_name = str(cfg.model.teacher_model_name)
     tokenizer = get_teacher_tokenizer(tokenizer_name)
 
+    num_hidden_layers = int(getattr(cfg.model, "num_hidden_layers", 4))
+    hidden_size = int(getattr(cfg.model, "hidden_size", 256))
+    num_attention_heads = int(getattr(cfg.model, "num_attention_heads", 4))
+    intermediate_size = int(getattr(cfg.model, "intermediate_size", 1024))
+    layer_selection = str(getattr(cfg.model, "layer_selection", "strided"))
+
     student_cfg = create_student_config(
         vocab_size=tokenizer.vocab_size,
-        hidden_size=256,
-        num_hidden_layers=4,
-        num_attention_heads=4,
-        intermediate_size=1024,
+        hidden_size=hidden_size,
+        num_hidden_layers=num_hidden_layers,
+        num_attention_heads=num_attention_heads,
+        intermediate_size=intermediate_size,
         num_labels=int(cfg.data.num_labels),
         dropout=float(cfg.model.dropout),
     )
 
     if init_type in ("teacher_init", "teacher"):
         teacher_model = AutoModelForSequenceClassification.from_pretrained("experiments/teacher")
-        model = init_from_teacher(teacher_model, student_cfg, strategy="projection")
+        model = init_from_teacher(
+            teacher_model,
+            student_cfg,
+            strategy="projection",
+            layer_selection=layer_selection,
+        )
+    elif init_type == "small_pretrained":
+        pretrained_small = str(getattr(cfg.model, "pretrained_small_name", "csebuetnlp/banglabert_small"))
+        model = init_from_small_pretrained(
+            pretrained_name=pretrained_small,
+            num_hidden_layers=num_hidden_layers,
+            num_labels=int(cfg.data.num_labels),
+            dropout=float(cfg.model.dropout),
+            layer_selection=layer_selection,
+        )
     else:
         model = init_random(student_cfg)
 
@@ -116,6 +137,7 @@ def evaluate_kd_hyperparameter_pair(
     batch_size = int(cfg.training.batch_size)
     total_steps = int((len(train_ds) // batch_size + 1) * epochs)
     warmup_steps = int(total_steps * float(cfg.training.warmup_ratio))
+    lr_scheduler_type = str(getattr(cfg.training, "lr_scheduler_type", "cosine"))
 
     ckpt_dir = Path(output_dir) / f"run_T{temperature}_a{alpha}"
     training_args = TrainingArguments(
@@ -124,6 +146,7 @@ def evaluate_kd_hyperparameter_pair(
         per_device_train_batch_size=batch_size,
         per_device_eval_batch_size=batch_size * 2,
         learning_rate=float(cfg.training.lr),
+        lr_scheduler_type=lr_scheduler_type,
         weight_decay=float(cfg.training.weight_decay),
         warmup_steps=warmup_steps,
         max_grad_norm=float(cfg.training.gradient_clip),
@@ -134,6 +157,7 @@ def evaluate_kd_hyperparameter_pair(
         greater_is_better=True,
         fp16=use_fp16,
         dataloader_num_workers=0,
+        remove_unused_columns=False,
         save_total_limit=1,
         logging_strategy="epoch",
         seed=seed,

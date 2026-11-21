@@ -1,0 +1,29 @@
+# Teacher 3: BanglaBERT-Large (~335M params, 24L/1024H) + R-Drop + LLRD (8GB VRAM safe: bs=8, accum=4, fp16)
+model:
+  teacher_model_name: "csebuetnlp/banglabert_large"
+  max_seq_len: 64
+  dropout: 0.15
+
+training:
+  output_dir:                  "experiments"
+  run_name:                    "teacher_large"
+  epochs:                      5
+  batch_size:                  8
+  gradient_accumulation_steps: 4
+  gradient_checkpointing:      false
+  lr:                          1.5e-5
+  lr_scheduler_type:           "cosine"
+  llrd_factor:                 0.92
+  rdrop_alpha:                 0.30
+  weight_decay:                0.05
+  label_smoothing:             0.0
+  warmup_ratio:                0.1
+  gradient_clip:               1.0
+  eval_strategy:               "epoch"
+  save_strategy:               "epoch"
+  early_stopping_patience:     3
+  load_best_model_at_end:      true
+  metric_for_best:             "f1_macro"
+  greater_is_better:           true
+  fp16:                        true
+  dataloader_num_workers:      0

@@ -1,0 +1,29 @@
+{
+  "split": "cross_genre_baitbuster_zeroshot",
+  "accuracy": 0.8246,
+  "precision_macro": 0.8483,
+  "recall_macro": 0.8422,
+  "f1_macro": 0.8245,
+  "val_f1_macro": 0.8245,
+  "f1_not_clickbait": 0.8293,
+  "precision_not_clickbait": 0.7197,
+  "recall_not_clickbait": 0.9784,
+  "f1_clickbait": 0.8196,
+  "precision_clickbait": 0.9769,
+  "recall_clickbait": 0.7059,
+  "ece": 0.05,
+  "confusion_matrix": [
+    [
+      4262,
+      94
+    ],
+    [
+      1660,
+      3984
+    ]
+  ],
+  "true_class_counts": {
+    "0": 4356,
+    "1": 5644
+  }
+}

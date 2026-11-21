@@ -1,0 +1,10 @@
+{
+  "run_name": "baseline_small_12l_ce",
+  "model_id": "csebuetnlp/banglabert_small",
+  "lr": 5e-05,
+  "epochs": 8,
+  "batch_size": 32,
+  "max_length": 64,
+  "seed": 42,
+  "params": 13738498
+}

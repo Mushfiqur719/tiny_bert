@@ -1,0 +1,10 @@
+{
+  "run_name": "teacher_base",
+  "model_id": "csebuetnlp/banglabert",
+  "lr": 2e-05,
+  "epochs": 6,
+  "batch_size": 32,
+  "max_length": 64,
+  "seed": 1234,
+  "params": 110618882
+}

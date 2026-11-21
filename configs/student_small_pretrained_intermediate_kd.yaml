@@ -1,0 +1,38 @@
+# Student 6: Pre-trained BanglaBERT-Small (4 Strided Layers) + Logit KD + Intermediate Hidden/Attention KD
+model:
+  student_model_name: "TinyBanglaBERT"
+  init_type: "small_pretrained"
+  pretrained_small_name: "csebuetnlp/banglabert_small"
+  layer_selection: "strided"
+  num_hidden_layers: 4
+  hidden_size: 256
+  num_attention_heads: 4
+  intermediate_size: 1024
+  max_seq_len: 64
+  dropout: 0.1
+
+distillation:
+  temperature: 6.0
+  alpha: 0.3
+  intermediate_layers: true
+  hidden_loss_weight: 0.5
+  attention_loss_weight: 0.2
+
+training:
+  output_dir:             "experiments"
+  run_name:               "student_small_pretrained_intermediate_kd"
+  epochs:                 12
+  batch_size:             32
+  lr:                     5.0e-5
+  lr_scheduler_type:      "cosine"
+  weight_decay:           0.01
+  warmup_ratio:           0.1
+  gradient_clip:          1.0
+  eval_strategy:          "epoch"
+  save_strategy:          "epoch"
+  early_stopping_patience: 4
+  load_best_model_at_end: true
+  metric_for_best:        "f1_macro"
+  greater_is_better:      true
+  fp16:                   true
+  dataloader_num_workers: 0

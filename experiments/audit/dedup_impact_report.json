@@ -1,0 +1,87 @@
+{
+  "leakage_impact_on_existing_models": [
+    {
+      "model": "Teacher (BanglaBERT)",
+      "full_n": 1506,
+      "full_acc": 0.8373,
+      "full_f1": 0.8174,
+      "clean_n": 1351,
+      "clean_acc": 0.8327,
+      "clean_f1": 0.8038,
+      "leaked_n": 155,
+      "leaked_acc": 0.8774,
+      "leaked_f1": 0.8749,
+      "f1_inflation_from_leakage": 0.0136
+    },
+    {
+      "model": "Student: Teacher-Init + KD",
+      "full_n": 1506,
+      "full_acc": 0.7842,
+      "full_f1": 0.7615,
+      "clean_n": 1351,
+      "clean_acc": 0.7742,
+      "clean_f1": 0.7397,
+      "leaked_n": 155,
+      "leaked_acc": 0.871,
+      "leaked_f1": 0.8669,
+      "f1_inflation_from_leakage": 0.0218
+    },
+    {
+      "model": "Student: BanglaBERT-Small 4L + KD",
+      "full_n": 1506,
+      "full_acc": 0.8054,
+      "full_f1": 0.7895,
+      "clean_n": 1351,
+      "clean_acc": 0.8009,
+      "clean_f1": 0.7768,
+      "leaked_n": 155,
+      "leaked_acc": 0.8452,
+      "leaked_f1": 0.8395,
+      "f1_inflation_from_leakage": 0.0127
+    }
+  ],
+  "dedup_splits_metadata": {
+    "created_at": "2026-11-19T20:32:21.317816+00:00",
+    "seed": 42,
+    "deduplicated": true,
+    "dedup_stats": {
+      "raw_cleaned_rows": 15056,
+      "unique_exact_norm_groups": 14105,
+      "exact_duplicates_removed": 938,
+      "near_duplicates_removed": 20,
+      "label_conflicts_resolved": 1,
+      "ambiguous_ties_dropped": 24,
+      "final_deduplicated_rows": 14073
+    },
+    "total_labeled": 14073,
+    "train_ratio": 0.8,
+    "val_ratio": 0.1,
+    "test_ratio": 0.1,
+    "train_size": 11258,
+    "val_size": 1407,
+    "test_size": 1408
+  },
+  "dedup_splits_audit": {
+    "train_vs_val": {
+      "exact_duplicates_in_second": 0,
+      "near_duplicate_items_in_second": 0,
+      "union_items": 0,
+      "pct_of_second": 0.0
+    },
+    "train_vs_test": {
+      "exact_duplicates_in_second": 0,
+      "near_duplicate_items_in_second": 0,
+      "union_items": 0,
+      "pct_of_second": 0.0,
+      "exact_dup_label_agreement": null
+    },
+    "val_vs_test": {
+      "exact_duplicates_in_second": 0,
+      "near_duplicate_items_in_second": 0,
+      "union_items": 0,
+      "pct_of_second": 0.0
+    },
+    "train_internal_duplicates": 0,
+    "train_label_conflicts": 0
+  }
+}

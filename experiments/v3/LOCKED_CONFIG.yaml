@@ -1,0 +1,30 @@
+# Phase I — Locked Model Configuration (Selected Strictly on Validation Macro-F1)
+# Locked prior to Phase J One-Time Test Evaluation (TBB_ALLOW_TEST=1).
+
+primary_metric: f1_macro
+non_inferiority_margin: 0.020
+seeds: [13, 42, 87, 1234, 2026]
+
+datasets:
+  baitbuster:
+    splits_file: data/processed/v3_baitbuster/splits_v3.json
+    locked_models:
+      - teacher_base_uw
+      - baseline_small_12l_ce_uw
+      - F_strided_kd_100_uw
+      - F_strided_ce_100_uw
+      - F_rand_kd_100_uw
+      - F_rand_ce_100_uw
+    selected_student: F_strided_kd_100_uw  # Highest 4L Val Macro-F1: 0.9866 +/- 0.0017 (ECE 0.0080)
+
+  banglabait:
+    splits_file: data/processed/v3/splits_v3.json
+    locked_models:
+      - teacher_base
+      - teacher_base_tb
+      - baseline_small_12l_ce
+      - F_strided_kd_100
+      - F_strided_ce_100
+      - F_rand_kd_100
+      - F_rand_ce_100
+    selected_student: F_strided_kd_100     # Highest 4L Val Macro-F1: 0.7747 +/- 0.0062 (ECE 0.0808)

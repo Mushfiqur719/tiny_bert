@@ -1,0 +1,168 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{TinyBanglaBERT: A Lightweight Knowledge-Distilled Transformer for Real-Time Bengali Clickbait Detection on Resource-Constrained Edge Devices}
+
+\author{\IEEEauthorblockN{Mushfiqur Rahman}
+\IEEEauthorblockA{\textit{Department of Computer Science and Engineering} \\
+\textit{Independent University, Bangladesh}\\
+Dhaka, Bangladesh}
+}
+
+\maketitle
+
+\begin{abstract}
+Clickbait headline detection in low-resource Indic languages, particularly Bengali, has predominantly relied on heavy pre-trained language models (such as BanglaBERT with $\sim$110.6M parameters). While these large models achieve strong classification accuracy, their significant parameter footprint ($\sim$423 MB), high CPU latency ($>$120 ms), and memory requirements prevent deployment on resource-constrained client environments, such as browser extensions and mobile devices. In this work, we propose \textbf{TinyBanglaBERT-4L}, an ultra-compact 4-layer student transformer model (\textbf{7.42M parameters, 14.91$\times$ compression}) trained via temperature-scaled knowledge distillation and strided pre-trained layer initialization ($L_S = \{2, 5, 8, 11\}$) with factorized embeddings.
+
+Extensive empirical evaluations through a $3 \times 2$ factorial ablation and depth-scaling study demonstrate that TinyBanglaBERT-4L retains \textbf{96.59\% of the Teacher's Macro-F1} (0.7895 vs. 0.8174) and \textbf{96.19\% of accuracy} (80.54\% vs. 83.73\%) on the in-domain BanglaBait test set ($N = 1,506$), and \textbf{96.64\% Macro-F1 retention} (0.7768 vs. 0.8038, 80.09\% accuracy) on the strictly deduplicated leak-free test subset ($N = 1,351$). On CPU edge hardware, TinyBanglaBERT-4L combined with ONNX Runtime dynamic INT8 quantization compresses the model to \textbf{7.29 MB} (\textbf{57.99$\times$ smaller} than the Teacher), achieving a single-headline latency of \textbf{4.00 ms} (\textbf{30.83$\times$ faster}, \textbf{249.9 headlines/second}) while improving test accuracy to \textbf{80.81\%} and Macro-F1 to \textbf{0.7917} (\textbf{96.86\% Teacher retention}) with zero quantization loss. Holm-Bonferroni corrected exact McNemar tests confirm that 3$\times$ layer compression from 12 to 4 layers incurs no statistically significant error increase ($p = 0.6592$), while dual SHAP and LIME attributions verify lexical grounding. Furthermore, on an unseen zero-overlap cross-domain benchmark of 10,000 human-annotated headlines (\textit{BaitBuster-Bangla}), TinyBanglaBERT-4L exhibits a \textbf{34\% smaller domain degradation} than the Teacher ($-4.36\%$ vs. $-6.60\%$ Macro-F1), retaining \textbf{99.27\% of Teacher Macro-F1} (0.7459 vs. 0.7514) and outperforming the 110.6M Teacher in Clickbait F1 (0.7288 vs. 0.7253, \textbf{100.48\% retention}).
+\end{abstract}
+
+\begin{IEEEkeywords}
+Bengali NLP, Knowledge Distillation, Clickbait Detection, Transformer Compression, Model Explainability, Edge AI, ONNX Runtime, INT8 Quantization.
+\end{IEEEkeywords}
+
+\section{Introduction}
+Clickbait headline detection in Bengali poses significant computational challenges due to morphological richness and colloquial social-media phrasing. While 110.6M-parameter models like BanglaBERT~\cite{b1} achieve high accuracy, their 422.76 MB footprint and $>120$ ms CPU latency preclude real-time execution inside browser extensions and mobile applications. This paper introduces \textbf{TinyBanglaBERT-4L}, systematically comparing random initialization, orthogonal PCA teacher projection ($768 \to 256$, 11.55M parameters), and strided pre-trained compact transfer (7.42M parameters) across 4, 6, and 12 encoder layers under knowledge distillation~\cite{b2,b3}.
+
+\section{Methodology}
+The distillation objective combines class-weighted Cross-Entropy ($\mathcal{L}_{\text{CE}}$) with temperature-scaled Kullback-Leibler divergence ($\mathcal{L}_{\text{KL}}$):
+\begin{equation}
+\mathcal{L}_{\text{total}} = \alpha \mathcal{L}_{\text{CE}}\left(\sigma(z_S), y\right) + (1 - \alpha) T^2 \mathcal{L}_{\text{KL}}\left(\sigma\left(\frac{z_S}{T}\right), \sigma\left(\frac{z_T}{T}\right)\right)
+\end{equation}
+Grid search optimization on the validation split selects $T=4.0, \alpha=0.1$ for PCA-projected initialization ($W_p \in \mathbb{R}^{768 \times 256}, W_p^T W_p = I$ with neutral LayerNorm $\gamma=\mathbf{1}, \beta=\mathbf{0}$) and $T=4.0, \alpha=0.5$ for strided compact transfer ($L_S = \{2, 5, 8, 11\}$ with factorized embeddings $d_e=128 \to d_h=256$).
+
+\section{Experimental Results}
+
+\subsection{In-Domain Benchmark \& $3 \times 2$ Factorial Ablation}
+Table~\ref{tab:indomain} summarizes the $3 \times 2$ factorial ablation and depth-scaling study on the BanglaBait test set ($N=1,506$).
+
+\begin{table}[htbp]
+\caption{Factorial Ablation and Depth Scaling on BanglaBait Test Set}
+\begin{center}
+\begin{tabular}{llcccc}
+\toprule
+\textbf{Model Variant} & \textbf{Obj.} & \textbf{Params} & \textbf{Acc (\%)} & \textbf{Macro-F1} & \textbf{CB-F1} \\
+\midrule
+Teacher (12L Base) & CE & 110.6M & \textbf{83.73} & \textbf{0.8174} & \textbf{0.7572} \\
+\midrule
+Random (4L) & CE & 11.55M & 76.56 & 0.7390 & 0.6556 \\
+Random (4L) & KD & 11.55M & 74.63 & 0.7313 & 0.6678 \\
+PCA-Teacher (4L) & CE & 11.55M & 75.83 & 0.7472 & 0.6941 \\
+PCA-Teacher (4L) & KD & 11.55M & 78.42 & 0.7615 & 0.6878 \\
+Small-Pretrained (4L) & CE & \textbf{7.42M} & 79.75 & 0.7830 & 0.7269 \\
+\textbf{TinyBanglaBERT-4L} & \textbf{KD} & \textbf{7.42M} & \textbf{80.54} & \textbf{0.7895} & \textbf{0.7314} \\
+\textbf{TinyBanglaBERT-4L (INT8)} & \textbf{KD} & \textbf{7.42M} & \textbf{80.81} & \textbf{0.7917} & \textbf{0.7331} \\
+\midrule
+TinyBanglaBERT-6L & KD & 9.00M & 79.75 & 0.7824 & 0.7250 \\
+BanglaBERT-Small-12L & KD & 13.73M & 81.14 & 0.7926 & 0.7300 \\
+\bottomrule
+\end{tabular}
+\label{tab:indomain}
+\end{center}
+\end{table}
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=0.48\textwidth]{figures/fig1_ablation_f1_accuracy.png}}
+\caption{Test Macro-F1 and Accuracy across the $3 \times 2$ factorial ablation and depth-scaling configurations.}
+\label{fig:ablation}
+\end{figure}
+
+\subsection{Computational Efficiency, Latency \& INT8 Verification}
+Single-headline inference latency ($B=1$) was measured over $N=200$ iterations alongside full test-set post-quantization accuracy verification (Table~\ref{tab:efficiency}).
+
+\begin{table}[htbp]
+\caption{Efficiency, CPU Latency, and Post-Quantization Test Accuracy}
+\begin{center}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Runtime / Variant} & \textbf{Size} & \textbf{CPU Lat} & \textbf{FPS} & \textbf{Speedup} & \textbf{Test F1} \\
+\midrule
+Teacher (PyTorch FP32) & 422.8MB & 123.36ms & 8.1 & 1.00$\times$ & 0.8174 \\
+TinyBanglaBERT-4L (PT) & 28.31MB & 11.74ms & 85.2 & 10.51$\times$ & 0.7895 \\
+TinyBanglaBERT-4L (ONNX) & 28.40MB & 9.20ms & 108.6 & 13.40$\times$ & 0.7895 \\
+\textbf{TinyBanglaBERT-4L (INT8)} & \textbf{7.29MB} & \textbf{4.00ms} & \textbf{249.9} & \textbf{30.83$\times$} & \textbf{0.7917} \\
+\bottomrule
+\end{tabular}
+\label{tab:efficiency}
+\end{center}
+\end{table}
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=0.48\textwidth]{figures/fig3_latency_speedup_breakdown.png}}
+\caption{Single-headline CPU latency and real-time throughput across runtimes.}
+\label{fig:latency}
+\end{figure}
+
+\subsection{Zero-Shot Cross-Domain Generalization}
+Generalization was evaluated on 10,000 human-annotated headlines from \textit{BaitBuster-Bangla}~\cite{b4} (verified 0.0\% overlap with BanglaBait).
+
+\begin{table}[htbp]
+\caption{In-Domain vs. Cross-Domain Zero-Shot Generalization ($N=10,000$)}
+\begin{center}
+\begin{tabular}{llcccc}
+\toprule
+\textbf{Model} & \textbf{Domain} & \textbf{Acc} & \textbf{Macro-F1} & \textbf{CB-F1} & \textbf{$\Delta$ F1} \\
+\midrule
+Teacher (110.6M) & In-Domain & 0.8373 & 0.8174 & 0.7572 & Base \\
+Teacher (110.6M) & Cross-Domain & 0.7542 & 0.7514 & 0.7253 & $-6.60\%$ \\
+\midrule
+TinyBanglaBERT-4L & In-Domain & 0.8054 & 0.7895 & 0.7314 & Base \\
+\textbf{TinyBanglaBERT-4L} & \textbf{Cross-Domain} & \textbf{0.7470} & \textbf{0.7459} & \textbf{0.7288} & \textbf{$-4.36\%$} \\
+\bottomrule
+\end{tabular}
+\label{tab:crossdomain}
+\end{center}
+\end{table}
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=0.48\textwidth]{figures/fig4_crossdomain_generalization.png}}
+\caption{In-Domain vs. Cross-Domain Macro-F1 and Clickbait-F1 retention on BaitBuster-Bangla.}
+\label{fig:crossdomain}
+\end{figure}
+
+\subsection{Selective Prediction \& Two-Tier Edge--Cloud Cascade}
+Using validation-fitted temperature scaling ($T_{\text{cal}}=1.7375$), TinyBanglaBERT-4L achieves an Area Under the Risk--Coverage Curve (AURC) of \textbf{0.10268}, reaching \textbf{83.69\% accuracy (0.8199 Macro-F1) at 90\% coverage}, \textbf{85.98\% at 80\% coverage}, \textbf{90.38\% (0.8905 Macro-F1) at 60\% coverage}, and peaking at \textbf{97.50\%} on high-confidence predictions (Table~\ref{tab:selective}). In a two-tier Edge--Cloud cascade where TinyBanglaBERT-4L (4.00 ms INT8) handles 80\% of headlines locally and defers the most uncertain 20\% to the Teacher, cloud requests drop by 80\% while achieving \textbf{83.20\% system accuracy (0.8145 Macro-F1)} at 6.52 ms amortized latency (and \textbf{0.8177 Macro-F1} at 60\% edge offload, outperforming the standalone Teacher).
+
+\begin{table}[htbp]
+\caption{Selective Prediction and Edge--Cloud Deferral Cascade ($N=1,506$)}
+\begin{center}
+\begin{tabular}{cccccc}
+\toprule
+\textbf{Edge Cov.} & \textbf{Conf. $\ge$} & \textbf{Edge Acc} & \textbf{Edge F1} & \textbf{Cascade Acc} & \textbf{Cascade F1} \\
+\midrule
+100\% & 0.501 & 80.54\% & 0.7895 & 80.54\% & 0.7895 \\
+90\% & 0.653 & 83.69\% & 0.8199 & 82.27\% & 0.8054 \\
+80\% & 0.752 & 85.98\% & 0.8441 & \textbf{83.20\%} & \textbf{0.8145} \\
+70\% & 0.806 & 88.33\% & 0.8674 & 83.00\% & 0.8115 \\
+60\% & 0.838 & \textbf{90.38\%} & \textbf{0.8905} & \textbf{83.60\%} & \textbf{0.8177} \\
+30\% & 0.877 & \textbf{92.92\%} & \textbf{0.9283} & --- & --- \\
+\bottomrule
+\end{tabular}
+\label{tab:selective}
+\end{center}
+\end{table}
+
+\section{Conclusion}
+TinyBanglaBERT-4L achieves a 14.91$\times$ parameter reduction (7.42M parameters), a 57.99$\times$ disk size reduction (7.29 MB in INT8), and a 30.83$\times$ CPU speedup (4.00 ms/headline, 249.9 fps) over BanglaBERT while preserving 96.86\% in-domain Macro-F1 (80.81\% accuracy) and 99.27\% cross-domain Macro-F1 (100.48\% Clickbait F1), enabling real-time edge deployment.
+
+\begin{thebibliography}{00}
+\bibitem{b1} M. S. I. Sarker et al., ``BanglaBERT: Language Model Pre-training and Benchmarks for Bengali,'' in \textit{Findings of ACL}, 2021.
+\bibitem{b2} V. Sanh et al., ``DistilBERT, a distilled version of BERT: smaller, faster, cheaper and lighter,'' in \textit{NeurIPS EMC2 Workshop}, 2019.
+\bibitem{b3} G. Hinton, O. Vinyals, and J. Dean, ``Distilling the Knowledge in a Neural Network,'' in \textit{NIPS Deep Learning Workshop}, 2014.
+\bibitem{b4} A. Imran et al., ``BaitBuster-Bangla: A Large-Scale Multimodal Dataset for Bengali Clickbait Detection,'' \textit{IEEE Access}, 2024.
+\end{thebibliography}
+
+\end{document}

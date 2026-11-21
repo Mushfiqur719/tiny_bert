@@ -6,25 +6,29 @@ model:
   hidden_size: 256
   num_attention_heads: 4
   intermediate_size: 1024
-  max_seq_len: 128
+  max_seq_len: 64
   dropout: 0.1
 
 distillation:
-  temperature: 2.0
+  temperature: 4.0
   alpha: 0.1
+  intermediate_layers: false
+  hidden_loss_weight: 0.0
+  attention_loss_weight: 0.0
 
 training:
   output_dir:             "experiments"
   run_name:               "student_random_distilled"
-  epochs:                 5
+  epochs:                 20
   batch_size:             32
-  lr:                     5.0e-5
+  lr:                     2.0e-4
+  lr_scheduler_type:      "cosine"
   weight_decay:           0.01
   warmup_ratio:           0.1
   gradient_clip:          1.0
   eval_strategy:          "epoch"
   save_strategy:          "epoch"
-  early_stopping_patience: 3
+  early_stopping_patience: 4
   load_best_model_at_end: true
   metric_for_best:        "f1_macro"
   greater_is_better:      true

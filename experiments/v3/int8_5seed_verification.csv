@@ -1,0 +1,3 @@
+model,n_seeds,fp32_f1_mean,int8_acc_mean,int8_acc_std,int8_f1_mean,int8_f1_std,delta_f1_pp
+F_strided_kd_100,5,0.7537,0.7778,0.005,0.7535,0.0047,-0.02
+baseline_small_12l_ce,5,0.7543,0.7761,0.0079,0.7512,0.0076,-0.31
